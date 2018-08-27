@@ -5,11 +5,12 @@
   "main": "src/index.js",
   "scripts": {
     "test": "node src/index.js",
-	"build": "nexe -o dist/screwzira-downloader.exe"
+    "build": "nexe -o dist/screwzira-downloader.exe"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "node-notifier": "^5.2.1",
     "request": "^2.88.0"
   },
   "bundledDependencies": [
