@@ -2,10 +2,11 @@
   "name": "screwzira-downloader",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "built/index.js",
   "scripts": {
-    "test": "node src/index.js",
-    "build": "nexe -o dist/screwzira-downloader.exe"
+    "test": "npm run comile && node built/index.js",
+    "complie": "tsc",
+    "build": "npm run comile && nexe -o dist/screwzira-downloader.exe"
   },
   "author": "",
   "license": "ISC",
@@ -17,5 +18,8 @@
   },
   "bundledDependencies": [
     "request"
-  ]
+  ],
+  "devDependencies": {
+    "@types/node": "^10.9.2"
+  }
 }

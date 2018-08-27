@@ -31,15 +31,15 @@ let notify = (message) => {
 		title: 'Screwzira Subtitle Downloader',
 		message
 	});
-}
+};
 
 let cleanText = (text) => {
 	return text.toLowerCase().replace(/[\.|-]/g, ' ').trim();
-}
+};
 
 let splitText = (text) => {
 	return text.split(' ');
-}
+};
 
 let commonWordsInSentences = (s1, s2, excludeList) => {
 	let split1 = splitText(cleanText(s1));
@@ -48,7 +48,7 @@ let commonWordsInSentences = (s1, s2, excludeList) => {
 	let commonWords = split1.filter(word1 => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
 	logger.log('debug', `"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}]`);
 	return commonWords;
-}
+};
 
 let downloadBestMatch = (subtitleID, filenameNoExtension, relativePath) => {
 	logger.log('info', `Downloading: ${subtitleID}`);
@@ -81,7 +81,7 @@ let downloadBestMatch = (subtitleID, filenameNoExtension, relativePath) => {
 			notify(`Failed dowloadeding subtitle`);
 		}
 	});
-}
+};
 
 let findClosestMatch = (filenameNoExtension, list, excludeList) => {
 	logger.log('info', `Looking for closest match for "${filenameNoExtension}" from: [${list && list.map(item => item.SubtitleName).join(', ')}]`);
@@ -94,7 +94,7 @@ let findClosestMatch = (filenameNoExtension, list, excludeList) => {
 				maxCommonWords = commonWords;
 				maxIndex = index;
 			}
-		})
+		});
 		
 		let bestMatch = list[maxIndex];
 		logger.log('info', `filename:  "${filenameNoExtension}"`);
@@ -103,7 +103,7 @@ let findClosestMatch = (filenameNoExtension, list, excludeList) => {
 		
 		return bestMatch.Identifier;
 	}
-}
+};
 
 let handleResponse = (error, response, body, excludeList, filenameNoExtension, relativePath) => {
 	if (!error && response.statusCode == 200) {
@@ -116,7 +116,7 @@ let handleResponse = (error, response, body, excludeList, filenameNoExtension, r
 			logger.log('error', JSON.stringify(response));
 		}
 	}
-}
+};
 
 let handleMovie = (movieName, movieYear, filenameNoExtension, relativePath) => {
 	logger.log('info', `Handling Movie: "${movieName}" (${movieYear})`);
@@ -142,7 +142,7 @@ let handleMovie = (movieName, movieYear, filenameNoExtension, relativePath) => {
 	request(options, (error, response, body) => {
 		handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath);
 	});
-}
+};
 
 let handleEpisode = (series, season, episode, filenameNoExtension, relativePath) => {
 		logger.log('info', `Handling Series "${series}" Season ${season} Episode ${episode}`);
@@ -168,7 +168,7 @@ let handleEpisode = (series, season, episode, filenameNoExtension, relativePath)
 	request(options, (error, response, body) => {
 		handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath);
 	});
-}
+};
 
 let classify = (filenameNoExtension, parentFolder) => {
 	let match = episodeRegex.exec(filenameNoExtension);
@@ -180,7 +180,7 @@ let classify = (filenameNoExtension, parentFolder) => {
 			series: cleanText(match[1]),
 			season: Number(match[2]),
 			episode: Number(match[3])
-		}
+		};
 	}
 	else {
 		let match = movieRegex.exec(parentFolder);
@@ -188,15 +188,15 @@ let classify = (filenameNoExtension, parentFolder) => {
 			type: "movie",
 			movieName: match[1],
 			movieYear: Number(match[2])
-		}
+		};
 	}
-}
+};
 
 
 if (process.argv.length > 2) {
 	logger.log('info', `*** Looking for subtitle for "${process.argv[2]}" ***`);
-	let fullpath = process.argv[2].replace(/\\/g, "/");;
-	let relativePath = fullpath.substr(0, fullpath.lastIndexOf("/"))
+	let fullpath = process.argv[2].replace(/\\/g, "/");
+	let relativePath = fullpath.substr(0, fullpath.lastIndexOf("/"));
 	let split = fullpath.split('/');
 	let filename = split[split.length - 1];
 	let filenameNoExtension = filename.substr(0, filename.lastIndexOf("."));
