@@ -1,12 +1,20 @@
 const fs = require('fs');
 const path = require('path');
 const request = require('request');
+const notifier = require('node-notifier');
 
 const baseUrl = 'http://api.screwzira.com';
 const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
 
 const episodeRegex = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
 const movieRegex = /((?:[^\(]+))\s+(?:\((\d+)\))/;
+
+let notify = (message) => {
+	notifier.notify({
+		title: 'Screwzira Subtitle Downloader',
+		message
+	});
+}
 
 let cleanText = (text) => {
 	return text.toLowerCase().replace(/[\.|-]/g, ' ').trim();
@@ -49,6 +57,8 @@ let downloadBestMatch = (subtitleID, filenameNoExtension, relativePath) => {
 			}
 			console.log(`writing response to ${destination}`);
 			fs.writeFileSync(destination, body);
+			
+			notify(`Successfully dowloaded ${destination}`);
 		}
 		else {
 			console.log(error);
@@ -146,9 +156,11 @@ let handleEpisode = (series, season, episode, filenameNoExtension, relativePath)
 	});
 }
 
-let clasify = (filenameNoExtension, parentFolder) => {
+let classify = (filenameNoExtension, parentFolder) => {
 	let match = episodeRegex.exec(filenameNoExtension);
-	if (match && match.length > 2) {
+	if (match && match.length > 2 && match[1] && match[2] && match[3]) {
+		console.log(JSON.stringify(match));
+		
 		return {
 			type: "episode",
 			series: cleanText(match[1]),
@@ -176,7 +188,7 @@ if (process.argv.length > 2) {
 	let filenameNoExtension = filename.substr(0, filename.lastIndexOf("."));
 	let parentFolder = split[split.length - 2];
 	
-	let clasification = clasify(filenameNoExtension, parentFolder);
+	let clasification = classify(filenameNoExtension, parentFolder);
 	
 	console.log(JSON.stringify(clasification));
 	
