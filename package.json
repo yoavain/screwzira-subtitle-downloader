@@ -4,9 +4,9 @@
   "description": "",
   "main": "built/index.js",
   "scripts": {
-    "test": "npm run comile && node built/index.js",
-    "complie": "tsc",
-    "build": "npm run comile && nexe -o dist/screwzira-downloader.exe"
+    "test": "npm run compile && node built/index.js",
+    "compile": "tsc",
+    "build": "npm run compile && nexe -o dist/screwzira-downloader.exe"
   },
   "author": "",
   "license": "ISC",

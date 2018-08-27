@@ -26,22 +26,22 @@ const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 
 const episodeRegex = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
 const movieRegex = /((?:[^\(]+))\s+(?:\((\d+)\))/;
 
-let notify = (message) => {
+let notify = (message: string) => {
 	notifier.notify({
 		title: 'Screwzira Subtitle Downloader',
 		message
 	});
 };
 
-let cleanText = (text) => {
+let cleanText = (text: string): string => {
 	return text.toLowerCase().replace(/[\.|-]/g, ' ').trim();
 };
 
-let splitText = (text) => {
+let splitText = (text: string): string[] => {
 	return text.split(' ');
 };
 
-let commonWordsInSentences = (s1, s2, excludeList) => {
+let commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): string[] => {
 	let split1 = splitText(cleanText(s1));
 	let split2 = splitText(cleanText(s2));
 	
@@ -50,7 +50,7 @@ let commonWordsInSentences = (s1, s2, excludeList) => {
 	return commonWords;
 };
 
-let downloadBestMatch = (subtitleID, filenameNoExtension, relativePath) => {
+let downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string) => {
 	logger.log('info', `Downloading: ${subtitleID}`);
 	var options = {
 		url: `${baseUrl}/Download`,
@@ -83,7 +83,7 @@ let downloadBestMatch = (subtitleID, filenameNoExtension, relativePath) => {
 	});
 };
 
-let findClosestMatch = (filenameNoExtension, list, excludeList) => {
+let findClosestMatch = (filenameNoExtension: string, list, excludeList: string[]): string => {
 	logger.log('info', `Looking for closest match for "${filenameNoExtension}" from: [${list && list.map(item => item.SubtitleName).join(', ')}]`);
 	if (list && list.length > 0) {
 		let maxCommonWords = commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
@@ -105,7 +105,7 @@ let findClosestMatch = (filenameNoExtension, list, excludeList) => {
 	}
 };
 
-let handleResponse = (error, response, body, excludeList, filenameNoExtension, relativePath) => {
+let handleResponse = (error: any, response: any, body: any, excludeList: string[], filenameNoExtension: string, relativePath: string) => {
 	if (!error && response.statusCode == 200) {
 		let subtitleID = findClosestMatch(filenameNoExtension, body && JSON.parse(body).Results, excludeList);
 		downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
@@ -144,7 +144,7 @@ let handleMovie = (movieName, movieYear, filenameNoExtension, relativePath) => {
 	});
 };
 
-let handleEpisode = (series, season, episode, filenameNoExtension, relativePath) => {
+let handleEpisode = (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) => {
 		logger.log('info', `Handling Series "${series}" Season ${season} Episode ${episode}`);
 	var options = {
 		url: `${baseUrl}/FindSeries`,
@@ -170,7 +170,7 @@ let handleEpisode = (series, season, episode, filenameNoExtension, relativePath)
 	});
 };
 
-let classify = (filenameNoExtension, parentFolder) => {
+let classify = (filenameNoExtension: string, parentFolder: string) => {
 	let match = episodeRegex.exec(filenameNoExtension);
 	if (match && match.length > 2 && match[1] && match[2] && match[3]) {
 		logger.log('verbose', `Classification match: ${JSON.stringify(match)}`);
