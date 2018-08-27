@@ -1,0 +1,17 @@
+{
+  "name": "screwzira-downloader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "request": "^2.88.0"
+  },
+  "bundledDependencies": [
+    "request"
+  ]
+}
