@@ -1,4 +1,5 @@
 const fs = require('fs');
+const fsextra = require("fs-extra");
 const path = require('path');
 const request = require('request');
 const notifier = require('node-notifier');
@@ -9,10 +10,14 @@ const { combine, timestamp, label, printf } = format;
 const myFormat = printf(info => {
   return `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`;
 });
+
+// Make sure the log directory is there
+fsextra.ensureDirSync(path.resolve(process.env.ProgramData, 'Screwzira-Downloader'));
+const logFile = path.resolve(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader.log');
 const logger = createLogger({
 	level: 'debug',
 	format: combine(timestamp(), myFormat),
-	transports: [new transports.File({ filename: 'screwzira-downloader.log' })]
+	transports: [new transports.File({ filename: logFile })]
 });
 
 const baseUrl = 'http://api.screwzira.com';
