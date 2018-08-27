@@ -1,6 +1,7 @@
 # screwzira-subtitle-downloader
 
 CLI for downloading Hebrew subtitles from screwzira.com using their API
+Usage: screwzira-downloader.exe <video-file-full-path>
 
 Adding to right-click:
 
