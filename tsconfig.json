@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
-        "outDir": "./built",
+        "outDir": "./compiled",
         "allowJs": true,
         "target": "es6",
-		"lib": ["es6", "dom", "es2017"]
+		"lib": ["es6", "es2017"]
     },
     "include": [
         "./src/**/*"
