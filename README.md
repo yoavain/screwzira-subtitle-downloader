@@ -17,3 +17,7 @@ All users: HKEY_LOCAL_MACHINE\Software\Classes\mplayerc64.mkv\shell
 3) Set the command value:
 You need to set the default value of the command subkey. You need to set that with the path to this application, like so: HKEY_CURRENT_USER\Software\Classes\mplayerc64.mkv\shell\screwzira-subtitle-downloader\command would be set to "c:\path\to\screwzira-downloader.exe" "%1".
 Now a context menu for .mkv files will have a "screwzira-subtitle-downloader" item which will launch this app and try to download subtitles.
+
+
+To build:
+npm install -g nexe typescript

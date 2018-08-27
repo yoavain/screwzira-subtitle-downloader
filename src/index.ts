@@ -2,22 +2,25 @@ const fs = require('fs');
 const fsextra = require("fs-extra");
 const path = require('path');
 const request = require('request');
-const notifier = require('node-notifier');
-
-// Logger
-const { createLogger, format, transports } = require('winston');
-const { combine, timestamp, label, printf } = format;
-const myFormat = printf(info => {
-  return `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`;
-});
+const winston = require('winston');
+const WindowsToaster = require('node-notifier').WindowsToaster;
 
 // Make sure the log directory is there
 fsextra.ensureDirSync(path.resolve(process.env.ProgramData, 'Screwzira-Downloader'));
+
+// Logger
 const logFile = path.resolve(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader.log');
-const logger = createLogger({
+const logger = winston.createLogger({
 	level: 'debug',
-	format: combine(timestamp(), myFormat),
-	transports: [new transports.File({ filename: logFile })]
+	transports: [new winston.transports.File({ filename: logFile })]
+});
+
+// Notifier
+const customPath = process.argv[0].endsWith("screwzira-downloader.exe") ? path.join(process.argv[0], "../", "SnoreToast.exe") : null;
+logger.log('debug', `Custom path: ${customPath}`);
+const notifier = new WindowsToaster({
+  withFallback: false,
+  customPath: customPath
 });
 
 const baseUrl = 'http://api.screwzira.com';
@@ -171,25 +174,30 @@ let handleEpisode = (series: string, season: number, episode: number, filenameNo
 };
 
 let classify = (filenameNoExtension: string, parentFolder: string) => {
-	let match = episodeRegex.exec(filenameNoExtension);
-	if (match && match.length > 2 && match[1] && match[2] && match[3]) {
-		logger.log('verbose', `Classification match: ${JSON.stringify(match)}`);
+	let episodematch = episodeRegex.exec(filenameNoExtension);
+	if (episodematch && episodematch.length > 2 && episodematch[1] && episodematch[2] && episodematch[3]) {
+		logger.log('verbose', `Classification match: ${JSON.stringify(episodematch)}`);
 		
 		return {
 			type: "episode",
-			series: cleanText(match[1]),
-			season: Number(match[2]),
-			episode: Number(match[3])
+			series: cleanText(episodematch[1]),
+			season: Number(episodematch[2]),
+			episode: Number(episodematch[3])
 		};
 	}
 	else {
-		let match = movieRegex.exec(parentFolder);
-		return {
-			type: "movie",
-			movieName: match[1],
-			movieYear: Number(match[2])
-		};
+		let movieMatch = movieRegex.exec(parentFolder);
+		if (movieMatch && movieMatch.length > 1 && movieMatch[1] && movieMatch[2]) {
+			return {
+				type: "movie",
+				movieName: movieMatch[1],
+				movieYear: Number(movieMatch[2])
+			};
+		}
 	}
+	return {
+		type: undefined
+	};
 };
 
 
@@ -211,6 +219,9 @@ if (process.argv.length > 2) {
 	}
 	else if (clasification.type === "episode") {
 		handleEpisode(clasification.series, clasification.season, clasification.episode, filenameNoExtension, relativePath);
+	}
+	else {
+		notify(`Unable to classify input file as movie or episode`);
 	}
 }
 else {

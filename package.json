@@ -4,11 +4,12 @@
   "description": "",
   "main": "built/index.js",
   "scripts": {
-    "test": "npm run compile && node built/index.js",
+    "test": "npm run compile && npm run webpack && node built/index.js",
     "compile": "tsc",
-    "build": "npm run compile && nexe -o dist/screwzira-downloader.exe"
+    "webpack": "webpack --mode=development",
+    "build": "npm run compile && npm run webpack && nexe -o dist/screwzira-downloader.exe"
   },
-  "author": "",
+  "author": "yoavain",
   "license": "ISC",
   "dependencies": {
     "fs-extra": "^7.0.0",
@@ -20,6 +21,9 @@
     "request"
   ],
   "devDependencies": {
-    "@types/node": "^10.9.2"
+    "@types/node": "^10.9.2",
+    "copy-webpack-plugin": "^4.5.2",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0"
   }
 }
