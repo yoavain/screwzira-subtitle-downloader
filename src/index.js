@@ -1,7 +1,24 @@
 const fs = require('fs');
+const fsextra = require("fs-extra");
 const path = require('path');
 const request = require('request');
 const notifier = require('node-notifier');
+
+// Logger
+const { createLogger, format, transports } = require('winston');
+const { combine, timestamp, label, printf } = format;
+const myFormat = printf(info => {
+  return `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`;
+});
+
+// Make sure the log directory is there
+fsextra.ensureDirSync(path.resolve(process.env.ProgramData, 'Screwzira-Downloader'));
+const logFile = path.resolve(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader.log');
+const logger = createLogger({
+	level: 'debug',
+	format: combine(timestamp(), myFormat),
+	transports: [new transports.File({ filename: logFile })]
+});
 
 const baseUrl = 'http://api.screwzira.com';
 const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
@@ -29,12 +46,12 @@ let commonWordsInSentences = (s1, s2, excludeList) => {
 	let split2 = splitText(cleanText(s2));
 	
 	let commonWords = split1.filter(word1 => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
-	//console.log(`"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}]`);
+	logger.log('debug', `"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}]`);
 	return commonWords;
 }
 
 let downloadBestMatch = (subtitleID, filenameNoExtension, relativePath) => {
-	console.log(`Downloading: ${subtitleID}`);
+	logger.log('info', `Downloading: ${subtitleID}`);
 	var options = {
 		url: `${baseUrl}/Download`,
 		method: 'POST',
@@ -47,7 +64,7 @@ let downloadBestMatch = (subtitleID, filenameNoExtension, relativePath) => {
 		}
 	};
 	
-	//console.log(JSON.stringify(options));
+	logger.log('debug', JSON.stringify(options));
 
 	request(options, (error, response, body) => {
 		if (!error && response.statusCode == 200) {
@@ -55,22 +72,19 @@ let downloadBestMatch = (subtitleID, filenameNoExtension, relativePath) => {
 			if (fs.existsSync(destination)) {
 				destination = path.resolve(relativePath, filenameNoExtension + ".HebrewSZ.srt");
 			}
-			console.log(`writing response to ${destination}`);
+			logger.log('verbose', `writing response to ${destination}`);
 			fs.writeFileSync(destination, body);
-			
-			notify(`Successfully dowloaded ${destination}`);
+			notify(`Successfully downloaded "${destination}"`);
 		}
 		else {
-			console.log(error);
-			if (response) {
-				console.log(JSON.stringify(response));
-			}
+			logger.log('error', error);
+			notify(`Failed dowloadeding subtitle`);
 		}
 	});
 }
 
 let findClosestMatch = (filenameNoExtension, list, excludeList) => {
-	console.log(`Looking for closest match to ${filenameNoExtension} from:\n${list && list.map(item => item.SubtitleName).join(',\n')}\n`);
+	logger.log('info', `Looking for closest match for "${filenameNoExtension}" from: [${list && list.map(item => item.SubtitleName).join(', ')}]`);
 	if (list && list.length > 0) {
 		let maxCommonWords = commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
 		let maxIndex = 0;
@@ -83,9 +97,9 @@ let findClosestMatch = (filenameNoExtension, list, excludeList) => {
 		})
 		
 		let bestMatch = list[maxIndex];
-		console.log(`filename:  ${filenameNoExtension}`);
-		console.log(`best match: ${bestMatch.SubtitleName}`);
-		console.log(`common words: [\"${maxCommonWords.join('\", \"')}\"]`);
+		logger.log('info', `filename:  "${filenameNoExtension}"`);
+		logger.log('info', `best match: "${bestMatch.SubtitleName}"`);
+		logger.log('info', `common words: [\"${maxCommonWords.join('\", \"')}\"]`);
 		
 		return bestMatch.Identifier;
 	}
@@ -97,15 +111,15 @@ let handleResponse = (error, response, body, excludeList, filenameNoExtension, r
 		downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
 	}
 	else {
-		console.log(error);
+		logger.log('error', error);
 		if (response) {
-			console.log(JSON.stringify(response));
+			logger.log('error', JSON.stringify(response));
 		}
 	}
 }
 
 let handleMovie = (movieName, movieYear, filenameNoExtension, relativePath) => {
-	console.log(`Handling Movie: "${movieName}" (${movieYear})`);
+	logger.log('info', `Handling Movie: "${movieName}" (${movieYear})`);
 	var options = {
 		url: `${baseUrl}/FindFilm`,
 		method: 'POST',
@@ -123,7 +137,7 @@ let handleMovie = (movieName, movieYear, filenameNoExtension, relativePath) => {
 	let excludeList = splitText(cleanText(movieName));
 	excludeList.push(movieYear.toString());
 	
-	//console.log(JSON.stringify(options));
+	logger.log('debug', `Handle movie request options: ${JSON.stringify(options)}`);
 
 	request(options, (error, response, body) => {
 		handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath);
@@ -131,7 +145,7 @@ let handleMovie = (movieName, movieYear, filenameNoExtension, relativePath) => {
 }
 
 let handleEpisode = (series, season, episode, filenameNoExtension, relativePath) => {
-		console.log(`Handling Series "${series}" Season ${season} Episode ${episode}`);
+		logger.log('info', `Handling Series "${series}" Season ${season} Episode ${episode}`);
 	var options = {
 		url: `${baseUrl}/FindSeries`,
 		method: 'POST',
@@ -149,7 +163,7 @@ let handleEpisode = (series, season, episode, filenameNoExtension, relativePath)
 
 	let excludeList = splitText(series);
 	
-	console.log(JSON.stringify(options));
+	logger.log('debug', `Handle episode request options: ${JSON.stringify(options)}`);
 
 	request(options, (error, response, body) => {
 		handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath);
@@ -159,7 +173,7 @@ let handleEpisode = (series, season, episode, filenameNoExtension, relativePath)
 let classify = (filenameNoExtension, parentFolder) => {
 	let match = episodeRegex.exec(filenameNoExtension);
 	if (match && match.length > 2 && match[1] && match[2] && match[3]) {
-		console.log(JSON.stringify(match));
+		logger.log('verbose', `Classification match: ${JSON.stringify(match)}`);
 		
 		return {
 			type: "episode",
@@ -180,8 +194,8 @@ let classify = (filenameNoExtension, parentFolder) => {
 
 
 if (process.argv.length > 2) {
+	logger.log('info', `*** Looking for subtitle for "${process.argv[2]}" ***`);
 	let fullpath = process.argv[2].replace(/\\/g, "/");;
-	console.log(`Looking for subtitle for ${fullpath}`);
 	let relativePath = fullpath.substr(0, fullpath.lastIndexOf("/"))
 	let split = fullpath.split('/');
 	let filename = split[split.length - 1];
@@ -190,7 +204,7 @@ if (process.argv.length > 2) {
 	
 	let clasification = classify(filenameNoExtension, parentFolder);
 	
-	console.log(JSON.stringify(clasification));
+	logger.log('verbose', `Clasification response: ${JSON.stringify(clasification)}`);
 	
 	if (clasification.type === "movie") {
 		handleMovie(clasification.movieName, clasification.movieYear, filenameNoExtension, relativePath);
@@ -200,5 +214,6 @@ if (process.argv.length > 2) {
 	}
 }
 else {
-	console.log('Missing input file');
+	logger.log('error', '*** Missing input file ***');
+	notify(`Missing input file`);
 }

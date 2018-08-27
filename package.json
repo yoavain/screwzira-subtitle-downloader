@@ -10,8 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "fs-extra": "^7.0.0",
     "node-notifier": "^5.2.1",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "winston": "^3.0.0"
   },
   "bundledDependencies": [
     "request"
