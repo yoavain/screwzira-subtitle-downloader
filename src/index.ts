@@ -23,11 +23,23 @@ const notifier = new WindowsToaster({
   customPath: customPath
 });
 
+// Conf file
+const confFile = path.resolve(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader-config.json');
+if (!fs.existsSync(confFile)) {
+    fsextra.outputJsonSync(confFile, { replacePairs: {} });
+}
+const conf = fsextra.readJsonSync(confFile);
+const replacePairs = conf && conf.replacePairs && JSON.parse(JSON.stringify(conf.replacePairs).toLowerCase());
+logger.log('debug', `Replace pairs (${Object.keys(replacePairs).length}): ${Object.keys(replacePairs).map(pairKey => pairKey + " => " + replacePairs[pairKey]).join('; ')}`);
+
+// Request Info
 const baseUrl = 'http://api.screwzira.com';
 const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
 
+// Regex
 const episodeRegex = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
 const movieRegex = /((?:[^\(]+))\s+(?:\((\d+)\))/;
+
 
 let notify = (message: string) => {
 	notifier.notify({
@@ -38,6 +50,14 @@ let notify = (message: string) => {
 
 let cleanText = (text: string): string => {
 	return text.toLowerCase().replace(/[\.|-]/g, ' ').trim();
+};
+
+let replaceTitleIfNeeded = (text: string): string => {
+    if (replacePairs && replacePairs[text]) {
+        logger.log('info', `Replaced "${text}" with "${replacePairs[text]}" for query`);
+        return replacePairs[text];
+    }
+    return text;
 };
 
 let splitText = (text: string): string[] => {
@@ -180,7 +200,7 @@ let classify = (filenameNoExtension: string, parentFolder: string) => {
 		
 		return {
 			type: "episode",
-			series: cleanText(episodematch[1]),
+			series: replaceTitleIfNeeded(cleanText(episodematch[1])),
 			season: Number(episodematch[2]),
 			episode: Number(episodematch[3])
 		};
@@ -190,7 +210,7 @@ let classify = (filenameNoExtension: string, parentFolder: string) => {
 		if (movieMatch && movieMatch.length > 1 && movieMatch[1] && movieMatch[2]) {
 			return {
 				type: "movie",
-				movieName: movieMatch[1],
+                movieName: replaceTitleIfNeeded(movieMatch[1]),
 				movieYear: Number(movieMatch[2])
 			};
 		}
