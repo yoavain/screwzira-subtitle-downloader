@@ -129,9 +129,15 @@ let findClosestMatch = (filenameNoExtension: string, list, excludeList: string[]
 };
 
 let handleResponse = (error: any, response: any, body: any, excludeList: string[], filenameNoExtension: string, relativePath: string) => {
-	if (!error && response.statusCode == 200) {
-		let subtitleID = findClosestMatch(filenameNoExtension, body && JSON.parse(body).Results, excludeList);
-		downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
+    if (!error && response.statusCode == 200) {
+        let results = body && JSON.parse(body).Results;
+        if (Array.isArray(results) && results.length) {
+            let subtitleID = findClosestMatch(filenameNoExtension, results, excludeList);
+            downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
+        }
+        else {
+            notify(`No subtitle found`);
+        }
 	}
 	else {
 		logger.log('error', error);
