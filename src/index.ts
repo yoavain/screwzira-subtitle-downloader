@@ -136,6 +136,7 @@ let handleResponse = (error: any, response: any, body: any, excludeList: string[
             downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
         }
         else {
+            logger.log('info', "No subtitle found");
             notify(`No subtitle found`);
         }
 	}
