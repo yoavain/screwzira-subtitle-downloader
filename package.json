@@ -15,15 +15,15 @@
     "fs-extra": "^7.0.0",
     "node-notifier": "^5.2.1",
     "request": "^2.88.0",
-    "winston": "^3.0.0"
+    "winston": "^3.1.0"
   },
   "bundledDependencies": [
     "request"
   ],
   "devDependencies": {
-    "@types/node": "^10.9.2",
+    "@types/node": "^10.9.4",
     "copy-webpack-plugin": "^4.5.2",
-    "webpack": "^4.17.1",
+    "webpack": "^4.17.2",
     "webpack-cli": "^3.1.0"
   }
 }
