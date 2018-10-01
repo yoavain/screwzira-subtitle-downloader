@@ -7,10 +7,6 @@ import {ISzClassifier} from './szClassifier';
 import {ISzLogger} from './szLogger';
 
 
-export interface IScrewziraUtils {
-    new(logger: ISzLogger, notifier: ISzNotifier): ScrewziraUtils;
-}
-
 class ScrewziraUtils {
     // Request Info
     baseUrl = 'http://api.screwzira.com';
