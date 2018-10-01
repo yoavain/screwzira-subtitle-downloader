@@ -12,6 +12,8 @@
   "author": "yoavain",
   "license": "ISC",
   "dependencies": {
+    "@types/node-notifier": "0.0.28",
+    "@types/request": "^2.47.1",
     "fs-extra": "^7.0.0",
     "node-notifier": "^5.2.1",
     "request": "^2.88.0",
@@ -21,9 +23,9 @@
     "request"
   ],
   "devDependencies": {
-    "@types/node": "^10.9.4",
+    "@types/node": "^10.11.3",
     "copy-webpack-plugin": "^4.5.2",
-    "webpack": "^4.17.2",
-    "webpack-cli": "^3.1.0"
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2"
   }
 }
