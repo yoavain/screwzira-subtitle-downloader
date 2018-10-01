@@ -7,6 +7,8 @@ const SzConfig = require('./szConfig');
 const SzClassifier = require('./szClassifier');
 const ScrewziraUtils = require('./screwziraUtils');
 
+const batchInterval = 3000; // milliseconds
+
 // Make sure the log directory is there
 fsextra.ensureDirSync(path.resolve(process.env.ProgramData, 'Screwzira-Downloader'));
 
@@ -29,6 +31,7 @@ const szClassifier = new SzClassifier(szLogger, szConfig);
 // Screwzira Utils
 const screwziraUtils = new ScrewziraUtils(szLogger, szNotifier, szClassifier);
 
+// handle single file
 let handleSingleFile = (fullpath: string, fileExists: boolean) => {
     let relativePath = fullpath.substr(0, fullpath.lastIndexOf("/"));
     let split = fullpath.split('/');
@@ -50,22 +53,34 @@ let handleSingleFile = (fullpath: string, fileExists: boolean) => {
     }
 };
 
+
+// Batch
+
 let getFileExtension = (fullPath: string): string => {
     let ext = path.extname(fullPath);
     return ext && ext.length > 1 && ext.startsWith(".") ? ext.substr(1) : undefined;
 };
 
+// Batch counter for pacing requests to server
+let batchCounter = 0;
+let getWaitTimeMs = (): number => {
+    batchCounter += 1;
+    return batchCounter * batchInterval;
+};
+
 let handleFolder = (dir: string) => {
     fs.readdirSync(dir).forEach(file => {
-        let fullPath = path.join(dir, file).replace(/\\/g, "/");;
+        let fullPath = path.join(dir, file).replace(/\\/g, "/");
         if (fs.lstatSync(fullPath).isDirectory()) {
             szLogger.log('verbose', `Handling sub-folder ${fullPath}`);
             handleFolder(fullPath);
         }
         else {
             if (szConfig.getExtensions().includes(getFileExtension(fullPath))) {
-                szLogger.log('verbose', `Handling file ${fullPath}`);
-                handleSingleFile(fullPath, true);
+                let waitTimeMs = getWaitTimeMs();
+                szLogger.log('verbose', `Waiting ${waitTimeMs}ms to handle file ${fullPath}`);
+                console.log(``);
+                setTimeout(handleSingleFile, waitTimeMs, fullPath, true);
             }
         }
     });
