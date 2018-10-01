@@ -1,6 +1,11 @@
 import {ISzConfig} from './szConfig'
 import {ISzLogger} from './szLogger';
 
+// RegEx
+const episodeRegex = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
+const movieRegex = /([ .\w']+?)\.(\d+)/;
+const movieParentRegex = /((?:[^(]+))\s+(?:\((\d+)\))/;
+
 interface FileClassification {
     type: string
 }
@@ -25,17 +30,10 @@ export interface ISzClassifier {
 }
 
 class SzClassifier {
-    episodeRegex: RegExp;
-    movieRegex: RegExp;
-    movieParentRegex: RegExp;
     logger: ISzLogger;
     config: ISzConfig;
 
     constructor(logger: ISzLogger, config: ISzConfig) {
-        // Regex
-        this.episodeRegex = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
-        this.movieRegex = /([ .\w']+?)\.(\d+)/;
-        this.movieParentRegex = /((?:[^(]+))\s+(?:\((\d+)\))/;
         this.logger = logger;
         this.config = config;
     }
@@ -66,7 +64,7 @@ class SzClassifier {
      * @param parentFolder
      */
     classify = (filenameNoExtension: string, parentFolder: string): MovieFileClassification | TvEpisodeFileClassification => {
-        let episodeMatch = this.episodeRegex.exec(filenameNoExtension);
+        let episodeMatch = episodeRegex.exec(filenameNoExtension);
         if (episodeMatch && episodeMatch.length > 2 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
             this.logger.log('verbose', `Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
@@ -77,7 +75,7 @@ class SzClassifier {
             };
         }
         else {
-            let movieMatch = this.movieRegex.exec(filenameNoExtension);
+            let movieMatch = movieRegex.exec(filenameNoExtension);
             if (movieMatch && movieMatch.length > 1 && movieMatch[1] && movieMatch[2]) {
                 this.logger.log('verbose', `Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
@@ -86,8 +84,8 @@ class SzClassifier {
                     movieYear: Number(movieMatch[2])
                 };
             }
-            else {
-                let movieMatchFromParent = this.movieParentRegex.exec(parentFolder);
+            else if (parentFolder) {
+                let movieMatchFromParent = movieParentRegex.exec(parentFolder);
                 if (movieMatchFromParent && movieMatchFromParent.length > 1 && movieMatchFromParent[1] && movieMatchFromParent[2]) {
                     this.logger.log('verbose', `Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
                     return {
