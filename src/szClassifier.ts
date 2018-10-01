@@ -1,5 +1,5 @@
-import {Logger} from "winston";
-import {IScrewziraConfig} from "./screwziraConfig"
+import {ISzConfig} from './szConfig'
+import {ISzLogger} from './szLogger';
 
 interface FileClassification {
     type: string
@@ -16,21 +16,21 @@ interface TvEpisodeFileClassification extends FileClassification {
     episode: number
 }
 
-export interface IClassifier {
-    new (logger: Logger, config: IScrewziraConfig): Classifier;
+export interface ISzClassifier {
+    new(logger: ISzLogger, config: ISzConfig): SzClassifier;
     cleanText(text: string): string;
     splitText(text: string): string[];
     commonWordsInSentences(s1: string, s2: string, excludeList: string[]): string[];
     classify(filenameNoExtension: string, parentFolder: string): MovieFileClassification | TvEpisodeFileClassification;
 }
 
-class Classifier {
+class SzClassifier {
     episodeRegex: RegExp;
     movieRegex: RegExp;
-    logger: Logger;
-    config: IScrewziraConfig;
+    logger: ISzLogger;
+    config: ISzConfig;
 
-    constructor(logger: Logger, config: IScrewziraConfig) {
+    constructor(logger: ISzLogger, config: ISzConfig) {
         // Regex
         this.episodeRegex = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
         this.movieRegex = /((?:[^(]+))\s+(?:\((\d+)\))/;
@@ -79,3 +79,5 @@ class Classifier {
         return undefined;
     };
 }
+
+module.exports = SzClassifier;

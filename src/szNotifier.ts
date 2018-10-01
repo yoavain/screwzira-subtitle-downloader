@@ -1,15 +1,16 @@
-import {Logger} from "winston";
+import {ISzLogger} from './szLogger';
+const WindowsToaster = require('node-notifier').WindowsToaster;
 
-export interface INotifier {
-    new(logger: Logger, snoreToastPath: string): Notifier
+export interface ISzNotifier {
+    new(logger: ISzLogger, snoreToastPath: string): SzNotifier
     notif(message: string);
 }
 
-class Notifier {
-    logger: Logger;
+class SzNotifier {
+    logger: ISzLogger;
     notifier: any;
 
-    constructor(logger: Logger, snoreToastPath: string) {
+    constructor(logger: ISzLogger, snoreToastPath: string) {
         this.logger = logger;
         this.logger.log('debug', `Custom path: ${snoreToastPath}`);
         this.notifier = new WindowsToaster({ withFallback: false, customPath: snoreToastPath });
@@ -19,3 +20,5 @@ class Notifier {
         this.notifier.notify({ title: 'Screwzira Subtitle Downloader', message });
     };
 }
+
+module.exports = SzNotifier;
