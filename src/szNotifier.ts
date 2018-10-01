@@ -1,4 +1,5 @@
 import {ISzLogger} from './szLogger';
+import {NodeNotifier} from 'node-notifier';
 const WindowsToaster = require('node-notifier').WindowsToaster;
 
 export interface ISzNotifier {
@@ -8,7 +9,7 @@ export interface ISzNotifier {
 
 class SzNotifier {
     logger: ISzLogger;
-    notifier: any;
+    notifier: NodeNotifier ;
 
     constructor(logger: ISzLogger, snoreToastPath: string) {
         this.logger = logger;
