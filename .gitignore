@@ -2,5 +2,7 @@ node_modules/**
 compiled/**
 built/**
 dist/**
+.idea/**
+.vs/**
 deploy.bat
 

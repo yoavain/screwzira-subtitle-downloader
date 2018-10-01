@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "moduleResolution": "node",
         "outDir": "./compiled",
         "allowJs": true,
         "target": "es6",
