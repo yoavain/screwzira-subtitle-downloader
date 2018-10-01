@@ -7,8 +7,6 @@ const SzConfig = require('./szConfig');
 const SzClassifier = require('./szClassifier');
 const ScrewziraUtils = require('./screwziraUtils');
 
-const batchInterval = 3000; // milliseconds
-
 // Make sure the log directory is there
 fsextra.ensureDirSync(path.resolve(process.env.ProgramData, 'Screwzira-Downloader'));
 
@@ -55,17 +53,16 @@ let handleSingleFile = (fullpath: string, fileExists: boolean) => {
 
 
 // Batch
-
-let getFileExtension = (fullPath: string): string => {
-    let ext = path.extname(fullPath);
-    return ext && ext.length > 1 && ext.startsWith(".") ? ext.substr(1) : undefined;
-};
-
-// Batch counter for pacing requests to server
+const batchInterval = 3000; // milliseconds
 let batchCounter = 0;
 let getWaitTimeMs = (): number => {
     batchCounter += 1;
     return batchCounter * batchInterval;
+};
+
+let getFileExtension = (fullPath: string): string => {
+    let ext = path.extname(fullPath);
+    return ext && ext.length > 1 && ext.startsWith(".") ? ext.substr(1) : undefined;
 };
 
 let handleFolder = (dir: string) => {

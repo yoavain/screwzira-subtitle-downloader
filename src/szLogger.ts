@@ -14,7 +14,7 @@ class SzLogger {
     transports: { file: FileTransportInstance };
     logger: Logger;
 
-    constructor(logFile: PathLike) {
+    constructor(logFile: string) {
         this.transports = {
             file: new winston.transports.File({filename: logFile})
         };
