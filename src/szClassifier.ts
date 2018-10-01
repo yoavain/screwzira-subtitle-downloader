@@ -27,13 +27,15 @@ export interface ISzClassifier {
 class SzClassifier {
     episodeRegex: RegExp;
     movieRegex: RegExp;
+    movieParentRegex: RegExp;
     logger: ISzLogger;
     config: ISzConfig;
 
     constructor(logger: ISzLogger, config: ISzConfig) {
         // Regex
         this.episodeRegex = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
-        this.movieRegex = /((?:[^(]+))\s+(?:\((\d+)\))/;
+        this.movieRegex = /([ .\w']+?)\.(\d+)/;
+        this.movieParentRegex = /((?:[^(]+))\s+(?:\((\d+)\))/;
         this.logger = logger;
         this.config = config;
     }
@@ -55,25 +57,45 @@ class SzClassifier {
         return commonWords;
     };
 
+    /**
+     * Classify filename:
+     * 1. Try episode regex
+     * 2. Try movie regex
+     * 3. Try movie folder regex
+     * @param filenameNoExtension
+     * @param parentFolder
+     */
     classify = (filenameNoExtension: string, parentFolder: string): MovieFileClassification | TvEpisodeFileClassification => {
         let episodeMatch = this.episodeRegex.exec(filenameNoExtension);
         if (episodeMatch && episodeMatch.length > 2 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
-            this.logger.log('verbose', `Classification match: ${JSON.stringify(episodeMatch)}`);
-
+            this.logger.log('verbose', `Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
                 type: "episode",
                 series: this.config.replaceTitleIfNeeded(this.cleanText(episodeMatch[1])),
                 season: Number(episodeMatch[2]),
                 episode: Number(episodeMatch[3])
             };
-        } else {
-            let movieMatch = this.movieRegex.exec(parentFolder);
+        }
+        else {
+            let movieMatch = this.movieRegex.exec(filenameNoExtension);
             if (movieMatch && movieMatch.length > 1 && movieMatch[1] && movieMatch[2]) {
+                this.logger.log('verbose', `Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
                     type: "movie",
                     movieName: this.config.replaceTitleIfNeeded(movieMatch[1]),
                     movieYear: Number(movieMatch[2])
                 };
+            }
+            else {
+                let movieMatchFromParent = this.movieParentRegex.exec(parentFolder);
+                if (movieMatchFromParent && movieMatchFromParent.length > 1 && movieMatchFromParent[1] && movieMatchFromParent[2]) {
+                    this.logger.log('verbose', `Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
+                    return {
+                        type: "movie",
+                        movieName: this.config.replaceTitleIfNeeded(movieMatchFromParent[1]),
+                        movieYear: Number(movieMatchFromParent[2])
+                    };
+                }
             }
         }
         return undefined;
