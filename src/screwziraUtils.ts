@@ -1,24 +1,22 @@
-import {Logger} from 'winston';
-import {Response} from "request";
-import {INotifier} from "./notifier";
-import {IClassifier} from "./classifier";
-
+const fs = require('fs');
+const path = require('path');
 const request = require('request');
+import {Response} from 'request';
+import {ISzNotifier} from './szNotifier';
+import {ISzClassifier} from './szClassifier';
+import {ISzLogger} from './szLogger';
 
-interface IScrewziraUtils {
-    new (logger: Logger, notifier: INotifier): ScrewziraUtils;
-}
 
 class ScrewziraUtils {
     // Request Info
     baseUrl = 'http://api.screwzira.com';
     userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
 
-    logger: Logger;
-    notifier: INotifier;
-    classifier: IClassifier;
+    logger: ISzLogger;
+    notifier: ISzNotifier;
+    classifier: ISzClassifier;
 
-    constructor(logger: Logger, notifier: INotifier, classifier: IClassifier) {
+    constructor(logger: ISzLogger, notifier: ISzNotifier, classifier: ISzClassifier) {
         this.logger = logger;
         this.notifier = notifier;
         this.classifier = classifier;
@@ -52,7 +50,7 @@ class ScrewziraUtils {
             let results = body && JSON.parse(body).Results;
             if (Array.isArray(results) && results.length) {
                 let subtitleID = this.findClosestMatch(filenameNoExtension, results, excludeList);
-                screwziraUtils.downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
+                this.downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
             }
             else {
                 this.logger.log('info', "No subtitle found");
@@ -151,5 +149,6 @@ class ScrewziraUtils {
             }
         });
     };
-
 }
+
+module.exports = ScrewziraUtils;
