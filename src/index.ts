@@ -42,10 +42,10 @@ if (process.argv.length > 2) {
 
     szLogger.log('verbose', `Classification response: ${JSON.stringify(classification)}`);
 	
-	if (classification.type === "movie") {
+	if (classification && classification.type === "movie") {
         screwziraUtils.handleMovie(classification.movieName, classification.movieYear, filenameNoExtension, relativePath);
 	}
-	else if (classification.type === "episode") {
+	else if (classification && classification.type === "episode") {
         screwziraUtils.handleEpisode(classification.series, classification.season, classification.episode, filenameNoExtension, relativePath);
 	}
 	else {
