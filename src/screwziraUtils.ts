@@ -1,20 +1,19 @@
-const fs = require('fs');
-const path = require('path');
-const request = require('request');
-import {Response} from 'request';
-import {ISzNotifier} from './szNotifier';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as request from 'request';
 import {ISzClassifier} from './szClassifier';
 import {ISzLogger} from './szLogger';
+import {ISzNotifier} from './szNotifier';
 
 
-class ScrewziraUtils {
+export class ScrewziraUtils {
     // Request Info
-    baseUrl = 'http://api.screwzira.com';
-    userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
+    public baseUrl = 'http://api.screwzira.com';
+    public userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
 
-    logger: ISzLogger;
-    notifier: ISzNotifier;
-    classifier: ISzClassifier;
+    public logger: ISzLogger;
+    public notifier: ISzNotifier;
+    public classifier: ISzClassifier;
 
     constructor(logger: ISzLogger, notifier: ISzNotifier, classifier: ISzClassifier) {
         this.logger = logger;
@@ -22,20 +21,20 @@ class ScrewziraUtils {
         this.classifier = classifier;
     }
 
-    findClosestMatch = (filenameNoExtension: string, list, excludeList: string[]): string => {
+    public findClosestMatch = (filenameNoExtension: string, list, excludeList: string[]): string => {
         this.logger.log('info', `Looking for closest match for "${filenameNoExtension}" from: [${list && list.map(item => item.SubtitleName).join(', ')}]`);
         if (list && list.length > 0) {
             let maxCommonWords = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
             let maxIndex = 0;
             list.forEach((item, index) => {
-                let commonWords = this.classifier.commonWordsInSentences(filenameNoExtension, item.SubtitleName, excludeList);
+                const commonWords = this.classifier.commonWordsInSentences(filenameNoExtension, item.SubtitleName, excludeList);
                 if (commonWords.length > maxCommonWords.length) {
                     maxCommonWords = commonWords;
                     maxIndex = index;
                 }
             });
 
-            let bestMatch = list[maxIndex];
+            const bestMatch = list[maxIndex];
             this.logger.log('info', `filename:  "${filenameNoExtension}"`);
             this.logger.log('info', `best match: "${bestMatch.SubtitleName}"`);
             this.logger.log('info', `common words: [\"${maxCommonWords.join('\", \"')}\"]`);
@@ -45,11 +44,11 @@ class ScrewziraUtils {
     };
 
 
-    handleResponse = (error: any, response: Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string) => {
-        if (!error && response.statusCode == 200) {
-            let results = body && JSON.parse(body).Results;
+    public handleResponse = (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string) => {
+        if (!error && response.statusCode === 200) {
+            const results = body && JSON.parse(body).Results;
             if (Array.isArray(results) && results.length) {
-                let subtitleID = this.findClosestMatch(filenameNoExtension, results, excludeList);
+                const subtitleID = this.findClosestMatch(filenameNoExtension, results, excludeList);
                 this.downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
             }
             else {
@@ -65,7 +64,7 @@ class ScrewziraUtils {
         }
     };
 
-    handleMovie(movieName, movieYear, filenameNoExtension, relativePath) {
+    public handleMovie(movieName, movieYear, filenameNoExtension, relativePath) {
         this.logger.log('info', `Handling Movie: "${movieName}" (${movieYear})`);
         const options = {
             url: `${this.baseUrl}/FindFilm`,
@@ -81,7 +80,7 @@ class ScrewziraUtils {
             }
         };
 
-        let excludeList = this.classifier.splitText(this.classifier.cleanText(movieName));
+        const excludeList = this.classifier.splitText(this.classifier.cleanText(movieName));
         excludeList.push(movieYear.toString());
 
         this.logger.log('debug', `Handle movie request options: ${JSON.stringify(options)}`);
@@ -91,7 +90,7 @@ class ScrewziraUtils {
         });
     }
 
-    handleEpisode(series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) {
+    public handleEpisode(series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) {
         this.logger.log('info', `Handling Series "${series}" Season ${season} Episode ${episode}`);
         const options = {
             url: `${this.baseUrl}/FindSeries`,
@@ -108,7 +107,7 @@ class ScrewziraUtils {
             }
         };
 
-        let excludeList = this.classifier.splitText(series);
+        const excludeList = this.classifier.splitText(series);
 
         this.logger.log('debug', `Handle episode request options: ${JSON.stringify(options)}`);
 
@@ -117,7 +116,7 @@ class ScrewziraUtils {
         });
     }
 
-    downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string) => {
+    public downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string) => {
         this.logger.log('info', `Downloading: ${subtitleID}`);
         const options = {
             url: `${this.baseUrl}/Download`,
@@ -126,7 +125,7 @@ class ScrewziraUtils {
             encoding: null,
             json: {
                 request: {
-                    subtitleID: subtitleID
+                    subtitleID
                 }
             }
         };
@@ -134,7 +133,7 @@ class ScrewziraUtils {
         this.logger.log('debug', JSON.stringify(options));
 
         request(options, (error, response, body) => {
-            if (!error && response.statusCode == 200) {
+            if (!error && response.statusCode === 200) {
                 let destination = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
                 if (fs.existsSync(destination)) {
                     destination = path.resolve(relativePath, filenameNoExtension + ".HebrewSZ.srt");
@@ -150,5 +149,3 @@ class ScrewziraUtils {
         });
     };
 }
-
-module.exports = ScrewziraUtils;

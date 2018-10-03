@@ -6,51 +6,55 @@ const episodeRegex = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
 const movieRegex = /([ .\w']+?)\.(\d+)/;
 const movieParentRegex = /((?:[^(]+))\s+(?:\((\d+)\))/;
 
-interface FileClassification {
+interface IFileClassification {
     type: string
 }
 
-interface MovieFileClassification extends FileClassification {
+export interface IMovieFileClassification extends IFileClassification {
     movieName: string,
     movieYear: number
 }
 
-interface TvEpisodeFileClassification extends FileClassification {
+export interface ITvEpisodeFileClassification extends IFileClassification {
     series: string,
     season: number,
     episode: number
 }
 
-export interface ISzClassifier {
-    new(logger: ISzLogger, config: ISzConfig): SzClassifier;
+export interface ISzClassifier  {
+    // new(logger: ISzLogger, config: ISzConfig): any;
+
     cleanText(text: string): string;
+
     splitText(text: string): string[];
+
     commonWordsInSentences(s1: string, s2: string, excludeList: string[]): string[];
-    classify(filenameNoExtension: string, parentFolder: string): MovieFileClassification | TvEpisodeFileClassification;
+
+    classify(filenameNoExtension: string, parentFolder: string): IMovieFileClassification | ITvEpisodeFileClassification;
 }
 
-class SzClassifier {
-    logger: ISzLogger;
-    config: ISzConfig;
+export class SzClassifier implements ISzClassifier {
+    public logger: ISzLogger;
+    public config: ISzConfig;
 
     constructor(logger: ISzLogger, config: ISzConfig) {
         this.logger = logger;
         this.config = config;
     }
 
-    cleanText = (text: string): string => {
+    public cleanText = (text: string): string => {
         return text.toLowerCase().replace(/[.|-]/g, ' ').trim();
     };
 
-    splitText = (text: string): string[] => {
+    public splitText = (text: string): string[] => {
         return text.split(' ');
     };
 
-    commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): string[] => {
-        let split1 = this.splitText(this.cleanText(s1));
-        let split2 = this.splitText(this.cleanText(s2));
+    public commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): string[] => {
+        const split1 = this.splitText(this.cleanText(s1));
+        const split2 = this.splitText(this.cleanText(s2));
 
-        let commonWords = split1.filter(word1 => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
+        const commonWords = split1.filter(word1 => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
         this.logger.log('debug', `"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}]`);
         return commonWords;
     };
@@ -63,8 +67,8 @@ class SzClassifier {
      * @param filenameNoExtension
      * @param parentFolder
      */
-    classify = (filenameNoExtension: string, parentFolder: string): MovieFileClassification | TvEpisodeFileClassification => {
-        let episodeMatch = episodeRegex.exec(filenameNoExtension);
+    public classify = (filenameNoExtension: string, parentFolder: string): IMovieFileClassification | ITvEpisodeFileClassification => {
+        const episodeMatch = episodeRegex.exec(filenameNoExtension);
         if (episodeMatch && episodeMatch.length > 2 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
             this.logger.log('verbose', `Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
@@ -75,7 +79,7 @@ class SzClassifier {
             };
         }
         else {
-            let movieMatch = movieRegex.exec(filenameNoExtension);
+            const movieMatch = movieRegex.exec(filenameNoExtension);
             if (movieMatch && movieMatch.length > 1 && movieMatch[1] && movieMatch[2]) {
                 this.logger.log('verbose', `Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
@@ -85,7 +89,7 @@ class SzClassifier {
                 };
             }
             else if (parentFolder) {
-                let movieMatchFromParent = movieParentRegex.exec(parentFolder);
+                const movieMatchFromParent = movieParentRegex.exec(parentFolder);
                 if (movieMatchFromParent && movieMatchFromParent.length > 1 && movieMatchFromParent[1] && movieMatchFromParent[2]) {
                     this.logger.log('verbose', `Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
                     return {
@@ -99,5 +103,3 @@ class SzClassifier {
         return undefined;
     };
 }
-
-module.exports = SzClassifier;

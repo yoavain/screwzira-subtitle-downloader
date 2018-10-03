@@ -1,27 +1,26 @@
+import * as fs from 'fs';
+import * as fsextra from 'fs-extra';
 import {ISzLogger} from './szLogger';
-import {PathLike} from 'fs';
-const fs = require('fs');
-const fsextra = require('fs-extra');
 
-interface ReplacePairs {
+interface IReplacePairs {
     [key: string]: string;
 }
 
 const defaultExtensions = ["mkv", "avi"];
 
 export interface ISzConfig {
-    new(confFile: PathLike, logger: ISzLogger): SzConfig;
+    // new(confFile: string, logger: ISzLogger): SzConfig;
     replaceTitleIfNeeded(text: string): string;
     getLogLevel(): string;
 }
 
-class SzConfig {
-    logLevel: string;
-    replacePairs: ReplacePairs;
-    logger: ISzLogger;
-    extensions: string[];
+export class SzConfig implements ISzConfig {
+    public logLevel: string;
+    public replacePairs: IReplacePairs;
+    public logger: ISzLogger;
+    public extensions: string[];
 
-    constructor(confFile: PathLike, logger: ISzLogger) {
+    constructor(confFile: string, logger: ISzLogger) {
         this.logger = logger;
         if (!fs.existsSync(confFile)) {
             fsextra.outputJsonSync(confFile, {logLevel: "debug", extensions: defaultExtensions, replacePairs: {}});
@@ -34,7 +33,7 @@ class SzConfig {
         this.logger.log('debug', `Replace pairs (${Object.keys(this.replacePairs).length}): ${Object.keys(this.replacePairs).map(pairKey => pairKey + " => " + this.replacePairs[pairKey]).join('; ')}`);
     }
 
-    replaceTitleIfNeeded = (text: string): string => {
+    public replaceTitleIfNeeded = (text: string): string => {
         if (this.replacePairs[text]) {
             this.logger.log('info', `Replaced "${text}" with "${this.replacePairs[text]}" for query`);
             return this.replacePairs[text];
@@ -42,13 +41,11 @@ class SzConfig {
         return text;
     };
 
-    getLogLevel = (): string => {
+    public getLogLevel = (): string => {
         return this.logLevel;
     };
 
-    getExtensions = ():string[] => {
+    public getExtensions = ():string[] => {
         return this.extensions;
     }
 }
-
-module.exports = SzConfig;
