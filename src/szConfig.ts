@@ -7,6 +7,7 @@ interface IReplacePairs {
 }
 
 const defaultExtensions = ["mkv", "avi"];
+const defaultConf = {logLevel: "debug", extensions: defaultExtensions, replacePairs: {}};
 
 export interface ISzConfig {
     // new(confFile: string, logger: ISzLogger): SzConfig;
@@ -23,9 +24,16 @@ export class SzConfig implements ISzConfig {
     constructor(confFile: string, logger: ISzLogger) {
         this.logger = logger;
         if (!fs.existsSync(confFile)) {
-            fsextra.outputJsonSync(confFile, {logLevel: "debug", extensions: defaultExtensions, replacePairs: {}});
+
+            fsextra.outputJsonSync(confFile, defaultConf);
         }
-        const conf = fsextra.readJsonSync(confFile);
+        let conf;
+        try {
+            conf = fsextra.readJsonSync(confFile);
+        } catch (e) {
+            this.logger.log('error', `Configuration file corrupted. Using default.`);
+            conf = defaultConf;
+        }
         this.logLevel = conf && conf.logLevel;
         this.logger.log('debug', `LogLevel ${this.logLevel}`);
         this.extensions = conf && conf.extensions ? conf.extensions : defaultExtensions;
