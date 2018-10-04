@@ -1,18 +1,14 @@
-import {Logger} from 'winston';
-import {PathLike} from 'fs';
-import {FileTransportInstance} from 'winston/lib/winston/transports';
-
-const winston = require('winston');
+import * as winston from 'winston';
 
 export interface ISzLogger {
-    new(logFile: PathLike): SzLogger;
-    setLogLevel(level: string);
+    // new(logFile: string): SzLogger;
+    setLogLevel(level: string, x: string);
     log(level: string, message: string);
 }
 
-class SzLogger {
-    transports: { file: FileTransportInstance };
-    logger: Logger;
+export class SzLogger implements ISzLogger {
+    public transports: { file: winston.transports.FileTransportInstance };
+    public logger: winston.Logger;
 
     constructor(logFile: string) {
         this.transports = {
@@ -24,16 +20,13 @@ class SzLogger {
         });
     }
 
-    setLogLevel = (level: string) => {
+    public setLogLevel = (level: string) => {
         if (level) {
             this.transports.file.level = level;
         }
     };
 
-    log = (level: string, message: string) => {
+    public log = (level: string, message: string) => {
         this.logger.log(level, message);
     }
 }
-
-module.exports = SzLogger;
-
