@@ -4,13 +4,13 @@
   "description": "",
   "main": "built/index.js",
   "scripts": {
+    "build": "npm run tslint && npm run compile && npm run webpack && nexe -o dist/screwzira-downloader.exe && npm run installer",
+    "test": "npm run tslint && npm run compile && npm run webpack && node built/index.js",
     "tslint": "tslint src/**/*.ts",
     "tslint:fix": "npm run tslint -- --fix",
     "compile": "tsc",
     "webpack": "webpack --mode=development",
-    "build": "npm run tslint && npm run compile && npm run webpack && nexe -o dist/screwzira-downloader.exe",
-    "installer": "cd installer && \"C:/Program Files (x86)/NSIS/makensis.exe\" screwzira.nsi && cd ..",
-    "test": "npm run tslint && npm run compile && npm run webpack && node built/index.js"
+    "installer": "cd installer && \"C:/Program Files (x86)/NSIS/makensis.exe\" screwzira.nsi && cd .."
   },
   "author": "yoavain",
   "license": "ISC",
