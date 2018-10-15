@@ -84,7 +84,7 @@ export class SzClassifier implements ISzClassifier {
                 this.logger.log('verbose', `Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
                     type: "movie",
-                    movieName: this.config.replaceTitleIfNeeded(movieMatch[1]),
+                    movieName: this.config.replaceTitleIfNeeded(this.cleanText(movieMatch[1])),
                     movieYear: Number(movieMatch[2])
                 };
             }
@@ -94,7 +94,7 @@ export class SzClassifier implements ISzClassifier {
                     this.logger.log('verbose', `Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
                     return {
                         type: "movie",
-                        movieName: this.config.replaceTitleIfNeeded(movieMatchFromParent[1]),
+                        movieName: this.config.replaceTitleIfNeeded(this.cleanText(movieMatchFromParent[1])),
                         movieYear: Number(movieMatchFromParent[2])
                     };
                 }
