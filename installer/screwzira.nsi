@@ -1,5 +1,5 @@
 !define PRODUCT_NAME "Screwzira-Downloader"
-!define PRODUCT_VERSION "1.0.0"
+!define PRODUCT_VERSION "1.0.1"
 !define PRODUCT_PUBLISHER "yoavain"
 !define PRODUCT_WEB_SITE "https://github.com/yoavain/screwzira-subtitle-downloader"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
