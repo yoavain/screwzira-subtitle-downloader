@@ -5,11 +5,24 @@ import {ISzClassifier} from './szClassifier';
 import {ISzLogger} from './szLogger';
 import {ISzNotifier} from './szNotifier';
 
+export interface IScrewziraUtils {
+    // new(logger: ISzLogger, notifier: ISzNotifier, classifier: ISzClassifier): ScrewziraUtils;
+    findClosestMatch(filenameNoExtension: string, list, excludeList: string[]): string;
+    handleResponse(error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string);
+    handleMovie(movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string);
+    handleEpisode(series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string);
+    downloadBestMatch(subtitleID: string, filenameNoExtension: string, relativePath: string);
+}
+
+export interface IFindFilmResponse {
+    SubtitleName: string,
+    Identifier: string
+}
 
 export class ScrewziraUtils {
     // Request Info
-    public baseUrl = 'http://api.screwzira.com';
-    public userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
+    public baseUrl: string = 'http://api.screwzira.com';
+    public userAgent: string = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
 
     public logger: ISzLogger;
     public notifier: ISzNotifier;
@@ -21,20 +34,20 @@ export class ScrewziraUtils {
         this.classifier = classifier;
     }
 
-    public findClosestMatch = (filenameNoExtension: string, list, excludeList: string[]): string => {
+    public findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
         this.logger.log('info', `Looking for closest match for "${filenameNoExtension}" from: [${list && list.map(item => item.SubtitleName).join(', ')}]`);
         if (list && list.length > 0) {
-            let maxCommonWords = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
-            let maxIndex = 0;
+            let maxCommonWords: string[] = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
+            let maxIndex: number = 0;
             list.forEach((item, index) => {
-                const commonWords = this.classifier.commonWordsInSentences(filenameNoExtension, item.SubtitleName, excludeList);
+                const commonWords: string[] = this.classifier.commonWordsInSentences(filenameNoExtension, item.SubtitleName, excludeList);
                 if (commonWords.length > maxCommonWords.length) {
                     maxCommonWords = commonWords;
                     maxIndex = index;
                 }
             });
 
-            const bestMatch = list[maxIndex];
+            const bestMatch: IFindFilmResponse = list[maxIndex];
             this.logger.log('info', `filename:  "${filenameNoExtension}"`);
             this.logger.log('info', `best match: "${bestMatch.SubtitleName}"`);
             this.logger.log('info', `common words: [\"${maxCommonWords.join('\", \"')}\"]`);
@@ -46,9 +59,9 @@ export class ScrewziraUtils {
 
     public handleResponse = (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string) => {
         if (!error && response.statusCode === 200) {
-            const results = body && JSON.parse(body).Results;
+            const results: IFindFilmResponse[] = body && JSON.parse(body).Results;
             if (Array.isArray(results) && results.length) {
-                const subtitleID = this.findClosestMatch(filenameNoExtension, results, excludeList);
+                const subtitleID: string = this.findClosestMatch(filenameNoExtension, results, excludeList);
                 this.downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
             }
             else {
@@ -64,9 +77,9 @@ export class ScrewziraUtils {
         }
     };
 
-    public handleMovie(movieName, movieYear, filenameNoExtension, relativePath) {
+    public handleMovie = (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) =>{
         this.logger.log('info', `Handling Movie: "${movieName}" (${movieYear})`);
-        const options = {
+        const options: request.Options = {
             url: `${this.baseUrl}/FindFilm`,
             method: 'POST',
             headers: { "User-Agent": this.userAgent },
@@ -80,7 +93,7 @@ export class ScrewziraUtils {
             }
         };
 
-        const excludeList = this.classifier.splitText(this.classifier.cleanText(movieName));
+        const excludeList: string[] = this.classifier.splitText(this.classifier.cleanText(movieName));
         excludeList.push(movieYear.toString());
 
         this.logger.log('debug', `Handle movie request options: ${JSON.stringify(options)}`);
@@ -88,11 +101,11 @@ export class ScrewziraUtils {
         request(options, (error, response, body) => {
             this.handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath);
         });
-    }
+    };
 
-    public handleEpisode(series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) {
+    public handleEpisode = (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) => {
         this.logger.log('info', `Handling Series "${series}" Season ${season} Episode ${episode}`);
-        const options = {
+        const options: request.Options = {
             url: `${this.baseUrl}/FindSeries`,
             method: 'POST',
             headers: { "User-Agent": this.userAgent },
@@ -107,18 +120,18 @@ export class ScrewziraUtils {
             }
         };
 
-        const excludeList = this.classifier.splitText(series);
+        const excludeList: string[] = this.classifier.splitText(series);
 
         this.logger.log('debug', `Handle episode request options: ${JSON.stringify(options)}`);
 
         request(options, (error, response, body) => {
             this.handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath);
         });
-    }
+    };
 
     public downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string) => {
         this.logger.log('info', `Downloading: ${subtitleID}`);
-        const options = {
+        const options: request.Options = {
             url: `${this.baseUrl}/Download`,
             method: 'POST',
             headers: {"User-Agent": this.userAgent, "Accept": "*/*"},
@@ -134,7 +147,7 @@ export class ScrewziraUtils {
 
         request(options, (error, response, body) => {
             if (!error && response.statusCode === 200) {
-                let destination = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
+                let destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
                 if (fs.existsSync(destination)) {
                     destination = path.resolve(relativePath, filenameNoExtension + ".HebrewSZ.srt");
                 }

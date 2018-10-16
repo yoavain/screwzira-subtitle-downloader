@@ -6,13 +6,20 @@ interface IReplacePairs {
     [key: string]: string;
 }
 
-const defaultExtensions = ["mkv", "avi"];
-const defaultConf = {logLevel: "debug", extensions: defaultExtensions, replacePairs: {}};
+interface IConfig {
+    logLevel: string;
+    extensions: string[]
+    replacePairs: IReplacePairs
+}
+
+const defaultExtensions: string[] = ["mkv", "avi"];
+const defaultConf: IConfig = {logLevel: "debug", extensions: defaultExtensions, replacePairs: {}};
 
 export interface ISzConfig {
     // new(confFile: string, logger: ISzLogger): SzConfig;
     replaceTitleIfNeeded(text: string): string;
     getLogLevel(): string;
+    getExtensions():string[];
 }
 
 export class SzConfig implements ISzConfig {
@@ -27,7 +34,7 @@ export class SzConfig implements ISzConfig {
 
             fsextra.outputJsonSync(confFile, defaultConf);
         }
-        let conf;
+        let conf: IConfig;
         try {
             conf = fsextra.readJsonSync(confFile);
         } catch (e) {

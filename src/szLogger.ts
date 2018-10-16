@@ -3,7 +3,7 @@ const { combine, timestamp, printf, label } = winston.format;
 
 export interface ISzLogger {
     // new(logFile: string): SzLogger;
-    setLogLevel(level: string, x: string);
+    setLogLevel(level: string);
     log(level: string, message: string);
 }
 

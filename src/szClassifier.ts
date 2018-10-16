@@ -2,9 +2,9 @@ import {ISzConfig} from './szConfig'
 import {ISzLogger} from './szLogger';
 
 // RegEx
-const episodeRegex = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
-const movieRegex = /([ .\w']+?)\.(\d+)/;
-const movieParentRegex = /((?:[^(]+))\s+(?:\((\d+)\))/;
+const episodeRegex: RegExp = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
+const movieRegex: RegExp = /([ .\w']+?)\.(\d+)/;
+const movieParentRegex: RegExp = /((?:[^(]+))\s+(?:\((\d+)\))/;
 
 interface IFileClassification {
     type: string
@@ -51,10 +51,10 @@ export class SzClassifier implements ISzClassifier {
     };
 
     public commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): string[] => {
-        const split1 = this.splitText(this.cleanText(s1));
-        const split2 = this.splitText(this.cleanText(s2));
+        const split1: string[] = this.splitText(this.cleanText(s1));
+        const split2: string[] = this.splitText(this.cleanText(s2));
 
-        const commonWords = split1.filter(word1 => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
+        const commonWords: string[]= split1.filter(word1 => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
         this.logger.log('debug', `"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}]`);
         return commonWords;
     };
@@ -68,7 +68,7 @@ export class SzClassifier implements ISzClassifier {
      * @param parentFolder
      */
     public classify = (filenameNoExtension: string, parentFolder: string): IMovieFileClassification | ITvEpisodeFileClassification => {
-        const episodeMatch = episodeRegex.exec(filenameNoExtension);
+        const episodeMatch: RegExpExecArray = episodeRegex.exec(filenameNoExtension);
         if (episodeMatch && episodeMatch.length > 2 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
             this.logger.log('verbose', `Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
@@ -79,7 +79,7 @@ export class SzClassifier implements ISzClassifier {
             };
         }
         else {
-            const movieMatch = movieRegex.exec(filenameNoExtension);
+            const movieMatch: RegExpExecArray = movieRegex.exec(filenameNoExtension);
             if (movieMatch && movieMatch.length > 1 && movieMatch[1] && movieMatch[2]) {
                 this.logger.log('verbose', `Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
@@ -89,7 +89,7 @@ export class SzClassifier implements ISzClassifier {
                 };
             }
             else if (parentFolder) {
-                const movieMatchFromParent = movieParentRegex.exec(parentFolder);
+                const movieMatchFromParent: RegExpExecArray = movieParentRegex.exec(parentFolder);
                 if (movieMatchFromParent && movieMatchFromParent.length > 1 && movieMatchFromParent[1] && movieMatchFromParent[2]) {
                     this.logger.log('verbose', `Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
                     return {
