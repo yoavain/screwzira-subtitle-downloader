@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Screwzira-Downloader"
-!define PRODUCT_VERSION "1.0.2"
+!define PRODUCT_VERSION "1.0.3"
 !define PRODUCT_PUBLISHER "yoavain"
 !define PRODUCT_WEB_SITE "https://github.com/yoavain/screwzira-subtitle-downloader"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}.exe"
@@ -17,8 +17,8 @@ Var Mp4ProgID
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
-!define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+!define MUI_ICON "../resources/sz_install.ico"
+!define MUI_UNICON "../resources/sz_uninstall.ico"
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
