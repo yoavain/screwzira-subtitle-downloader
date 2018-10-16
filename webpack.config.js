@@ -16,6 +16,11 @@ module.exports = {
 			from: 'node_modules/node-notifier/vendor/snoreToast/SnoreToast.exe',
 			to: '../dist/SnoreToast.exe',
 			toType: 'file'
+		},
+		{
+			from: 'resources/bin/screwzira-downloader-launcher.exe',
+			to: '../dist/screwzira-downloader-launcher.exe',
+			toType: 'file'
 		}
 		])
 	],

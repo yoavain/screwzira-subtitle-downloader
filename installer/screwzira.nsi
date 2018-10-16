@@ -17,8 +17,8 @@ Var Mp4ProgID
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "../resources/sz_install.ico"
-!define MUI_UNICON "../resources/sz_uninstall.ico"
+!define MUI_ICON "../resources/icons/sz_install.ico"
+!define MUI_UNICON "../resources/icons/sz_uninstall.ico"
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
@@ -49,30 +49,31 @@ ShowUnInstDetails show
 Section "Main" SEC00
 SetOutPath "$INSTDIR"
 File "..\dist\screwzira-downloader.exe"
+File "..\dist\screwzira-downloader-launcher.exe"
 File "..\dist\SnoreToast.exe"
 SectionEnd
 Section "Directory" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}\command" "" '$INSTDIR\screwzira-downloader.exe "%1"'
+  WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" "%1"'
 SectionEnd
 Section "MKV" SEC02
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   ReadRegStr $MkvProgID HKLM "SOFTWARE\Classes\.mkv" ""
-  WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}\command" "" '$INSTDIR\screwzira-downloader.exe "%1"'
+  WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" "%1"'
 SectionEnd
 Section "AVI" SEC03
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
     ReadRegStr $AviProgID HKLM "SOFTWARE\Classes\.avi" ""
-    WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}\command" "" '$INSTDIR\screwzira-downloader.exe "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" "%1"'
 SectionEnd
 Section "MP4" SEC04
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
     ReadRegStr $Mp4ProgID HKLM "SOFTWARE\Classes\.mp4" ""
-    WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}\command" "" '$INSTDIR\screwzira-downloader.exe "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" "%1"'
 SectionEnd
 
 Section -Post
@@ -111,6 +112,7 @@ FunctionEnd
 Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}_Uninst.exe"
   Delete "$INSTDIR\screwzira-downloader.exe"
+  Delete "$INSTDIR\screwzira-downloader-launcher.exe"
   Delete "$INSTDIR\SnoreToast.exe"
   RMDir "$INSTDIR"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
