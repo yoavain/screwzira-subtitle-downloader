@@ -29,7 +29,6 @@ Var Mp4ProgID
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-; !define MUI_FINISHPAGE_RUN "$INSTDIR\AppMainExe.exe"
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
@@ -89,10 +88,10 @@ SectionEnd
 
 ; Section descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} ""
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} ""
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} ""
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} ""
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "Associate folders to $(^Name)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "Associate .mkv files to $(^Name)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "Associate .avi files to $(^Name)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Associate .mp4 files to $(^Name)"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function .onInit
