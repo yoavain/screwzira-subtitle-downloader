@@ -37,6 +37,13 @@ const handleSingleFile = (fullpath: string, fileExists: boolean) => {
     const filenameNoExtension: string = filename.substr(0, filename.lastIndexOf("."));
     const parentFolder: string = fileExists && split.length > 1 ? split[split.length - 2] : undefined;
 
+    // Check if already exists
+    if (szClassifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
+        szLogger.log('warning', `Hebrew subtitles already exist`);
+        szNotifier.notif(`Hebrew subtitles already exist`);
+        return;
+    }
+
     const classification: IMovieFileClassification | ITvEpisodeFileClassification = szClassifier.classify(filenameNoExtension, parentFolder);
 
     szLogger.log('verbose', `Classification response: ${JSON.stringify(classification)}`);

@@ -1,3 +1,5 @@
+import * as fs from "fs";
+import * as path from "path";
 import {ISzConfig} from './szConfig'
 import {ISzLogger} from './szLogger';
 
@@ -21,15 +23,12 @@ export interface ITvEpisodeFileClassification extends IFileClassification {
     episode: number
 }
 
-export interface ISzClassifier  {
+export interface ISzClassifier {
     // new(logger: ISzLogger, config: ISzConfig): any;
-
     cleanText(text: string): string;
-
     splitText(text: string): string[];
-
+    isSubtitlesAlreadyExist(relativePath: string, filenameNoExtension: string): boolean;
     commonWordsInSentences(s1: string, s2: string, excludeList: string[]): string[];
-
     classify(filenameNoExtension: string, parentFolder: string): IMovieFileClassification | ITvEpisodeFileClassification;
 }
 
@@ -48,6 +47,11 @@ export class SzClassifier implements ISzClassifier {
 
     public splitText = (text: string): string[] => {
         return text.split(' ');
+    };
+
+    public isSubtitlesAlreadyExist = (relativePath: string, filenameNoExtension: string): boolean => {
+        const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
+        return fs.existsSync(destination);
     };
 
     public commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): string[] => {

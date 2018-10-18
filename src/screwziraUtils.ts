@@ -19,7 +19,7 @@ export interface IFindFilmResponse {
     Identifier: string
 }
 
-export class ScrewziraUtils {
+export class ScrewziraUtils implements IScrewziraUtils {
     // Request Info
     public baseUrl: string = 'http://api.screwzira.com';
     public userAgent: string = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
@@ -33,6 +33,7 @@ export class ScrewziraUtils {
         this.notifier = notifier;
         this.classifier = classifier;
     }
+
 
     public findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
         this.logger.log('info', `Looking for closest match for "${filenameNoExtension}" from: [${list && list.map(item => item.SubtitleName).join(', ')}]`);
@@ -147,10 +148,14 @@ export class ScrewziraUtils {
 
         request(options, (error, response, body) => {
             if (!error && response.statusCode === 200) {
-                let destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
-                if (fs.existsSync(destination)) {
-                    destination = path.resolve(relativePath, filenameNoExtension + ".HebrewSZ.srt");
+                // Check if already exists
+                if (this.classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
+                    this.logger.log('warning', `Hebrew subtitles already exist`);
+                    this.notifier.notif(`Hebrew subtitles already exist`);
+                    return;
                 }
+
+                const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
                 this.logger.log('verbose', `writing response to ${destination}`);
                 fs.writeFileSync(destination, body);
                 this.notifier.notif(`Successfully downloaded "${destination}"`);
