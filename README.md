@@ -14,6 +14,10 @@ CLI for downloading Hebrew subtitles from screwzira.com using their API
 
 <br>Installer now adds right-click to folders and to .mkv/.avi/.mp4 files
 
+
+<br>Configuring sonarr:
+![sonarr configuration](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/screenshots/sonarr-custom-script.png)
+
 <br>To build:
  * install nsis
  * npm install -g nexe
