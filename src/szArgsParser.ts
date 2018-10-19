@@ -1,6 +1,4 @@
-import * as yargs from 'yargs'
-type Arguments = yargs.Arguments;
-type Argv = yargs.Argv;
+import * as path from "path";
 
 const SONARR = 'sonarr';
 const INPUT = 'input';
@@ -8,65 +6,53 @@ const QUIET = 'quiet';
 const SONARR_EPISODE_FILE_PATH = 'sonarr_episodefile_path';
 
 export interface ISzArgsParser {
+    isSonarrMode(): boolean;
     getInput(): string;
     isQuiet(): boolean;
-    showHelp();
+    getSnoreToastPath(): string;
+    getHelp(): string;
 }
 export class SzArgsParser implements ISzArgsParser {
-    private readonly argv: Argv;
-    private readonly arguments: Arguments;
+    private readonly sonarrMode: boolean;
+    private readonly input: string;
+    private readonly quiet: boolean;
+    private readonly snoreToastPath: string;
 
-    constructor(args: string[]) {
-        this.argv = yargs
-            .options({
-                [`${INPUT}`]: {
-                    alias: 'i',
-                    describe: 'input file'
-                },
-                [`${SONARR}`]: {
-                    alias: 's',
-                    describe: 'sonarr mode'
-                },
-                [`${QUIET}`]: {
-                    alias: 'q',
-                    describe: 'quiet mode'
-                }
-            });
-        this.arguments = this.argv.parse(args);
+    constructor(argv: string[]) {
+        const indexOfInput: number = argv.indexOf(INPUT);
+        if (indexOfInput >= 0 && indexOfInput + 1 < argv.length) {
+            this.input = argv[indexOfInput + 1];
+        }
+        else if (argv.indexOf(SONARR) >= 0) {
+            this.sonarrMode = true;
+            this.input = this.getSonarrEpisodePathEnvVar();
+        }
+        this.quiet = argv.indexOf(QUIET) >= 0;
+        this.snoreToastPath = argv[0].endsWith("screwzira-downloader.exe") ? path.join(argv[0], "../", "SnoreToast.exe") : null;
     }
 
+    public isSonarrMode(): boolean {
+        return !!this.sonarrMode;
+    }
 
     public getInput = (): string => {
-        // Check input
-        if (this.getInputArg()) {
-            return this.getInputArg();
-        }
-        else {
-            // Check sonarr
-            if (this.getSonarrArg()) {
-                return this.getSonarrEpisodePathEnvVar();
-            }
-        }
+        return this.input;
     };
 
     public isQuiet = (): boolean => {
-        return !!this.arguments[QUIET];
+        return !!this.quiet;
     };
 
-    public showHelp = () => {
-        this.argv.showHelp();
+    public getSnoreToastPath(): string {
+        return this.snoreToastPath;
+    }
+
+    public getHelp = (): string => {
+        return `\nOptions:\n\t${INPUT}\tinput file\n\t${SONARR}\tsonnar mode (input is taken from ENV VAR ${SONARR_EPISODE_FILE_PATH})\n\t${QUIET}\tquiet mode (no notifications)\n`;
     };
 
 
-    private getInputArg = (): string => {
-        return this.arguments[INPUT];
-    };
-
-    private getSonarrArg = (): boolean => {
-        return this.arguments[SONARR];
-    };
-
-    private getSonarrEpisodePathEnvVar= (): string => {
+    private getSonarrEpisodePathEnvVar = (): string => {
         return process.env[SONARR_EPISODE_FILE_PATH];
     }
 }

@@ -19,8 +19,7 @@ const logFile: string = path.resolve(process.env.ProgramData, 'Screwzira-Downloa
 const szLogger: ISzLogger = new SzLogger(logFile);
 
 // Notifier
-const snoreToastPath: string = process.argv[0].endsWith("screwzira-downloader.exe") ? path.join(process.argv[0], "../", "SnoreToast.exe") : null;
-const szNotifier: ISzNotifier = new SzNotifier(szLogger, snoreToastPath, szArgsParser.isQuiet());
+const szNotifier: ISzNotifier = new SzNotifier(szLogger, szArgsParser.getSnoreToastPath(), szArgsParser.isQuiet());
 
 // Config
 const confFile: string = path.resolve(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader-config.json');
@@ -103,6 +102,9 @@ const handleFolder = (dir: string) => {
 };
 
 // Main
+szLogger.verbose(`Argv: ${process.argv.join(' ')}`);
+szLogger.verbose(`Sonar Mode: ${szArgsParser.isSonarrMode()}`);
+szLogger.verbose(`Quiet Mode: ${szArgsParser.isQuiet()}`);
 const input: string = szArgsParser.getInput();
 if (input && typeof input === "string") {
     szLogger.info(`*** Looking for subtitle for "${input}" ***`);
@@ -127,4 +129,6 @@ if (input && typeof input === "string") {
 else {
     szLogger.error('*** Missing input file ***');
     szNotifier.notif(`Missing input file`);
+    // tslint:disable-next-line:no-console
+    console.log(`Usage:${szArgsParser.getHelp()}`);
 }
