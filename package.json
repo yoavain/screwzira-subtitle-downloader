@@ -4,11 +4,10 @@
   "description": "",
   "main": "built/index.js",
   "scripts": {
-    "build": "npm run tslint && npm run compile && npm run webpack && npm run nexe && npm run installer",
-    "test": "npm run tslint && npm run compile && npm run webpack && node built/index.js",
+    "build": "npm run tslint && npm run compile && npm run test && npm run webpack && npm run nexe && npm run installer",
     "tslint": "tslint src/**/*.ts",
     "tslint:fix": "npm run tslint -- --fix",
-    "jest-test": "jest test/**/*.test.ts",
+    "test": "jest test/**/*.test.ts",
     "compile": "tsc",
     "webpack": "webpack --mode=development",
     "nexe": "nexe -o dist/screwzira-downloader.exe",
