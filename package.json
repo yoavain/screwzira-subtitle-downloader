@@ -1,6 +1,6 @@
 {
   "name": "screwzira-downloader",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "",
   "main": "built/index.js",
   "scripts": {
@@ -19,7 +19,8 @@
     "fs-extra": "^7.0.0",
     "node-notifier": "^5.2.1",
     "request": "^2.88.0",
-    "winston": "^3.1.0"
+    "winston": "^3.1.0",
+    "yargs": "^12.0.2"
   },
   "bundledDependencies": [
     "request"
@@ -30,7 +31,8 @@
     "@types/node-notifier": "^0.0.28",
     "@types/request": "^2.47.1",
     "@types/winston": "^2.4.4",
-    "copy-webpack-plugin": "^4.5.3",
+    "@types/yargs": "^12.0.1",
+    "copy-webpack-plugin": "^4.5.4",
     "prettier": "^1.14.3",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",

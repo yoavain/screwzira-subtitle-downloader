@@ -33,8 +33,8 @@ export interface ISzClassifier {
 }
 
 export class SzClassifier implements ISzClassifier {
-    public logger: ISzLogger;
-    public config: ISzConfig;
+    private readonly logger: ISzLogger;
+    private readonly config: ISzConfig;
 
     constructor(logger: ISzLogger, config: ISzConfig) {
         this.logger = logger;
@@ -59,7 +59,7 @@ export class SzClassifier implements ISzClassifier {
         const split2: string[] = this.splitText(this.cleanText(s2));
 
         const commonWords: string[]= split1.filter(word1 => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
-        this.logger.log('debug', `"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}]`);
+        this.logger.debug(`"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}]`);
         return commonWords;
     };
 
@@ -74,7 +74,7 @@ export class SzClassifier implements ISzClassifier {
     public classify = (filenameNoExtension: string, parentFolder: string): IMovieFileClassification | ITvEpisodeFileClassification => {
         const episodeMatch: RegExpExecArray = episodeRegex.exec(filenameNoExtension);
         if (episodeMatch && episodeMatch.length > 2 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
-            this.logger.log('verbose', `Classification match episode: ${JSON.stringify(episodeMatch)}`);
+            this.logger.verbose(`Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
                 type: "episode",
                 series: this.config.replaceTitleIfNeeded(this.cleanText(episodeMatch[1])),
@@ -85,7 +85,7 @@ export class SzClassifier implements ISzClassifier {
         else {
             const movieMatch: RegExpExecArray = movieRegex.exec(filenameNoExtension);
             if (movieMatch && movieMatch.length > 1 && movieMatch[1] && movieMatch[2]) {
-                this.logger.log('verbose', `Classification match movie: ${JSON.stringify(movieMatch)}`);
+                this.logger.verbose(`Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
                     type: "movie",
                     movieName: this.config.replaceTitleIfNeeded(this.cleanText(movieMatch[1])),
@@ -95,7 +95,7 @@ export class SzClassifier implements ISzClassifier {
             else if (parentFolder) {
                 const movieMatchFromParent: RegExpExecArray = movieParentRegex.exec(parentFolder);
                 if (movieMatchFromParent && movieMatchFromParent.length > 1 && movieMatchFromParent[1] && movieMatchFromParent[2]) {
-                    this.logger.log('verbose', `Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
+                    this.logger.verbose(`Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
                     return {
                         type: "movie",
                         movieName: this.config.replaceTitleIfNeeded(this.cleanText(movieMatchFromParent[1])),
