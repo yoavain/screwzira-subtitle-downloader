@@ -21,12 +21,12 @@ export interface IFindFilmResponse {
 
 export class ScrewziraUtils implements IScrewziraUtils {
     // Request Info
-    public baseUrl: string = 'http://api.screwzira.com';
-    public userAgent: string = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
+    private readonly baseUrl: string = 'http://api.screwzira.com';
+    private readonly userAgent: string = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
 
-    public logger: ISzLogger;
-    public notifier: ISzNotifier;
-    public classifier: ISzClassifier;
+    private logger: ISzLogger;
+    private notifier: ISzNotifier;
+    private classifier: ISzClassifier;
 
     constructor(logger: ISzLogger, notifier: ISzNotifier, classifier: ISzClassifier) {
         this.logger = logger;
@@ -36,7 +36,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
 
 
     public findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
-        this.logger.log('info', `Looking for closest match for "${filenameNoExtension}" from: [${list && list.map(item => item.SubtitleName).join(', ')}]`);
+        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list && list.map(item => item.SubtitleName).join(', ')}]`);
         if (list && list.length > 0) {
             let maxCommonWords: string[] = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
             let maxIndex: number = 0;
@@ -49,9 +49,9 @@ export class ScrewziraUtils implements IScrewziraUtils {
             });
 
             const bestMatch: IFindFilmResponse = list[maxIndex];
-            this.logger.log('info', `filename:  "${filenameNoExtension}"`);
-            this.logger.log('info', `best match: "${bestMatch.SubtitleName}"`);
-            this.logger.log('info', `common words: [\"${maxCommonWords.join('\", \"')}\"]`);
+            this.logger.info(`filename:  "${filenameNoExtension}"`);
+            this.logger.info(`best match: "${bestMatch.SubtitleName}"`);
+            this.logger.info(`common words: [\"${maxCommonWords.join('\", \"')}\"]`);
 
             return bestMatch.Identifier;
         }
@@ -66,20 +66,20 @@ export class ScrewziraUtils implements IScrewziraUtils {
                 this.downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
             }
             else {
-                this.logger.log('info', "No subtitle found");
+                this.logger.info("No subtitle found");
                 this.notifier.notif(`No subtitle found`);
             }
         }
         else {
-            this.logger.log('error', error);
+            this.logger.error(error);
             if (response) {
-                this.logger.log('error', JSON.stringify(response));
+                this.logger.error(JSON.stringify(response));
             }
         }
     };
 
     public handleMovie = (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) =>{
-        this.logger.log('info', `Handling Movie: "${movieName}" (${movieYear})`);
+        this.logger.info(`Handling Movie: "${movieName}" (${movieYear})`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindFilm`,
             method: 'POST',
@@ -97,7 +97,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
         const excludeList: string[] = this.classifier.splitText(this.classifier.cleanText(movieName));
         excludeList.push(movieYear.toString());
 
-        this.logger.log('debug', `Handle movie request options: ${JSON.stringify(options)}`);
+        this.logger.debug(`Handle movie request options: ${JSON.stringify(options)}`);
 
         request(options, (error, response, body) => {
             this.handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath);
@@ -105,7 +105,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
     };
 
     public handleEpisode = (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) => {
-        this.logger.log('info', `Handling Series "${series}" Season ${season} Episode ${episode}`);
+        this.logger.info(`Handling Series "${series}" Season ${season} Episode ${episode}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindSeries`,
             method: 'POST',
@@ -123,7 +123,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
 
         const excludeList: string[] = this.classifier.splitText(series);
 
-        this.logger.log('debug', `Handle episode request options: ${JSON.stringify(options)}`);
+        this.logger.debug(`Handle episode request options: ${JSON.stringify(options)}`);
 
         request(options, (error, response, body) => {
             this.handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath);
@@ -131,7 +131,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
     };
 
     public downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string) => {
-        this.logger.log('info', `Downloading: ${subtitleID}`);
+        this.logger.info(`Downloading: ${subtitleID}`);
         const options: request.Options = {
             url: `${this.baseUrl}/Download`,
             method: 'POST',
@@ -144,24 +144,24 @@ export class ScrewziraUtils implements IScrewziraUtils {
             }
         };
 
-        this.logger.log('debug', JSON.stringify(options));
+        this.logger.debug(JSON.stringify(options));
 
         request(options, (error, response, body) => {
             if (!error && response.statusCode === 200) {
                 // Check if already exists
                 if (this.classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
-                    this.logger.log('warning', `Hebrew subtitles already exist`);
+                    this.logger.warn(`Hebrew subtitles already exist`);
                     this.notifier.notif(`Hebrew subtitles already exist`);
                     return;
                 }
 
                 const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
-                this.logger.log('verbose', `writing response to ${destination}`);
+                this.logger.verbose(`writing response to ${destination}`);
                 fs.writeFileSync(destination, body);
                 this.notifier.notif(`Successfully downloaded "${destination}"`);
             }
             else {
-                this.logger.log('error', error);
+                this.logger.error(error);
                 this.notifier.notif(`Failed downloading subtitle`);
             }
         });

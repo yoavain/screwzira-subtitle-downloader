@@ -23,10 +23,10 @@ export interface ISzConfig {
 }
 
 export class SzConfig implements ISzConfig {
-    public logLevel: string;
-    public replacePairs: IReplacePairs;
-    public logger: ISzLogger;
-    public extensions: string[];
+    private readonly logLevel: string;
+    private readonly logger: ISzLogger;
+    private readonly replacePairs: IReplacePairs;
+    private readonly extensions: string[];
 
     constructor(confFile: string, logger: ISzLogger) {
         this.logger = logger;
@@ -38,19 +38,19 @@ export class SzConfig implements ISzConfig {
         try {
             conf = fsextra.readJsonSync(confFile);
         } catch (e) {
-            this.logger.log('error', `Configuration file corrupted. Using default.`);
+            this.logger.error(`Configuration file corrupted. Using default.`);
             conf = defaultConf;
         }
         this.logLevel = conf && conf.logLevel;
-        this.logger.log('debug', `LogLevel ${this.logLevel}`);
+        this.logger.debug(`LogLevel ${this.logLevel}`);
         this.extensions = conf && conf.extensions ? conf.extensions : defaultExtensions;
         this.replacePairs = conf && conf.replacePairs ? Object.freeze(JSON.parse(JSON.stringify(conf.replacePairs).toLowerCase())) : Object.freeze({});
-        this.logger.log('debug', `Replace pairs (${Object.keys(this.replacePairs).length}): ${Object.keys(this.replacePairs).map(pairKey => pairKey + " => " + this.replacePairs[pairKey]).join('; ')}`);
+        this.logger.debug(`Replace pairs (${Object.keys(this.replacePairs).length}): ${Object.keys(this.replacePairs).map(pairKey => pairKey + " => " + this.replacePairs[pairKey]).join('; ')}`);
     }
 
     public replaceTitleIfNeeded = (text: string): string => {
         if (this.replacePairs[text]) {
-            this.logger.log('info', `Replaced "${text}" with "${this.replacePairs[text]}" for query`);
+            this.logger.info(`Replaced "${text}" with "${this.replacePairs[text]}" for query`);
             return this.replacePairs[text];
         }
         return text;

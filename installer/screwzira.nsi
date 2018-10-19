@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Screwzira-Downloader"
-!define PRODUCT_VERSION "1.0.4"
+!define PRODUCT_VERSION "1.1.0"
 !define PRODUCT_PUBLISHER "yoavain"
 !define PRODUCT_WEB_SITE "https://github.com/yoavain/screwzira-subtitle-downloader"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}.exe"
@@ -56,28 +56,28 @@ Section "Directory" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
-  WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" "%1"'
+  WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" input "%1"'
 SectionEnd
 Section "MKV" SEC02
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   ReadRegStr $MkvProgID HKLM "SOFTWARE\Classes\.mkv" ""
   WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
-  WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" "%1"'
+  WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" input "%1"'
 SectionEnd
 Section "AVI" SEC03
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
     ReadRegStr $AviProgID HKLM "SOFTWARE\Classes\.avi" ""
     WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
-    WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" input "%1"'
 SectionEnd
 Section "MP4" SEC04
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
     ReadRegStr $Mp4ProgID HKLM "SOFTWARE\Classes\.mp4" ""
     WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
-    WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" input "%1"'
 SectionEnd
 
 Section -Post

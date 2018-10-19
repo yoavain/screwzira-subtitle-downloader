@@ -1,15 +1,20 @@
 import * as winston from 'winston';
-const { combine, timestamp, printf, label } = winston.format;
+
+const {combine, timestamp, printf, label} = winston.format;
 
 export interface ISzLogger {
     // new(logFile: string): SzLogger;
     setLogLevel(level: string);
-    log(level: string, message: string);
+    info(message: string);
+    debug(message: string);
+    verbose(message: string);
+    warn(message: string);
+    error(message: string);
 }
 
 export class SzLogger implements ISzLogger {
-    public transports: { file: winston.transports.FileTransportInstance };
-    public logger: winston.Logger;
+    private transports: { file: winston.transports.FileTransportInstance };
+    private logger: winston.Logger;
 
     constructor(logFile: string) {
         this.transports = {
@@ -18,8 +23,8 @@ export class SzLogger implements ISzLogger {
         this.logger = winston.createLogger({
             level: 'debug',
             format: combine(
-                label({ label: '[my-label]' }),
-                timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                label({label: '[my-label]'}),
+                timestamp({format: 'YYYY-MM-DD HH:mm:ss.SSS'}),
                 printf(info => `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`)
             ),
             transports: [this.transports.file]
@@ -32,7 +37,28 @@ export class SzLogger implements ISzLogger {
         }
     };
 
-    public log = (level: string, message: string) => {
+    public info = (message: string) => {
+        this.log('info', message);
+    };
+
+    public debug = (message: string) => {
+        this.log('debug', message);
+    };
+
+    public verbose = (message: string) => {
+        this.log('verbose', message);
+    };
+
+    public warn = (message: string) => {
+        this.log('warn', message);
+    };
+
+    public error = (message: string) => {
+        this.log('error', message);
+    };
+
+
+    private log = (level: string, message: string) => {
         this.logger.log(level, message);
-    }
+    };
 }

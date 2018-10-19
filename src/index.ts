@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as fsextra from 'fs-extra';
 import * as path from 'path';
 import {IScrewziraUtils, ScrewziraUtils} from './screwziraUtils';
+import {ISzArgsParser, SzArgsParser} from "./szArgsParser";
 import {IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier} from './szClassifier';
 import {ISzConfig, SzConfig} from './szConfig';
 import {ISzLogger, SzLogger} from './szLogger';
@@ -10,13 +11,15 @@ import {ISzNotifier, SzNotifier} from './szNotifier';
 // Make sure the log directory is there
 fsextra.ensureDirSync(path.resolve(process.env.ProgramData, 'Screwzira-Downloader'));
 
+// CLI Args Parser
+const szArgsParser: ISzArgsParser = new SzArgsParser(process.argv);
+
 // Logger
 const logFile: string = path.resolve(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader.log');
 const szLogger: ISzLogger = new SzLogger(logFile);
 
 // Notifier
-const snoreToastPath: string = process.argv[0].endsWith("screwzira-downloader.exe") ? path.join(process.argv[0], "../", "SnoreToast.exe") : null;
-const szNotifier: ISzNotifier = new SzNotifier(szLogger, snoreToastPath);
+const szNotifier: ISzNotifier = new SzNotifier(szLogger, szArgsParser.getSnoreToastPath(), szArgsParser.isQuiet());
 
 // Config
 const confFile: string = path.resolve(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader-config.json');
@@ -39,14 +42,14 @@ const handleSingleFile = (fullpath: string, fileExists: boolean) => {
 
     // Check if already exists
     if (szClassifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
-        szLogger.log('warning', `Hebrew subtitles already exist`);
+        szLogger.warn(`Hebrew subtitles already exist`);
         szNotifier.notif(`Hebrew subtitles already exist`);
         return;
     }
 
     const classification: IMovieFileClassification | ITvEpisodeFileClassification = szClassifier.classify(filenameNoExtension, parentFolder);
 
-    szLogger.log('verbose', `Classification response: ${JSON.stringify(classification)}`);
+    szLogger.verbose(`Classification response: ${JSON.stringify(classification)}`);
 
     if (classification && classification.type === "movie") {
         const movieFile: IMovieFileClassification = classification as IMovieFileClassification;
@@ -80,28 +83,32 @@ const handleFolder = (dir: string) => {
     fs.readdirSync(dir).forEach(file => {
         const fullPath: string = path.join(dir, file).replace(/\\/g, "/");
         if (fs.lstatSync(fullPath).isDirectory()) {
-            szLogger.log('verbose', `Handling sub-folder ${fullPath}`);
+            szLogger.verbose(`Handling sub-folder ${fullPath}`);
             handleFolder(fullPath);
         }
         else {
             if (szConfig.getExtensions().includes(getFileExtension(fullPath))) {
                 noFileHandled = true;
                 const waitTimeMs: number = getWaitTimeMs();
-                szLogger.log('verbose', `Waiting ${waitTimeMs}ms to handle file ${fullPath}`);
+                szLogger.verbose(`Waiting ${waitTimeMs}ms to handle file ${fullPath}`);
                 setTimeout(handleSingleFile, waitTimeMs, fullPath, true);
             }
         }
     });
     if (noFileHandled) {
-        szLogger.log('warning', `No file handled`);
+        szLogger.warn(`No file handled`);
         szNotifier.notif(`No file handled`);
     }
 };
 
 // Main
-if (process.argv.length > 2) {
-    szLogger.log('info', `*** Looking for subtitle for "${process.argv[2]}" ***`);
-    const fullpath: string = process.argv[2].replace(/\\/g, "/");
+szLogger.verbose(`Argv: ${process.argv.join(' ')}`);
+szLogger.verbose(`Sonar Mode: ${szArgsParser.isSonarrMode()}`);
+szLogger.verbose(`Quiet Mode: ${szArgsParser.isQuiet()}`);
+const input: string = szArgsParser.getInput();
+if (input && typeof input === "string") {
+    szLogger.info(`*** Looking for subtitle for "${input}" ***`);
+    const fullpath: string = input.replace(/\\/g, "/");
     try {
         if (fs.lstatSync(fullpath).isDirectory()) {
             handleFolder(fullpath)
@@ -115,11 +122,13 @@ if (process.argv.length > 2) {
             handleSingleFile(fullpath, false);
         }
         else {
-            szLogger.log('error', `Cannot handle ${fullpath}`);
+            szLogger.error(`Cannot handle ${fullpath}`);
         }
     }
 }
 else {
-    szLogger.log('error', '*** Missing input file ***');
+    szLogger.error('*** Missing input file ***');
     szNotifier.notif(`Missing input file`);
+    // tslint:disable-next-line:no-console
+    console.log(`Usage:${szArgsParser.getHelp()}`);
 }
