@@ -19,15 +19,20 @@ export class SzArgsParser implements ISzArgsParser {
     private readonly snoreToastPath: string;
 
     constructor(argv: string[]) {
-        const indexOfInput: number = argv.indexOf(INPUT);
-        if (indexOfInput >= 0 && indexOfInput + 1 < argv.length) {
-            this.input = argv[indexOfInput + 1];
+        if (argv.length >= 2 && (argv[argv.length - 2].endsWith(".exe") || argv[argv.length - 2].endsWith(".js")) && ![SONARR, INPUT, QUIET].includes(argv[argv.length - 1])) {
+            this.input = argv[argv.length - 1];
         }
-        else if (argv.indexOf(SONARR) >= 0) {
-            this.sonarrMode = true;
-            this.input = this.getSonarrEpisodePathEnvVar();
+        else {
+            const indexOfInput: number = argv.indexOf(INPUT);
+            if (indexOfInput >= 0 && indexOfInput + 1 < argv.length) {
+                this.input = argv[indexOfInput + 1];
+            }
+            else if (argv.indexOf(SONARR) >= 0) {
+                this.sonarrMode = true;
+                this.input = this.getSonarrEpisodePathEnvVar();
+            }
+            this.quiet = argv.indexOf(QUIET) >= 0;
         }
-        this.quiet = argv.indexOf(QUIET) >= 0;
         this.snoreToastPath = argv[0].endsWith("screwzira-downloader.exe") ? path.join(argv[0], "../", "SnoreToast.exe") : null;
     }
 
