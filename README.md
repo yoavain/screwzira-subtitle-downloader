@@ -18,6 +18,10 @@ CLI for downloading Hebrew subtitles from screwzira.com using their API
 <br>Configuring sonarr:
 ![sonarr configuration](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/screenshots/sonarr-custom-script.png)
 
+<br>In order to have Silent launch of the downloader:
+<br>Path should be to the launcher: "C:\Program Files\Screwzira-Downloader\screwzira-downloader-launcher.exe"
+<br>Arguments should be: "C:\Program Files\Screwzira-Downloader\screwzira-downloader.exe" sonarr quiet
+
 <br>To build:
  * install nsis
  * npm install -g nexe
