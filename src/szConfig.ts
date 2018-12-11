@@ -31,7 +31,6 @@ export class SzConfig implements ISzConfig {
     constructor(confFile: string, logger: ISzLogger) {
         this.logger = logger;
         if (!fs.existsSync(confFile)) {
-
             fsextra.outputJsonSync(confFile, defaultConf);
         }
         let conf: IConfig;

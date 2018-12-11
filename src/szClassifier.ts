@@ -5,7 +5,7 @@ import {ISzLogger} from './szLogger';
 
 // RegEx
 const episodeRegex: RegExp = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
-const movieRegex: RegExp = /([ .\w']+?)\.(\d+)/;
+const movieRegex: RegExp = /([ .\w']+?)\.(\d+)\.(?!.*\d\.)/;
 const movieParentRegex: RegExp = /((?:[^(]+))\s+(?:\((\d+)\))/;
 
 interface IFileClassification {
