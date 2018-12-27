@@ -19,4 +19,14 @@ describe("test classify", () => {
         const actual: any = szClassifier.classify("Deadpool.2.2018.THEATRICAL.1080p.BluRay.x264-ROVERS", "");
         expect(actual).toEqual({ type: "movie", movieName: "deadpool 2", movieYear: 2018 });
     });
+    it("test movie name ends with space instead of dot", () => {
+        const szClassifier: ISzClassifier = new SzClassifier(mockLogger, mockConfig);
+        const actual: any = szClassifier.classify("Deadpool 2 2018 THEATRICAL 1080p BluRay x264-ROVERS", "");
+        expect(actual).toEqual({ type: "movie", movieName: "deadpool 2", movieYear: 2018 });
+    });
+    it("test movie name with irrelevant numbers", () => {
+        const szClassifier: ISzClassifier = new SzClassifier(mockLogger, mockConfig);
+        const actual: any = szClassifier.classify("The.House.That.Jack.Built.2018.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTG.mkv", "");
+        expect(actual).toEqual({ type: "movie", movieName: "the house that jack built", movieYear: 2018 });
+    });
 });
