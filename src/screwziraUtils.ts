@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as request from 'request';
-import {ISzClassifier} from './szClassifier';
+import {ICommonWordsInSentenceResponse, ISzClassifier} from './szClassifier';
 import {ISzLogger} from './szLogger';
 import {ISzNotifier} from './szNotifier';
 
@@ -38,11 +38,11 @@ export class ScrewziraUtils implements IScrewziraUtils {
     public findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
         this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list && list.map(item => item.SubtitleName).join(', ')}]`);
         if (list && list.length > 0) {
-            let maxCommonWords: string[] = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
+            let maxCommonWords: ICommonWordsInSentenceResponse = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
             let maxIndex: number = 0;
             list.forEach((item, index) => {
-                const commonWords: string[] = this.classifier.commonWordsInSentences(filenameNoExtension, item.SubtitleName, excludeList);
-                if (commonWords.length > maxCommonWords.length) {
+                const commonWords: ICommonWordsInSentenceResponse = this.classifier.commonWordsInSentences(filenameNoExtension, item.SubtitleName, excludeList);
+                if (commonWords.mark > maxCommonWords.mark) {
                     maxCommonWords = commonWords;
                     maxIndex = index;
                 }
@@ -51,7 +51,8 @@ export class ScrewziraUtils implements IScrewziraUtils {
             const bestMatch: IFindFilmResponse = list[maxIndex];
             this.logger.info(`filename:  "${filenameNoExtension}"`);
             this.logger.info(`best match: "${bestMatch.SubtitleName}"`);
-            this.logger.info(`common words: [\"${maxCommonWords.join('\", \"')}\"]`);
+            this.logger.info(`common words: [\"${maxCommonWords.commonWords.join('\", \"')}\"]`);
+            this.logger.info(`common words mark: ${maxCommonWords.mark}`);
 
             return bestMatch.Identifier;
         }

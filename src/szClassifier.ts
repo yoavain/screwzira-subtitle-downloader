@@ -8,6 +8,38 @@ const episodeRegex: RegExp = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
 const movieRegex: RegExp = /([ .\w']+?)[. ](\d{4})[. ]/;
 const movieParentRegex: RegExp = /((?:[^(]+))\s+(?:\((\d+)\))/;
 
+interface IWordWeight {
+    [key: string]: number
+}
+
+export const SPECIAL_EDITION_MARK = 4;
+export const RIP_MARK: number = 3;
+export const ENCODING_MARK: number = 1.2;
+export const DIMENSION_MARK: number = 0.8;
+export const AUDIO_MARK: number = 0.5;
+export const COMMON_WORDS_MARK: number  = 0.1;
+const WORD_WEIGHTS: IWordWeight = {
+    "theatrical": SPECIAL_EDITION_MARK,
+    "final": SPECIAL_EDITION_MARK / 2,
+    "cut": SPECIAL_EDITION_MARK / 2,
+    "bluray": RIP_MARK,
+    "hddvd": RIP_MARK,
+    "webrip": RIP_MARK,
+    "hdtv": RIP_MARK,
+    "web": RIP_MARK / 2,
+    "dl": RIP_MARK / 2,
+    "x264": ENCODING_MARK,
+    "x265": ENCODING_MARK,
+    "1080p": DIMENSION_MARK,
+    "720p": DIMENSION_MARK,
+    "5.1": AUDIO_MARK,
+    "dts": AUDIO_MARK,
+    "dd5": AUDIO_MARK,
+    "ac3": AUDIO_MARK,
+    "the": COMMON_WORDS_MARK
+};
+
+
 interface IFileClassification {
     type: string
 }
@@ -23,12 +55,18 @@ export interface ITvEpisodeFileClassification extends IFileClassification {
     episode: number
 }
 
+export interface ICommonWordsInSentenceResponse {
+    commonWords: string[],
+    mark: number
+}
+
 export interface ISzClassifier {
     // new(logger: ISzLogger, config: ISzConfig): any;
     cleanText(text: string): string;
     splitText(text: string): string[];
     isSubtitlesAlreadyExist(relativePath: string, filenameNoExtension: string): boolean;
-    commonWordsInSentences(s1: string, s2: string, excludeList: string[]): string[];
+    commonWordsInSentences(s1: string, s2: string, excludeList: string[]): ICommonWordsInSentenceResponse
+    calculateSimilarityMark(words: string[]): number;
     classify(filenameNoExtension: string, parentFolder: string): IMovieFileClassification | ITvEpisodeFileClassification;
 }
 
@@ -54,13 +92,21 @@ export class SzClassifier implements ISzClassifier {
         return fs.existsSync(destination);
     };
 
-    public commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): string[] => {
+    public commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): ICommonWordsInSentenceResponse => {
         const split1: string[] = this.splitText(this.cleanText(s1));
         const split2: string[] = this.splitText(this.cleanText(s2));
 
         const commonWords: string[]= split1.filter(word1 => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
-        this.logger.debug(`"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}]`);
-        return commonWords;
+        const mark: number = this.calculateSimilarityMark(commonWords);
+        this.logger.debug(`"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}] with total mark: ${mark}`);
+        return { commonWords, mark } ;
+    };
+
+    public calculateSimilarityMark = (words: string[]): number => {
+        return  words.reduce((acc, word) => {
+            acc += WORD_WEIGHTS[word] !== undefined ? WORD_WEIGHTS[word] : Math.min(5, word.length) / 5;
+            return acc;
+        }, 0);
     };
 
     /**
