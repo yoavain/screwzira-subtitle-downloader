@@ -25,9 +25,9 @@
     "request"
   ],
   "devDependencies": {
-    "@types/fs-extra": "^5.0.4",
-    "@types/jest": "^24.0.0",
-    "@types/node": "^10.12.23",
+    "@types/fs-extra": "^5.0.5",
+    "@types/jest": "^24.0.5",
+    "@types/node": "^11.9.4",
     "@types/node-notifier": "^0.0.28",
     "@types/request": "^2.48.1",
     "@types/winston": "^2.4.4",
@@ -38,7 +38,7 @@
     "tslint": "^5.12.1",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.3.3",
-    "webpack": "^4.29.3",
+    "webpack": "^4.29.4",
     "webpack-cli": "^3.2.3"
   }
 }
