@@ -1,6 +1,6 @@
 {
   "name": "screwzira-downloader",
-  "version": "1.5.2",
+  "version": "1.6.0",
   "description": "",
   "main": "built/index.js",
   "scripts": {
@@ -10,8 +10,8 @@
     "test": "jest",
     "compile": "tsc",
     "webpack": "webpack --mode=development",
-    "nexe": "nexe -t x64-10.15.3 -o dist/screwzira-downloader.exe",
-    "installer": "cd installer && \"C:/Program Files (x86)/NSIS/makensis.exe\" screwzira.nsi && cd .."
+    "nexe": "nexe -t x64-12.0.0 -o dist/screwzira-downloader.exe",
+    "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"C:/Program Files (x86)/NSIS/makensis.exe\" screwzira.nsi && cd .."
   },
   "author": "yoavain",
   "license": "ISC",
@@ -26,12 +26,13 @@
   ],
   "devDependencies": {
     "@types/fs-extra": "^5.0.5",
-    "@types/jest": "^24.0.11",
+    "@types/jest": "^24.0.12",
     "@types/node": "^11.13.8",
     "@types/node-notifier": "^5.4.0",
     "@types/request": "^2.48.1",
     "@types/winston": "^2.4.4",
     "copy-webpack-plugin": "^5.0.3",
+    "cross-env": "^5.2.0",
     "jest": "^24.7.1",
     "prettier": "^1.17.0",
     "ts-jest": "^24.0.2",
