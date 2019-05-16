@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as numeral from 'numeral';
 import * as path from 'path';
 import * as request from 'request';
 import {ICommonWordsInSentenceResponse, ISzClassifier} from './szClassifier';
@@ -52,7 +53,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
             this.logger.info(`filename:  "${filenameNoExtension}"`);
             this.logger.info(`best match: "${bestMatch.SubtitleName}"`);
             this.logger.info(`common words: [\"${maxCommonWords.commonWords.join('\", \"')}\"]`);
-            this.logger.info(`common words mark: ${maxCommonWords.mark}`);
+            this.logger.info(`common words mark: ${numeral(maxCommonWords.mark).format('0.00')}`);
 
             return bestMatch.Identifier;
         }
