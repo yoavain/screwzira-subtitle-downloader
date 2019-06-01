@@ -8,11 +8,11 @@ import {ISzNotifier} from './szNotifier';
 
 export interface IScrewziraUtils {
     // new(logger: ISzLogger, notifier: ISzNotifier, classifier: ISzClassifier): ScrewziraUtils;
-    findClosestMatch(filenameNoExtension: string, list, excludeList: string[]): string;
-    handleResponse(error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string);
-    handleMovie(movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string);
-    handleEpisode(series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string);
-    downloadBestMatch(subtitleID: string, filenameNoExtension: string, relativePath: string);
+    findClosestMatch: (filenameNoExtension: string, list, excludeList: string[]) => string;
+    handleResponse: (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string) => void;
+    handleMovie: (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) => void;
+    handleEpisode: (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) => void;
+    downloadBestMatch: (subtitleID: string, filenameNoExtension: string, relativePath: string) => void;
 }
 
 export interface IFindFilmResponse {

@@ -3,7 +3,7 @@ import {ISzLogger} from './szLogger';
 
 export interface ISzNotifier {
     // new(logger: ISzLogger, snoreToastPath: string, quiet: boolean): SzNotifier
-    notif(message: string);
+    notif: (message: string) => void;
 }
 
 export class SzNotifier implements ISzNotifier {

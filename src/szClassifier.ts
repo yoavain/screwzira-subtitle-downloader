@@ -62,12 +62,12 @@ export interface ICommonWordsInSentenceResponse {
 
 export interface ISzClassifier {
     // new(logger: ISzLogger, config: ISzConfig): any;
-    cleanText(text: string): string;
-    splitText(text: string): string[];
-    isSubtitlesAlreadyExist(relativePath: string, filenameNoExtension: string): boolean;
-    commonWordsInSentences(s1: string, s2: string, excludeList: string[]): ICommonWordsInSentenceResponse
-    calculateSimilarityMark(words: string[]): number;
-    classify(filenameNoExtension: string, parentFolder: string): IMovieFileClassification | ITvEpisodeFileClassification;
+    cleanText: (text: string) => string;
+    splitText: (text: string) => string[];
+    isSubtitlesAlreadyExist: (relativePath: string, filenameNoExtension: string) => boolean;
+    commonWordsInSentences: (s1: string, s2: string, excludeList: string[]) => ICommonWordsInSentenceResponse
+    calculateSimilarityMark: (words: string[]) => number;
+    classify: (filenameNoExtension: string, parentFolder: string) => IMovieFileClassification | ITvEpisodeFileClassification;
 }
 
 export class SzClassifier implements ISzClassifier {

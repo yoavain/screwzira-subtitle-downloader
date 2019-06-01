@@ -6,11 +6,11 @@ const QUIET = 'quiet';
 const SONARR_EPISODE_FILE_PATH = 'sonarr_episodefile_path';
 
 export interface ISzArgsParser {
-    isSonarrMode(): boolean;
-    getInput(): string;
-    isQuiet(): boolean;
-    getSnoreToastPath(): string;
-    getHelp(): string;
+    isSonarrMode: () => boolean;
+    getInput: () => string;
+    isQuiet: () => boolean;
+    getSnoreToastPath: () => string;
+    getHelp: () => string;
 }
 export class SzArgsParser implements ISzArgsParser {
     private readonly sonarrMode: boolean;

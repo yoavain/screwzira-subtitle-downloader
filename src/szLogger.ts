@@ -4,12 +4,12 @@ const {combine, timestamp, printf, label} = winston.format;
 
 export interface ISzLogger {
     // new(logFile: string): SzLogger;
-    setLogLevel(level: string);
-    info(message: string);
-    debug(message: string);
-    verbose(message: string);
-    warn(message: string);
-    error(message: string);
+    setLogLevel: (level: string) => void;
+    info: (message: string) => void;
+    debug: (message: string) => void;
+    verbose: (message: string) => void;
+    warn: (message: string) => void;
+    error: (message: string) => void;
 }
 
 export class SzLogger implements ISzLogger {

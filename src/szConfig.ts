@@ -17,9 +17,9 @@ const defaultConf: IConfig = {logLevel: "debug", extensions: defaultExtensions, 
 
 export interface ISzConfig {
     // new(confFile: string, logger: ISzLogger): SzConfig;
-    replaceTitleIfNeeded(text: string): string;
-    getLogLevel(): string;
-    getExtensions():string[];
+    replaceTitleIfNeeded: (text: string) => string;
+    getLogLevel: () => string;
+    getExtensions: () => string[];
 }
 
 export class SzConfig implements ISzConfig {
