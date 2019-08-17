@@ -33,7 +33,7 @@ describe("test classify", () => {
     });
     it("test movie name with irrelevant numbers", () => {
         const szClassifier: ISzClassifier = new SzClassifier(mockLogger, mockConfig);
-        const actual: any = szClassifier.classify("The.House.That.Jack.Built.2018.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTG.mkv", "");
+        const actual: any = szClassifier.classify("The.House.That.Jack.Built.2018.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTG", "");
         expect(actual).toEqual({ type: "movie", movieName: "the house that jack built", movieYear: 2018 });
     });
     it("test calculateSimilarityMark - unknown words", () => {
