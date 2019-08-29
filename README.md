@@ -32,4 +32,3 @@ CLI for downloading Hebrew subtitles from screwzira.com using their API
  * npm install -g nexe
  * npm install
  * npm run build
-
