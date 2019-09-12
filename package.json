@@ -1,6 +1,6 @@
 {
   "name": "screwzira-downloader",
-  "version": "1.6.7",
+  "version": "1.6.8",
   "description": "",
   "main": "built/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "test": "jest",
     "compile": "tsc",
     "webpack": "webpack --mode=development",
-    "nexe": "nexe -t x64-12.6.0 -o dist/screwzira-downloader.exe",
+    "nexe": "nexe -t x64-12.9.1 -o dist/screwzira-downloader.exe",
     "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"C:/Program Files (x86)/NSIS/makensis.exe\" screwzira.nsi && cd .."
   },
   "author": "yoavain",
@@ -28,19 +28,19 @@
   "devDependencies": {
     "@types/fs-extra": "^8.0.0",
     "@types/jest": "^24.0.18",
-    "@types/node": "^12.7.2",
+    "@types/node": "^12.7.5",
     "@types/node-notifier": "^5.4.0",
-    "@types/request": "^2.48.2",
+    "@types/request": "^2.48.3",
     "@types/winston": "^2.4.4",
     "copy-webpack-plugin": "^5.0.4",
-    "cross-env": "^5.2.0",
+    "cross-env": "^5.2.1",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "ts-jest": "^24.0.2",
-    "tslint": "^5.19.0",
+    "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.6.2",
+    "typescript": "^3.6.3",
     "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.7"
+    "webpack-cli": "^3.3.8"
   }
 }
