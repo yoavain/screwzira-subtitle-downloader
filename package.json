@@ -1,6 +1,6 @@
 {
   "name": "screwzira-downloader",
-  "version": "1.6.8",
+  "version": "1.7.0",
   "description": "",
   "main": "built/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "compile": "tsc",
     "webpack": "webpack --mode=development",
     "nexe": "nexe -t x64-12.9.1 -o dist/screwzira-downloader.exe",
-    "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"C:/Program Files (x86)/NSIS/makensis.exe\" screwzira.nsi && cd .."
+    "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"../bin/nsis-3.04/makensis.exe\" screwzira.nsi && cd .."
   },
   "author": "yoavain",
   "license": "ISC",
