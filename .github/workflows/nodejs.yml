@@ -15,7 +15,8 @@ jobs:
         node-version: [12.x]
 
     steps:
-    - uses: actions/checkout@v1
+    - name: Checkout
+      uses: actions/checkout@v1
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
@@ -28,3 +29,9 @@ jobs:
       run: npm run build
       env:
         CI: true
+    - name: release
+      uses: fnkr/github-action-ghr@v1
+      secrets:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GHR_PATH: "installer/Screwzira-Downloader_*_Setup.exe"
