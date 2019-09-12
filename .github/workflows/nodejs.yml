@@ -20,14 +20,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: NSIS Get
-        run:
-          shell:
-              powershell: Invoke-WebRequest http://prdownloads.sourceforge.net/nsis/nsis-3.04-setup.exe?download -UseBasicParsing -OutFile nsis-3.04-setup.exe
-    - name: NSIS Install
-      run:
-        shell:
-              cmd: nsis-3.04-setup.exe /SD
     - name: npm install, build, and test
       run: |
         npm install
