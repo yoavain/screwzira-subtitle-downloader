@@ -20,7 +20,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
     - name: test
-      eun echo github.event_name ${{ github.event_name }} github.event.action ${{ github.event.action }}
+      run: echo github.event_name ${{ github.event_name }} github.event.action ${{ github.event.action }}
     - name: Setup NodeJS
       uses: actions/setup-node@v1
       with:
