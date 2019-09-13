@@ -1,3 +1,4 @@
+# Create Windowless App ![types](https://img.shields.io/npm/types/typescript.svg) ![commit](https://img.shields.io/github/last-commit/yoavain/screwzira-subtitle-downloader.svg) [![Known Vulnerabilities](https://snyk.io//test/github/yoavain/screwzira-subtitle-downloader/badge.svg?targetFile=package.json)](https://snyk.io//test/github/yoavain/screwzira-subtitle-downloader?targetFile=package.json)
 # screwzira-subtitle-downloader
 
 CLI for downloading Hebrew subtitles from screwzira.com using their API
