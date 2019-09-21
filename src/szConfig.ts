@@ -12,7 +12,7 @@ interface IConfig {
     replacePairs: IReplacePairs
 }
 
-const defaultExtensions: string[] = ["mkv", "avi"];
+const defaultExtensions: string[] = ["mkv", "mp4", "avi"];
 const defaultConf: IConfig = {logLevel: "debug", extensions: defaultExtensions, replacePairs: {}};
 
 export interface ISzConfig {
