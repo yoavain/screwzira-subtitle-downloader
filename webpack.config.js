@@ -17,8 +17,8 @@ module.exports = {
 		new webpack.IgnorePlugin(/\.(css|less)$/),
 		new CopyWebpackPlugin([
 		{
-			from: 'node_modules/node-notifier/vendor/snoreToast/SnoreToast.exe',
-			to: '../dist/SnoreToast.exe',
+			from: 'node_modules/node-notifier/vendor/snoreToast/snoretoast-x64.exe',
+			to: '../dist/snoretoast-x64.exe',
 			toType: 'file'
 		},
 		{

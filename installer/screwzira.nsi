@@ -50,7 +50,7 @@ Section "Main" SEC00
 SetOutPath "$INSTDIR"
 File "..\dist\screwzira-downloader.exe"
 File "..\dist\screwzira-downloader-launcher.exe"
-File "..\dist\SnoreToast.exe"
+File "..\dist\snoretoast-x64.exe"
 SectionEnd
 Section "Directory" SEC01
   SetOutPath "$INSTDIR"
@@ -117,7 +117,7 @@ Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}_Uninst.exe"
   Delete "$INSTDIR\screwzira-downloader.exe"
   Delete "$INSTDIR\screwzira-downloader-launcher.exe"
-  Delete "$INSTDIR\SnoreToast.exe"
+  Delete "$INSTDIR\snoretoast-x64.exe"
   RMDir "$INSTDIR"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
