@@ -17,7 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "fs-extra": "^8.1.0",
-    "node-notifier": "^5.4.3",
+    "node-notifier": "^6.0.0",
     "numeral": "^2.0.6",
     "request": "^2.88.0",
     "winston": "^3.2.1"
