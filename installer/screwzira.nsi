@@ -52,27 +52,35 @@ File "..\dist\screwzira-downloader.exe"
 File "..\dist\screwzira-downloader-launcher.exe"
 File "..\dist\snoretoast-x64.exe"
 SectionEnd
-Section "Directory" SEC01
+Section "Icons" SEC01
+SetOutPath "$INSTDIR\notif-icons"
+File "..\dist\notif-icons\sz-logo-300.png"
+File "..\dist\notif-icons\sz-download-300.png"
+File "..\dist\notif-icons\sz-not-found-300.png"
+File "..\dist\notif-icons\sz-failed-300.png"
+File "..\dist\notif-icons\sz-warning-300.png"
+SectionEnd
+Section "Directory" SEC02
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
   WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" input "%1"'
 SectionEnd
-Section "MKV" SEC02
+Section "MKV" SEC03
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   ReadRegStr $MkvProgID HKLM "SOFTWARE\Classes\.mkv" ""
   WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
   WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" input "%1"'
 SectionEnd
-Section "AVI" SEC03
+Section "AVI" SEC04
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
     ReadRegStr $AviProgID HKLM "SOFTWARE\Classes\.avi" ""
     WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
     WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" "$INSTDIR\screwzira-downloader.exe" input "%1"'
 SectionEnd
-Section "MP4" SEC04
+Section "MP4" SEC05
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
     ReadRegStr $Mp4ProgID HKLM "SOFTWARE\Classes\.mp4" ""
@@ -118,6 +126,7 @@ Section Uninstall
   Delete "$INSTDIR\screwzira-downloader.exe"
   Delete "$INSTDIR\screwzira-downloader-launcher.exe"
   Delete "$INSTDIR\snoretoast-x64.exe"
+  RMDir "$INSTDIR\notif-icons"
   RMDir "$INSTDIR"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"

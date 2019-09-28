@@ -28,6 +28,10 @@ module.exports = {
                 from: 'resources/bin/screwzira-downloader-launcher.exe',
                 to: '../dist/screwzira-downloader-launcher.exe',
                 toType: 'file'
+            },
+            {
+                from: 'resources/notif-icons/',
+                to: '../dist/notif-icons/',
             }
         ])
     ],

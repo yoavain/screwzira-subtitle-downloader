@@ -1,12 +1,12 @@
 import * as fs from 'fs';
 import * as fsextra from 'fs-extra';
 import * as path from 'path';
-import {IScrewziraUtils, ScrewziraUtils} from './screwziraUtils';
-import {ISzArgsParser, SzArgsParser} from "./szArgsParser";
-import {IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier} from './szClassifier';
-import {ISzConfig, SzConfig} from './szConfig';
-import {ISzLogger, SzLogger} from './szLogger';
-import {ISzNotifier, SzNotifier} from './szNotifier';
+import { IScrewziraUtils, ScrewziraUtils } from './screwziraUtils';
+import { ISzArgsParser, SzArgsParser } from "./szArgsParser";
+import { IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier } from './szClassifier';
+import { ISzConfig, SzConfig } from './szConfig';
+import { ISzLogger, SzLogger } from './szLogger';
+import { ISzNotifier, NotificationIcon, SzNotifier } from './szNotifier';
 
 // Make sure the log directory is there
 fsextra.ensureDirSync(path.resolve(process.env.ProgramData, 'Screwzira-Downloader'));
@@ -97,7 +97,7 @@ const handleFolder = (dir: string) => {
     });
     if (noFileHandled) {
         szLogger.warn(`No file handled`);
-        szNotifier.notif(`No file handled`);
+        szNotifier.notif(`No file handled`, NotificationIcon.WARNING);
     }
 };
 
@@ -128,7 +128,7 @@ if (input && typeof input === "string") {
 }
 else {
     szLogger.error('*** Missing input file ***');
-    szNotifier.notif(`Missing input file`);
+    szNotifier.notif(`Missing input file`, NotificationIcon.FAILED);
     // tslint:disable-next-line:no-console
     console.log(`Usage:${szArgsParser.getHelp()}`);
 }

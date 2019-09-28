@@ -2,9 +2,9 @@ import * as fs from 'fs';
 import * as numeral from 'numeral';
 import * as path from 'path';
 import request from 'request';
-import {ICommonWordsInSentenceResponse, ISzClassifier} from './szClassifier';
-import {ISzLogger} from './szLogger';
-import {ISzNotifier} from './szNotifier';
+import { ICommonWordsInSentenceResponse, ISzClassifier } from './szClassifier';
+import { ISzLogger } from './szLogger';
+import { ISzNotifier, NotificationIcon } from './szNotifier';
 
 export interface IScrewziraUtils {
     // new(logger: ISzLogger, notifier: ISzNotifier, classifier: ISzClassifier): ScrewziraUtils;
@@ -69,7 +69,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
             }
             else {
                 this.logger.info("No subtitle found");
-                this.notifier.notif(`No subtitle found`);
+                this.notifier.notif(`No subtitle found`, NotificationIcon.WARNING);
             }
         }
         else {
@@ -153,18 +153,18 @@ export class ScrewziraUtils implements IScrewziraUtils {
                 // Check if already exists
                 if (this.classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
                     this.logger.warn(`Hebrew subtitles already exist`);
-                    this.notifier.notif(`Hebrew subtitles already exist`);
+                    this.notifier.notif(`Hebrew subtitles already exist`, NotificationIcon.WARNING);
                     return;
                 }
 
                 const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
                 this.logger.verbose(`writing response to ${destination}`);
                 fs.writeFileSync(destination, body);
-                this.notifier.notif(`Successfully downloaded "${destination}"`);
+                this.notifier.notif(`Successfully downloaded "${destination}"`, NotificationIcon.DOWNLOAD);
             }
             else {
                 this.logger.error(error);
-                this.notifier.notif(`Failed downloading subtitle`);
+                this.notifier.notif(`Failed downloading subtitle`, NotificationIcon.FAILED);
             }
         });
     };
