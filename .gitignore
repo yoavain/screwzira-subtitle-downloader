@@ -9,3 +9,4 @@ installer/Screwzira-Downloader_*.exe
 installer/*.reg
 installer/*.bat
 /.vscode/
+*.iml

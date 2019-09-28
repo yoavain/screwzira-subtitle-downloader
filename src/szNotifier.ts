@@ -23,11 +23,11 @@ export class SzNotifier implements ISzNotifier {
     }
 
     public notif = (message: string) => {
+        // todo add icon
         if (this.notifier) {
             this.notifier.notify({
                 title: 'Screwzira Subtitle Downloader',
-                message,
-                icon:
+                message
             });
         }
         else {

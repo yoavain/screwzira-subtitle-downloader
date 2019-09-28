@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as numeral from 'numeral';
 import * as path from 'path';
-import * as request from 'request';
+import request from 'request';
 import {ICommonWordsInSentenceResponse, ISzClassifier} from './szClassifier';
 import {ISzLogger} from './szLogger';
 import {ISzNotifier} from './szNotifier';

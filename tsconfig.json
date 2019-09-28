@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
         "moduleResolution": "node",
-        "outDir": "./compiled",
+        "outDir": "./_compile",
+        "esModuleInterop": true,
         "allowJs": true,
         "target": "es6",
 		"lib": ["es6", "es2017"]
