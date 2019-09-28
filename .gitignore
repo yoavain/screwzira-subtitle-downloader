@@ -1,6 +1,6 @@
 node_modules/**
-compiled/**
-built/**
+/_compile/
+_build/**
 dist/**
 .idea/**
 .vs/**
