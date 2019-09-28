@@ -24,7 +24,11 @@ export class SzNotifier implements ISzNotifier {
 
     public notif = (message: string) => {
         if (this.notifier) {
-            this.notifier.notify({title: 'Screwzira Subtitle Downloader', message});
+            this.notifier.notify({
+                title: 'Screwzira Subtitle Downloader',
+                message,
+                icon:
+            });
         }
         else {
             this.logger.info(`Quiet Mode. Skipping notification message: ${message}`);
