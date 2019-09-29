@@ -4,7 +4,7 @@ import {ISzConfig} from './szConfig'
 import {ISzLogger} from './szLogger';
 
 // RegEx
-const episodeRegex: RegExp = /(.+?)S?0*(\d+)?[xE]0*(\d+)/;
+const episodeRegex: RegExp = /(.+?)S?0?(\d+)?[xE]0?(\d+)/;
 const movieRegex: RegExp = /([ .\w']+?)[. ](\d{4})[. ]/;
 const movieParentRegex: RegExp = /((?:[^(]+))\s+(?:\((\d+)\))/;
 
