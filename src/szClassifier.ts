@@ -119,7 +119,6 @@ export class SzClassifier implements ISzClassifier {
      */
     public classify = (filenameNoExtension: string, parentFolder: string): IMovieFileClassification | ITvEpisodeFileClassification => {
         const episodeMatch: RegExpExecArray = episodeRegex.exec(filenameNoExtension);
-        console.log(`Yoav ${JSON.stringify(episodeMatch)}`);
         if (episodeMatch && episodeMatch.length > 2 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
             this.logger.verbose(`Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
