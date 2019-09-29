@@ -101,14 +101,17 @@ SectionEnd
 
 ; Section descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "Associate folders to $(^Name)"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "Associate .mkv files to $(^Name)"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "Associate .avi files to $(^Name)"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Associate .mp4 files to $(^Name)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC00} "Main $(^Name) app"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "Notification icons for $(^Name)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "Associate folders to $(^Name)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "Associate .mkv files to $(^Name)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Associate .avi files to $(^Name)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC05} "Associate .mp4 files to $(^Name)"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function .onInit
   SectionSetFlags ${SEC00} 17
+  SectionSetFlags ${SEC01} 17
 FunctionEnd
 
 Function un.onUninstSuccess
