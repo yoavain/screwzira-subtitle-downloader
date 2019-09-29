@@ -43,7 +43,7 @@ const handleSingleFile = (fullpath: string, fileExists: boolean) => {
     // Check if already exists
     if (szClassifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
         szLogger.warn(`Hebrew subtitles already exist`);
-        szNotifier.notif(`Hebrew subtitles already exist`);
+        szNotifier.notif(`Hebrew subtitles already exist`, NotificationIcon.WARNING);
         return;
     }
 
@@ -60,7 +60,7 @@ const handleSingleFile = (fullpath: string, fileExists: boolean) => {
         screwziraUtils.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
     }
     else {
-        szNotifier.notif(`Unable to classify input file as movie or episode`);
+        szNotifier.notif(`Unable to classify input file as movie or episode`, NotificationIcon.FAILED);
     }
 };
 
