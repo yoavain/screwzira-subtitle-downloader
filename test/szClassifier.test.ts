@@ -56,4 +56,9 @@ describe("test classify", () => {
         const specialEditionMark: any = szClassifier.calculateSimilarityMark(["final", "cut"]);
         expect(specialEditionMark).toEqual(SPECIAL_EDITION_MARK);
     });
+    it("test special episode name (season 00)", () => {
+        const szClassifier: ISzClassifier = new SzClassifier(mockLogger, mockConfig);
+        const actual: any = szClassifier.classify("Stranger.Things.S00E01.1080p.WEB.x264-STRiFE", "");
+        expect(actual).toEqual({ type: "episode", series: "stranger things", season: 0, episode: 1 });
+    });
 });
