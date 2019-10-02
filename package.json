@@ -1,6 +1,6 @@
 {
   "name": "screwzira-downloader",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "",
   "main": "_build/index.js",
   "scripts": {
@@ -11,6 +11,8 @@
     "tsc": "tsc",
     "webpack": "webpack",
     "nexe": "nexe -t windows-x64-12.9.1 -o dist/screwzira-downloader.exe",
+    "check-csc": "ts-node -e \"require(\"\"./launcher/launcherCompiler\"\").checkCscInPath(true)\"",
+    "rebuild-launcher": "csc /t:winexe /out:resources/bin/screwzira-downloader-launcher.exe /win32icon:launcher/launcher.ico launcher/launcher.cs",
     "start": "ts-node src/index.ts",
     "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"../bin/nsis-3.04/makensis.exe\" screwzira.nsi && cd .."
   },
@@ -27,6 +29,7 @@
     "request"
   ],
   "devDependencies": {
+    "@types/cross-spawn": "^6.0.0",
     "@types/fs-extra": "^8.0.0",
     "@types/jest": "^24.0.18",
     "@types/node": "^12.7.8",
@@ -35,6 +38,8 @@
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^5.0.4",
     "cross-env": "^6.0.0",
+    "cross-spawn": "^7.0.0",
+    "husky": "^3.0.8",
     "jest": "^24.9.0",
     "nexe": "^3.3.2",
     "prettier": "^1.18.2",
@@ -45,5 +50,10 @@
     "typescript": "^3.6.3",
     "webpack": "^4.41.0",
     "webpack-cli": "^3.3.9"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "git diff HEAD --exit-code --stat launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/screwzira-downloader-launcher.exe"
+    }
   }
 }
