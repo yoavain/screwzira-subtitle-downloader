@@ -20,6 +20,16 @@ Var Mp4ProgID
 !define MUI_ICON "../resources/icons/sz_install.ico"
 !define MUI_UNICON "../resources/icons/sz_uninstall.ico"
 
+; MUI Settings / Header
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_RIGHT
+!define MUI_HEADERIMAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Header\orange-r-nsis.bmp"
+!define MUI_HEADERIMAGE_UNBITMAP "${NSISDIR}\Contrib\Graphics\Header\orange-uninstall-r-nsis.bmp"
+
+; MUI Settings / Wizard
+!define MUI_WELCOMEFINISHPAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Wizard\orange-nsis.bmp"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Wizard\orange-uninstall-nsis.bmp"
+
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
 ; Components page
