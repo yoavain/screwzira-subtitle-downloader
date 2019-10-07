@@ -66,7 +66,7 @@ Configuration json file is located under the %ProgramData%\Screwzira-Downloader 
 <details><summary>Log</summary>
 <p>
 Log file is located under the %ProgramData%\Screwzira-Downloader folder.<br>  
- * You can use it to find a reason for why subtitle that are available in the website, are not being downloaded<br> 
+ * You can use it to find a reason for why subtitles that are available in the website, are not being downloaded<br> 
 
 </p>
 </details>
