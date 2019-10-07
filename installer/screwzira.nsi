@@ -139,7 +139,7 @@ Section Uninstall
   Delete "$INSTDIR\screwzira-downloader.exe"
   Delete "$INSTDIR\screwzira-downloader-launcher.exe"
   Delete "$INSTDIR\snoretoast-x64.exe"
-  RMDir "$INSTDIR\notif-icons"
+  RMDir /r "$INSTDIR\notif-icons"
   RMDir "$INSTDIR"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
