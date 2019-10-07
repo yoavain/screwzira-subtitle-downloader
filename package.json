@@ -53,7 +53,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "git diff HEAD --exit-code --stat launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/screwzira-downloader-launcher.exe"
+      "pre-commit": "git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/screwzira-downloader-launcher.exe"
     }
   }
 }
