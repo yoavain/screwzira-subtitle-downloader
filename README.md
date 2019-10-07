@@ -1,13 +1,13 @@
 # ![](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/icons/sz-64.png) Screwzira Subtitle Downloader  <br>![types](https://img.shields.io/npm/types/typescript.svg) ![commit](https://img.shields.io/github/last-commit/yoavain/screwzira-subtitle-downloader.svg) [![Known Vulnerabilities](https://snyk.io//test/github/yoavain/screwzira-subtitle-downloader/badge.svg?targetFile=package.json)](https://snyk.io//test/github/yoavain/screwzira-subtitle-downloader?targetFile=package.json) ![dependabot](https://api.dependabot.com/badges/status?host=github&repo=yoavain/screwzira-subtitle-downloader)
 
-### A tool for downloading Hebrew subtitles from screwzira.com using their API.
+## A tool for downloading Hebrew subtitles from screwzira.com using their API.
 Installer adds right-click context to folders and to mkv/avi/mp4 file types.
 
 
-#### Usage: 
+### Usage: 
 ![sonarr configuration](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/screenshots/right-click-usage.gif)
 
-#### CLI:
+### CLI:
 Usage example:  
 ```
 screwzira-downloader.exe input <video-file-full-path>
@@ -34,7 +34,7 @@ screwzira-downloader.exe <video-file-full-path>
 
 ---
 
-#### Configuring sonarr:
+## Configuring sonarr:
 
 ![sonarr configuration](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/screenshots/sonarr-custom-script.png)
 
