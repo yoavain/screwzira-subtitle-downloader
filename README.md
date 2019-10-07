@@ -44,6 +44,25 @@ Arguments should be: sonarr quiet
 
 ---
 
+<details><summary>Advanced configuration</summary>
+<p>
+Configuration json file is located under the %ProgramData%\Screwzira-Downloader folder.<br>  
+ * You can change the log level<br>
+ * You can configure replacement pair (useful for series name mismatch)<br>
+ 
+ example:
+ ```json
+{
+	"logLevel": "verbose",
+	"replacePairs": {
+		"The Handmaids Tale": "The Handmaid's Tale"
+	}
+}
+
+```
+</p>
+</details>
+
 ## To build:
 
  * npm install
