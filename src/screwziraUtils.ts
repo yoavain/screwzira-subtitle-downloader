@@ -37,8 +37,8 @@ export class ScrewziraUtils implements IScrewziraUtils {
 
 
     public findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
-        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list && list.map(item => item.SubtitleName).join(', ')}]`);
-        if (list && list.length > 0) {
+        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list?.map(item => item.SubtitleName).join(', ')}]`);
+        if (list?.length > 0) {
             let maxCommonWords: ICommonWordsInSentenceResponse = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
             let maxIndex: number = 0;
             list.forEach((item, index) => {
