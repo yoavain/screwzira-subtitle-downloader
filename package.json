@@ -32,7 +32,7 @@
     "@types/cross-spawn": "^6.0.1",
     "@types/fs-extra": "^8.0.0",
     "@types/jest": "^24.0.18",
-    "@types/node": "^12.7.11",
+    "@types/node": "^12.7.12",
     "@types/node-notifier": "^5.4.0",
     "@types/request": "^2.48.3",
     "clean-webpack-plugin": "^3.0.0",
@@ -47,8 +47,8 @@
     "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.6.3",
-    "webpack": "^4.41.0",
+    "typescript": "^3.6.4",
+    "webpack": "^4.41.1",
     "webpack-cli": "^3.3.9"
   },
   "husky": {
