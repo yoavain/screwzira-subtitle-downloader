@@ -1,6 +1,6 @@
 {
   "name": "screwzira-downloader",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "",
   "main": "_build/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "test": "jest",
     "tsc": "tsc",
     "webpack": "webpack",
-    "nexe": "nexe -t windows-x64-12.9.1 -o dist/screwzira-downloader.exe",
+    "nexe": "nexe -t windows-x64-12.11.1 -o dist/screwzira-downloader.exe",
     "check-csc": "ts-node -e \"require(\"\"./launcher/launcherCompiler\"\").checkCscInPath(true)\"",
     "rebuild-launcher": "csc /t:winexe /out:resources/bin/screwzira-downloader-launcher.exe /win32icon:launcher/launcher.ico launcher/launcher.cs",
     "start": "ts-node src/index.ts",
