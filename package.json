@@ -1,6 +1,6 @@
 {
   "name": "screwzira-downloader",
-  "version": "2.3.3",
+  "version": "2.3.5",
   "description": "",
   "main": "_build/index.js",
   "scripts": {
