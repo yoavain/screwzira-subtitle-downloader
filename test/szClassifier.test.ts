@@ -61,4 +61,9 @@ describe("test classify", () => {
         const actual: any = szClassifier.classify("Stranger.Things.S00E01.1080p.WEB.x264-STRiFE", "");
         expect(actual).toEqual({ type: "episode", series: "stranger things", season: 0, episode: 1 });
     });
+    it("test lowercase episode name", () => {
+        const szClassifier: ISzClassifier = new SzClassifier(mockLogger, mockConfig);
+        const actual: any = szClassifier.classify("living.with.yourself.s01e01.internal.hdr.1080p.web.h265-paleale", "");
+        expect(actual).toEqual({ type: "episode", series: "living with yourself", season: 1, episode: 1 });
+    });
 });
