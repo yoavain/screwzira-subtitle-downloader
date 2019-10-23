@@ -119,7 +119,7 @@ export class SzClassifier implements ISzClassifier {
      */
     public classify = (filenameNoExtension: string, parentFolder: string): IMovieFileClassification | ITvEpisodeFileClassification => {
         const episodeMatch: RegExpExecArray = episodeRegex.exec(filenameNoExtension);
-        if (episodeMatch && episodeMatch.length > 2 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
+        if (episodeMatch?.length >= 3 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
             this.logger.verbose(`Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
                 type: "episode",
@@ -130,7 +130,7 @@ export class SzClassifier implements ISzClassifier {
         }
         else {
             const movieMatch: RegExpExecArray = movieRegex.exec(filenameNoExtension);
-            if (movieMatch && movieMatch.length > 1 && movieMatch[1] && movieMatch[2]) {
+            if (movieMatch?.length >= 2 && movieMatch[1] && movieMatch[2]) {
                 this.logger.verbose(`Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
                     type: "movie",
@@ -140,7 +140,7 @@ export class SzClassifier implements ISzClassifier {
             }
             else if (parentFolder) {
                 const movieMatchFromParent: RegExpExecArray = movieParentRegex.exec(parentFolder);
-                if (movieMatchFromParent && movieMatchFromParent.length > 1 && movieMatchFromParent[1] && movieMatchFromParent[2]) {
+                if (movieMatchFromParent?.length >= 2 && movieMatchFromParent[1] && movieMatchFromParent[2]) {
                     this.logger.verbose(`Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
                     return {
                         type: "movie",

@@ -51,11 +51,11 @@ const handleSingleFile = (fullpath: string, fileExists: boolean) => {
 
     szLogger.verbose(`Classification response: ${JSON.stringify(classification)}`);
 
-    if (classification && classification.type === "movie") {
+    if (classification?.type === "movie") {
         const movieFile: IMovieFileClassification = classification as IMovieFileClassification;
         screwziraUtils.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
     }
-    else if (classification && classification.type === "episode") {
+    else if (classification?.type === "episode") {
         const tvEpisode: ITvEpisodeFileClassification = classification as ITvEpisodeFileClassification;
         screwziraUtils.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
     }
@@ -75,7 +75,7 @@ const getWaitTimeMs = (): number => {
 
 const getFileExtension = (fullPath: string): string => {
     const ext: string = path.extname(fullPath);
-    return ext && ext.length > 1 && ext.startsWith(".") ? ext.substr(1) : undefined;
+    return ext?.length > 1 && ext.startsWith(".") ? ext.substr(1) : undefined;
 };
 
 const handleFolder = (dir: string) => {
@@ -106,7 +106,7 @@ szLogger.verbose(`Argv: ${process.argv.join(' ')}`);
 szLogger.verbose(`Sonar Mode: ${szArgsParser.isSonarrMode()}`);
 szLogger.verbose(`Quiet Mode: ${szArgsParser.isQuiet()}`);
 const input: string = szArgsParser.getInput();
-if (input && typeof input === "string") {
+if (typeof input === "string") {
     szLogger.info(`*** Looking for subtitle for "${input}" ***`);
     const fullpath: string = input.replace(/\\/g, "/");
     try {
