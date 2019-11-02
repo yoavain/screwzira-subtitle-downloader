@@ -5,7 +5,6 @@
   "main": "_build/index.js",
   "scripts": {
     "build": "npm run tslint && npm run tsc && npm run test && npm run webpack && npm run nexe && npm run installer",
-    "editorconfig": "editorconfig .",
     "tslint": "tslint src/**/*.ts",
     "tslint:fix": "npm run tslint -- --fix",
     "test": "jest --coverage",
@@ -40,7 +39,6 @@
     "copy-webpack-plugin": "^5.0.4",
     "cross-env": "^6.0.3",
     "cross-spawn": "^7.0.1",
-    "editorconfig": "^0.15.3",
     "husky": "^3.0.9",
     "jest": "^24.9.0",
     "nexe": "^3.3.2",
@@ -55,7 +53,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "echo \"Before editorconfig\" && npm run editorconfig && echo \"After editorconfig\" && git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/screwzira-downloader-launcher.exe"
+      "pre-commit": "git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/screwzira-downloader-launcher.exe"
     }
   }
 }
