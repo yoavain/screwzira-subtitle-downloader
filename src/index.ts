@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as fsextra from 'fs-extra';
 import * as path from 'path';
 import { IScrewziraUtils, ScrewziraUtils } from './screwziraUtils';
-import { ISzArgsParser, SzArgsParser } from "./szArgsParser";
+import { ISzArgsParser, SzArgsParser } from './szArgsParser';
 import { IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier } from './szClassifier';
 import { ISzConfig, SzConfig } from './szConfig';
 import { ISzLogger, SzLogger } from './szLogger';
@@ -34,10 +34,10 @@ const screwziraUtils: IScrewziraUtils = new ScrewziraUtils(szLogger, szNotifier,
 
 // handle single file
 const handleSingleFile = (fullpath: string, fileExists: boolean) => {
-    const relativePath: string = fullpath.substr(0, fullpath.lastIndexOf("/"));
+    const relativePath: string = fullpath.substr(0, fullpath.lastIndexOf('/'));
     const split: string[] = fullpath.split('/');
     const filename: string = split[split.length - 1];
-    const filenameNoExtension: string = filename.substr(0, filename.lastIndexOf("."));
+    const filenameNoExtension: string = filename.substr(0, filename.lastIndexOf('.'));
     const parentFolder: string = fileExists && split.length > 1 ? split[split.length - 2] : undefined;
 
     // Check if already exists
@@ -51,19 +51,16 @@ const handleSingleFile = (fullpath: string, fileExists: boolean) => {
 
     szLogger.verbose(`Classification response: ${JSON.stringify(classification)}`);
 
-    if (classification?.type === "movie") {
+    if (classification?.type === 'movie') {
         const movieFile: IMovieFileClassification = classification as IMovieFileClassification;
         screwziraUtils.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
-    }
-    else if (classification?.type === "episode") {
+    } else if (classification?.type === 'episode') {
         const tvEpisode: ITvEpisodeFileClassification = classification as ITvEpisodeFileClassification;
         screwziraUtils.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
-    }
-    else {
+    } else {
         szNotifier.notif(`Unable to classify input file as movie or episode`, NotificationIcon.FAILED);
     }
 };
-
 
 // Batch
 const batchInterval: number = 3000; // milliseconds
@@ -75,18 +72,17 @@ const getWaitTimeMs = (): number => {
 
 const getFileExtension = (fullPath: string): string => {
     const ext: string = path.extname(fullPath);
-    return ext?.length > 1 && ext.startsWith(".") ? ext.substr(1) : undefined;
+    return ext?.length > 1 && ext.startsWith('.') ? ext.substr(1) : undefined;
 };
 
 const handleFolder = (dir: string) => {
     let noFileHandled: boolean = true;
-    fs.readdirSync(dir).forEach(file => {
-        const fullPath: string = path.join(dir, file).replace(/\\/g, "/");
+    fs.readdirSync(dir).forEach((file) => {
+        const fullPath: string = path.join(dir, file).replace(/\\/g, '/');
         if (fs.lstatSync(fullPath).isDirectory()) {
             szLogger.verbose(`Handling sub-folder ${fullPath}`);
             handleFolder(fullPath);
-        }
-        else {
+        } else {
             if (szConfig.getExtensions().includes(getFileExtension(fullPath))) {
                 noFileHandled = true;
                 const waitTimeMs: number = getWaitTimeMs();
@@ -106,27 +102,24 @@ szLogger.verbose(`Argv: ${process.argv.join(' ')}`);
 szLogger.verbose(`Sonar Mode: ${szArgsParser.isSonarrMode()}`);
 szLogger.verbose(`Quiet Mode: ${szArgsParser.isQuiet()}`);
 const input: string = szArgsParser.getInput();
-if (typeof input === "string") {
+if (typeof input === 'string') {
     szLogger.info(`*** Looking for subtitle for "${input}" ***`);
-    const fullpath: string = input.replace(/\\/g, "/");
+    const fullpath: string = input.replace(/\\/g, '/');
     try {
         if (fs.lstatSync(fullpath).isDirectory()) {
-            handleFolder(fullpath)
-        }
-        else {
+            handleFolder(fullpath);
+        } else {
             handleSingleFile(fullpath, false);
         }
     } catch (e) {
-        if(e.code === 'ENOENT'){
+        if (e.code === 'ENOENT') {
             // no such file or directory - treat as file
             handleSingleFile(fullpath, false);
-        }
-        else {
+        } else {
             szLogger.error(`Cannot handle ${fullpath}`);
         }
     }
-}
-else {
+} else {
     szLogger.error('*** Missing input file ***');
     szNotifier.notif(`Missing input file`, NotificationIcon.FAILED);
     // tslint:disable-next-line:no-console

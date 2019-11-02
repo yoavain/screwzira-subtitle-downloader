@@ -1,6 +1,6 @@
 import * as winston from 'winston';
 
-const {combine, timestamp, printf, label} = winston.format;
+const { combine, timestamp, printf, label } = winston.format;
 
 export interface ISzLogger {
     // new(logFile: string): SzLogger;
@@ -18,14 +18,14 @@ export class SzLogger implements ISzLogger {
 
     constructor(logFile: string) {
         this.transports = {
-            file: new winston.transports.File({filename: logFile})
+            file: new winston.transports.File({ filename: logFile })
         };
         this.logger = winston.createLogger({
             level: 'debug',
             format: combine(
-                label({label: '[my-label]'}),
-                timestamp({format: 'YYYY-MM-DD HH:mm:ss.SSS'}),
-                printf(info => `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`)
+                label({ label: '[my-label]' }),
+                timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                printf((info) => `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`)
             ),
             transports: [this.transports.file]
         });
@@ -56,7 +56,6 @@ export class SzLogger implements ISzLogger {
     public error = (message: string) => {
         this.log('error', message);
     };
-
 
     private log = (level: string, message: string) => {
         this.logger.log(level, message);

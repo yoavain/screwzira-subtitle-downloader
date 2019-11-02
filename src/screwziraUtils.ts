@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as numeral from 'numeral';
+import numeral from 'numeral';
 import * as path from 'path';
 import request from 'request';
 import { ICommonWordsInSentenceResponse, ISzClassifier } from './szClassifier';
@@ -16,8 +16,8 @@ export interface IScrewziraUtils {
 }
 
 export interface IFindFilmResponse {
-    SubtitleName: string,
-    Identifier: string
+    SubtitleName: string;
+    Identifier: string;
 }
 
 export class ScrewziraUtils implements IScrewziraUtils {
@@ -35,9 +35,8 @@ export class ScrewziraUtils implements IScrewziraUtils {
         this.classifier = classifier;
     }
 
-
     public findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
-        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list?.map(item => item.SubtitleName).join(', ')}]`);
+        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list?.map((item) => item.SubtitleName).join(', ')}]`);
         if (list?.length > 0) {
             let maxCommonWords: ICommonWordsInSentenceResponse = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
             let maxIndex: number = 0;
@@ -52,13 +51,12 @@ export class ScrewziraUtils implements IScrewziraUtils {
             const bestMatch: IFindFilmResponse = list[maxIndex];
             this.logger.info(`filename:  "${filenameNoExtension}"`);
             this.logger.info(`best match: "${bestMatch.SubtitleName}"`);
-            this.logger.info(`common words: [\"${maxCommonWords.commonWords.join('\", \"')}\"]`);
+            this.logger.info(`common words: [\"${maxCommonWords.commonWords.join('", "')}\"]`);
             this.logger.info(`common words mark: ${numeral(maxCommonWords.mark).format('0.00')}`);
 
             return bestMatch.Identifier;
         }
     };
-
 
     public handleResponse = (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string) => {
         if (!error && response.statusCode === 200) {
@@ -66,13 +64,11 @@ export class ScrewziraUtils implements IScrewziraUtils {
             if (Array.isArray(results) && results.length) {
                 const subtitleID: string = this.findClosestMatch(filenameNoExtension, results, excludeList);
                 this.downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
-            }
-            else {
-                this.logger.info("No subtitle found");
+            } else {
+                this.logger.info('No subtitle found');
                 this.notifier.notif(`No subtitle found`, NotificationIcon.WARNING);
             }
-        }
-        else {
+        } else {
             this.logger.error(error);
             if (response) {
                 this.logger.error(JSON.stringify(response));
@@ -80,17 +76,17 @@ export class ScrewziraUtils implements IScrewziraUtils {
         }
     };
 
-    public handleMovie = (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) =>{
+    public handleMovie = (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) => {
         this.logger.info(`Handling Movie: "${movieName}" (${movieYear})`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindFilm`,
             method: 'POST',
-            headers: { "User-Agent": this.userAgent },
+            headers: { 'User-Agent': this.userAgent },
             json: {
                 request: {
                     SearchPhrase: movieName,
-                    SearchType: "FilmName",
-                    Version:"1.0",
+                    SearchType: 'FilmName',
+                    Version: '1.0',
                     Year: movieYear
                 }
             }
@@ -111,12 +107,12 @@ export class ScrewziraUtils implements IScrewziraUtils {
         const options: request.Options = {
             url: `${this.baseUrl}/FindSeries`,
             method: 'POST',
-            headers: { "User-Agent": this.userAgent },
+            headers: { 'User-Agent': this.userAgent },
             json: {
                 request: {
                     SearchPhrase: series,
-                    SearchType: "FilmName",
-                    Version:"1.0",
+                    SearchType: 'FilmName',
+                    Version: '1.0',
                     Season: season,
                     Episode: episode
                 }
@@ -137,7 +133,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
         const options: request.Options = {
             url: `${this.baseUrl}/Download`,
             method: 'POST',
-            headers: {"User-Agent": this.userAgent, "Accept": "*/*"},
+            headers: { 'User-Agent': this.userAgent, Accept: '*/*' },
             encoding: null,
             json: {
                 request: {
@@ -157,12 +153,11 @@ export class ScrewziraUtils implements IScrewziraUtils {
                     return;
                 }
 
-                const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
+                const destination: string = path.resolve(relativePath, filenameNoExtension + '.Hebrew.srt');
                 this.logger.verbose(`writing response to ${destination}`);
                 fs.writeFileSync(destination, body);
                 this.notifier.notif(`Successfully downloaded "${destination}"`, NotificationIcon.DOWNLOAD);
-            }
-            else {
+            } else {
                 this.logger.error(error);
                 this.notifier.notif(`Failed downloading subtitle`, NotificationIcon.FAILED);
             }
