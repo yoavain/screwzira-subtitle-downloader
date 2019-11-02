@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import * as numeral from 'numeral';
+import numeral from 'numeral';
 import * as path from 'path';
 import request from 'request';
 import { ICommonWordsInSentenceResponse, ISzClassifier } from './szClassifier';
@@ -67,7 +67,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
             }
             else {
                 this.logger.info('No subtitle found');
-                this.notifier.notif('No subtitle found', NotificationIcon.WARNING);
+                this.notifier.notif('No subtitle found', NotificationIcon.WARNING, true);
             }
         }
         else {
