@@ -4,20 +4,26 @@
 root = true
 
 [*]
-end_of_line = lf
+end_of_line = crlf
+
+[*.yml]
+charset = utf-8
+trim_trailing_whitespace = false
+
+[*.MD]
+charset = utf-8
+trim_trailing_whitespace = false
+
+[*.{js, ts}]
+charset = utf-8
 insert_final_newline = true
 indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
-spaces_around_operators = true
-indent_brace_style = Allman
-
-[*.{js, ts}]
-charset = utf-8
-indent_brace_style = Stroustrup
 
 [*.json]
 charset = utf-8
 indent_style = space
 indent_size = 2
-indent_brace_style = Stroustrup
+insert_final_newline = false
+trim_trailing_whitespace = true

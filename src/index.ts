@@ -132,5 +132,3 @@ else {
     // tslint:disable-next-line:no-console
     console.log(`Usage:${szArgsParser.getHelp()}`);
 }
-
-

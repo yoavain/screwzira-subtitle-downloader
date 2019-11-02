@@ -19,7 +19,7 @@ namespace MyProcessSample {
                     myProcess.StartInfo.Arguments = String.Join(" ", args);
 
                     // WorkingDirectory same as BaseDirectory
-					myProcess.StartInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    myProcess.StartInfo.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
                     // Stop the process from opening a new window
                     myProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
