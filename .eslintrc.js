@@ -22,13 +22,22 @@ module.exports = {
         '@typescript-eslint'
     ],
     'rules': {
+        // code
+        'max-params': ['warn', 3],
+        'max-depth': ['error', 3],
+        'max-statements-per-line': ['error', { 'max': 1 }],
+        'max-lines': ['error', { 'max': 250, 'skipBlankLines': true, 'skipComments': true }],
+        'max-lines-per-function': ['error', { 'max': 50, 'skipBlankLines': true, 'skipComments': true }],
+        '@typescript-eslint/ban-ts-ignore': ['warn'],
+        '@typescript-eslint/interface-name-prefix': [0, 'never'],
+
+        // Style
+        'max-len': [`error`, { 'code': 200 }],
         'indent': ['error', 4],
         'linebreak-style': ['error', 'windows'],
         'quotes': ['error', 'single'],
         'semi': ['error', 'always'],
         'brace-style': ['error', 'stroustrup'],
         'object-curly-spacing': ["error", "always"],
-        '@typescript-eslint/ban-ts-ignore': ['warn'],
-        '@typescript-eslint/interface-name-prefix': [0, 'never']
     }
 };
