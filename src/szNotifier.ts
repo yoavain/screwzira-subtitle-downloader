@@ -1,13 +1,13 @@
 import { NodeNotifier, WindowsToaster } from 'node-notifier';
-import * as path from "path";
+import * as path from 'path';
 import { ISzLogger } from './szLogger';
 
 export enum NotificationIcon {
-    LOGO = "sz-logo-300.png",
-    DOWNLOAD = "sz-download-300.png",
-    WARNING = "sz-warning-300.png",
-    NOT_FOUND = "sz-not-found-300.png",
-    FAILED = "sz-failed-300.png"
+    LOGO = 'sz-logo-300.png',
+    DOWNLOAD = 'sz-download-300.png',
+    WARNING = 'sz-warning-300.png',
+    NOT_FOUND = 'sz-not-found-300.png',
+    FAILED = 'sz-failed-300.png'
 }
 
 export interface ISzNotifier {
@@ -24,7 +24,7 @@ export class SzNotifier implements ISzNotifier {
         if (!quiet) {
             this.logger.debug(`snoreToastPath: ${snoreToastPath}`);
             // @ts-ignore
-            this.notifier = new WindowsToaster({withFallback: false, customPath: snoreToastPath});
+            this.notifier = new WindowsToaster({ withFallback: false, customPath: snoreToastPath });
         }
         else {
             this.logger.debug('Quiet Mode. Not initializing notifier');
@@ -32,12 +32,12 @@ export class SzNotifier implements ISzNotifier {
     }
 
     public notif = (message: string, notificationIcon: NotificationIcon = NotificationIcon.LOGO) => {
-        this.logger.verbose(`Looking for icon in: ${path.join("notif-icons", notificationIcon)}`);
+        this.logger.verbose(`Looking for icon in: ${path.join('notif-icons', notificationIcon)}`);
         if (this.notifier) {
             this.notifier.notify({
                 title: 'Screwzira Subtitle Downloader',
                 message,
-                icon: path.join("notif-icons", notificationIcon)
+                icon: path.join('notif-icons', notificationIcon)
             });
         }
         else {
