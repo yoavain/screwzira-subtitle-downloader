@@ -23,19 +23,11 @@ module.exports = {
     ],
     'rules': {
         'indent': ['error', 4],
-        'linebreak-style': [
-            'error',
-            'windows'
-        ],
-        'quotes': [
-            'error',
-            'single'
-        ],
-        'semi': [
-            'error',
-            'always'
-        ],
+        'linebreak-style': ['error', 'windows'],
+        'quotes': ['error', 'single'],
+        'semi': ['error', 'always'],
         'brace-style': ['error', 'stroustrup'],
+        'object-curly-spacing': ["error", "always"],
         '@typescript-eslint/ban-ts-ignore': ['warn'],
         '@typescript-eslint/interface-name-prefix': [0, 'never']
     }
