@@ -45,7 +45,7 @@ export class SzConfig implements ISzConfig {
         this.logger.debug(`LogLevel ${this.logLevel}`);
         this.extensions = conf?.extensions ?? defaultExtensions;
         this.replacePairs = conf?.replacePairs ? Object.freeze(JSON.parse(JSON.stringify(conf.replacePairs).toLowerCase())) : Object.freeze({});
-        this.logger.debug(`Replace pairs (${Object.keys(this.replacePairs).length}): ${Object.keys(this.replacePairs).map(pairKey => pairKey + ' => ' + this.replacePairs[pairKey]).join('; ')}`);
+        this.logger.debug(`Replace pairs (${Object.keys(this.replacePairs).length}): ${Object.keys(this.replacePairs).map((pairKey) => pairKey + ' => ' + this.replacePairs[pairKey]).join('; ')}`);
     }
 
     public replaceTitleIfNeeded = (text: string): string => {

@@ -37,7 +37,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
 
 
     public findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
-        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list?.map(item => item.SubtitleName).join(', ')}]`);
+        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list?.map((item) => item.SubtitleName).join(', ')}]`);
         if (list?.length > 0) {
             let maxCommonWords: ICommonWordsInSentenceResponse = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
             let maxIndex = 0;
@@ -80,7 +80,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
         }
     };
 
-    public handleMovie = (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) =>{
+    public handleMovie = (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) => {
         this.logger.info(`Handling Movie: "${movieName}" (${movieYear})`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindFilm`,

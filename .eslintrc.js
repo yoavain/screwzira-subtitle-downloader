@@ -30,6 +30,7 @@ module.exports = {
         'max-lines-per-function': ['error', { 'max': 50, 'skipBlankLines': true, 'skipComments': true }],
         '@typescript-eslint/ban-ts-ignore': ['warn'],
         '@typescript-eslint/interface-name-prefix': [0, 'never'],
+        'arrow-parens': ['error'],
 
         // Style
         'max-len': [`error`, { 'code': 200 }],
@@ -39,5 +40,9 @@ module.exports = {
         'semi': ['error', 'always'],
         'brace-style': ['error', 'stroustrup'],
         'object-curly-spacing': ["error", "always"],
+        "no-mixed-spaces-and-tabs": "error",
+        'arrow-spacing': ['error'],
+        'comma-dangle': ['error', 'never'],
+        'comma-style': ['error'],
     }
 };

@@ -80,7 +80,7 @@ const getFileExtension = (fullPath: string): string => {
 
 const handleFolder = (dir: string) => {
     let noFileHandled = true;
-    fs.readdirSync(dir).forEach(file => {
+    fs.readdirSync(dir).forEach((file) => {
         const fullPath: string = path.join(dir, file).replace(/\\/g, '/');
         if (fs.lstatSync(fullPath).isDirectory()) {
             szLogger.verbose(`Handling sub-folder ${fullPath}`);

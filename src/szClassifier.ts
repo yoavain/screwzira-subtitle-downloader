@@ -96,7 +96,7 @@ export class SzClassifier implements ISzClassifier {
         const split1: string[] = this.splitText(this.cleanText(s1));
         const split2: string[] = this.splitText(this.cleanText(s2));
 
-        const commonWords: string[]= split1.filter(word1 => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
+        const commonWords: string[] = split1.filter((word1) => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
         const mark: number = this.calculateSimilarityMark(commonWords);
         this.logger.debug(`"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join('#')}] with total mark: ${mark}`);
         return { commonWords, mark } ;
