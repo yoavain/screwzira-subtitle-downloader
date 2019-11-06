@@ -60,7 +60,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
     };
 
 
-    public handleResponse = (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string) => {
+    public handleResponse = (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string): void => {
         if (!error && response.statusCode === 200) {
             const results: IFindFilmResponse[] = body && JSON.parse(body).Results;
             if (Array.isArray(results) && results.length) {
@@ -106,7 +106,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
         });
     };
 
-    public handleEpisode = (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) => {
+    public handleEpisode = (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string): void => {
         this.logger.info(`Handling Series "${series}" Season ${season} Episode ${episode}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindSeries`,
@@ -132,7 +132,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
         });
     };
 
-    public downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string) => {
+    public downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string): void => {
         this.logger.info(`Downloading: ${subtitleID}`);
         const options: request.Options = {
             url: `${this.baseUrl}/Download`,

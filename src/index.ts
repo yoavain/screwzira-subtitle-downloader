@@ -33,7 +33,7 @@ const szClassifier: ISzClassifier = new SzClassifier(szLogger, szConfig);
 const screwziraUtils: IScrewziraUtils = new ScrewziraUtils(szLogger, szNotifier, szClassifier);
 
 // handle single file
-const handleSingleFile = (fullpath: string, fileExists: boolean) => {
+const handleSingleFile = (fullpath: string, fileExists: boolean): void => {
     const relativePath: string = fullpath.substr(0, fullpath.lastIndexOf('/'));
     const split: string[] = fullpath.split('/');
     const filename: string = split[split.length - 1];
@@ -78,7 +78,7 @@ const getFileExtension = (fullPath: string): string => {
     return ext?.length > 1 && ext.startsWith('.') ? ext.substr(1) : undefined;
 };
 
-const handleFolder = (dir: string) => {
+const handleFolder = (dir: string): void => {
     let noFileHandled = true;
     fs.readdirSync(dir).forEach((file) => {
         const fullPath: string = path.join(dir, file).replace(/\\/g, '/');
@@ -88,7 +88,7 @@ const handleFolder = (dir: string) => {
         }
         else {
             if (szConfig.getExtensions().includes(getFileExtension(fullPath))) {
-                noFileHandled = true;
+                noFileHandled = false;
                 const waitTimeMs: number = getWaitTimeMs();
                 szLogger.verbose(`Waiting ${waitTimeMs}ms to handle file ${fullPath}`);
                 setTimeout(handleSingleFile, waitTimeMs, fullPath, true);

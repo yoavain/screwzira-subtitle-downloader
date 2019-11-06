@@ -31,34 +31,34 @@ export class SzLogger implements ISzLogger {
         });
     }
 
-    public setLogLevel = (level: string) => {
+    public setLogLevel = (level: string): void => {
         if (level) {
             this.transports.file.level = level;
         }
     };
 
-    public info = (message: string) => {
+    public info = (message: string): void => {
         this.log('info', message);
     };
 
-    public debug = (message: string) => {
+    public debug = (message: string): void => {
         this.log('debug', message);
     };
 
-    public verbose = (message: string) => {
+    public verbose = (message: string): void => {
         this.log('verbose', message);
     };
 
-    public warn = (message: string) => {
+    public warn = (message: string): void => {
         this.log('warn', message);
     };
 
-    public error = (message: string) => {
+    public error = (message: string): void => {
         this.log('error', message);
     };
 
 
-    private log = (level: string, message: string) => {
+    private log = (level: string, message: string): void => {
         this.logger.log(level, message);
     };
 }

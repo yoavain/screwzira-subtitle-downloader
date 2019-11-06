@@ -31,7 +31,7 @@ export class SzNotifier implements ISzNotifier {
         }
     }
 
-    public notif = (message: string, notificationIcon: NotificationIcon = NotificationIcon.LOGO) => {
+    public notif = (message: string, notificationIcon: NotificationIcon = NotificationIcon.LOGO): void => {
         this.logger.verbose(`Looking for icon in: ${path.join('notif-icons', notificationIcon)}`);
         if (this.notifier) {
             this.notifier.notify({
