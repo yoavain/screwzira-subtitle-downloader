@@ -19,26 +19,25 @@ export const DIMENSION_MARK = 0.8;
 export const AUDIO_MARK = 0.5;
 export const COMMON_WORDS_MARK = 0.1;
 const WORD_WEIGHTS: IWordWeight = {
-    'theatrical': SPECIAL_EDITION_MARK,
-    'final': SPECIAL_EDITION_MARK / 2,
-    'cut': SPECIAL_EDITION_MARK / 2,
-    'bluray': RIP_MARK,
-    'hddvd': RIP_MARK,
-    'webrip': RIP_MARK,
-    'hdtv': RIP_MARK,
-    'web': RIP_MARK / 2,
-    'dl': RIP_MARK / 2,
-    'x264': ENCODING_MARK,
-    'x265': ENCODING_MARK,
+    theatrical: SPECIAL_EDITION_MARK,
+    final: SPECIAL_EDITION_MARK / 2,
+    cut: SPECIAL_EDITION_MARK / 2,
+    bluray: RIP_MARK,
+    hddvd: RIP_MARK,
+    webrip: RIP_MARK,
+    hdtv: RIP_MARK,
+    web: RIP_MARK / 2,
+    dl: RIP_MARK / 2,
+    x264: ENCODING_MARK,
+    x265: ENCODING_MARK,
     '1080p': DIMENSION_MARK,
     '720p': DIMENSION_MARK,
     '5.1': AUDIO_MARK,
-    'dts': AUDIO_MARK,
-    'dd5': AUDIO_MARK,
-    'ac3': AUDIO_MARK,
-    'the': COMMON_WORDS_MARK
+    dts: AUDIO_MARK,
+    dd5: AUDIO_MARK,
+    ac3: AUDIO_MARK,
+    the: COMMON_WORDS_MARK
 };
-
 
 interface IFileClassification {
     type: string;
@@ -80,7 +79,10 @@ export class SzClassifier implements ISzClassifier {
     }
 
     public cleanText = (text: string): string => {
-        return text.toLowerCase().replace(/[.|-]/g, ' ').trim();
+        return text
+            .toLowerCase()
+            .replace(/[.|-]/g, ' ')
+            .trim();
     };
 
     public splitText = (text: string): string[] => {
@@ -99,11 +101,11 @@ export class SzClassifier implements ISzClassifier {
         const commonWords: string[] = split1.filter((word1) => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
         const mark: number = this.calculateSimilarityMark(commonWords);
         this.logger.debug(`"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join('#')}] with total mark: ${mark}`);
-        return { commonWords, mark } ;
+        return { commonWords, mark };
     };
 
     public calculateSimilarityMark = (words: string[]): number => {
-        return  words.reduce((acc, word) => {
+        return words.reduce((acc, word) => {
             acc += WORD_WEIGHTS[word] !== undefined ? WORD_WEIGHTS[word] : Math.min(5, word.length) / 5;
             return acc;
         }, 0);

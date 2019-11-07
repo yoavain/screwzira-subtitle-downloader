@@ -35,7 +35,6 @@ export class ScrewziraUtils implements IScrewziraUtils {
         this.classifier = classifier;
     }
 
-
     public findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
         this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list?.map((item) => item.SubtitleName).join(', ')}]`);
         if (list?.length > 0) {
@@ -58,7 +57,6 @@ export class ScrewziraUtils implements IScrewziraUtils {
             return bestMatch.Identifier;
         }
     };
-
 
     public handleResponse = (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string): void => {
         if (!error && response.statusCode === 200) {
@@ -137,7 +135,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
         const options: request.Options = {
             url: `${this.baseUrl}/Download`,
             method: 'POST',
-            headers: { 'User-Agent': this.userAgent, 'Accept': '*/*' },
+            headers: { 'User-Agent': this.userAgent, Accept: '*/*' },
             encoding: null,
             json: {
                 request: {

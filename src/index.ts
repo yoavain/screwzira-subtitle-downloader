@@ -64,7 +64,6 @@ const handleSingleFile = (fullpath: string, fileExists: boolean): void => {
     }
 };
 
-
 // Batch
 const batchInterval = 3000; // milliseconds
 let batchCounter = 0;

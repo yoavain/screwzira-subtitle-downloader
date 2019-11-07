@@ -5,8 +5,8 @@
   "main": "_build/index.js",
   "scripts": {
     "build": "npm run eslint && npm run tsc && npm run test && npm run webpack && npm run nexe && npm run installer",
-    "eslint": "eslint src/**/*.ts",
-    "eslint:fix": "npm run eslint -- --fix",
+    "eslint:fix": "npm run eslint",
+    "prettier-eslint": "prettier-eslint --write src/**/*.ts",
     "test": "jest --coverage",
     "tsc": "tsc",
     "webpack": "webpack",
@@ -46,6 +46,7 @@
     "jest": "^24.9.0",
     "nexe": "^3.3.2",
     "prettier": "^1.18.2",
+    "prettier-eslint-cli": "^5.0.0",
     "ts-jest": "^24.1.0",
     "ts-node": "^8.4.1",
     "typescript": "3.7.2",

@@ -56,8 +56,7 @@ export class SzArgsParser implements ISzArgsParser {
         return `\nOptions:\n\t${INPUT}\tinput file\n\t${SONARR}\tsonnar mode (input is taken from ENV VAR ${SONARR_EPISODE_FILE_PATH})\n\t${QUIET}\tquiet mode (no notifications)\n`;
     };
 
-
     private getSonarrEpisodePathEnvVar = (): string => {
         return process.env[SONARR_EPISODE_FILE_PATH];
-    }
+    };
 }

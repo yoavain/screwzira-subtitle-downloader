@@ -57,7 +57,6 @@ export class SzLogger implements ISzLogger {
         this.log('error', message);
     };
 
-
     private log = (level: string, message: string): void => {
         this.logger.log(level, message);
     };
