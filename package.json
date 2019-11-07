@@ -4,8 +4,7 @@
   "description": "",
   "main": "_build/index.js",
   "scripts": {
-    "build": "npm run eslint && npm run tsc && npm run test && npm run webpack && npm run nexe && npm run installer",
-    "eslint:fix": "npm run eslint",
+    "build": "npm run prettier-eslint && npm run tsc && npm run test && npm run webpack && npm run nexe && npm run installer",
     "prettier-eslint": "prettier-eslint --write src/**/*.ts",
     "test": "jest --coverage",
     "tsc": "tsc",
