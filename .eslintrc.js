@@ -31,7 +31,7 @@ module.exports = {
         '@typescript-eslint/ban-ts-ignore': ['warn'],
         '@typescript-eslint/interface-name-prefix': [0, 'never'],
         'arrow-parens': ['error'],
-        'quote-props': ["error", "consistent", { "numbers": true }],
+        'quote-props': ["error", "consistent-as-needed", { "numbers": true }],
 
         // Style
         'max-len': [`error`, { 'code': 200 }],
