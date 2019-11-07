@@ -135,7 +135,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
         const options: request.Options = {
             url: `${this.baseUrl}/Download`,
             method: 'POST',
-            headers: { 'User-Agent': this.userAgent, Accept: '*/*' },
+            headers: { 'User-Agent': this.userAgent, 'Accept': '*/*' },
             encoding: null,
             json: {
                 request: {

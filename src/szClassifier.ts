@@ -19,24 +19,24 @@ export const DIMENSION_MARK = 0.8;
 export const AUDIO_MARK = 0.5;
 export const COMMON_WORDS_MARK = 0.1;
 const WORD_WEIGHTS: IWordWeight = {
-    theatrical: SPECIAL_EDITION_MARK,
-    final: SPECIAL_EDITION_MARK / 2,
-    cut: SPECIAL_EDITION_MARK / 2,
-    bluray: RIP_MARK,
-    hddvd: RIP_MARK,
-    webrip: RIP_MARK,
-    hdtv: RIP_MARK,
-    web: RIP_MARK / 2,
-    dl: RIP_MARK / 2,
-    x264: ENCODING_MARK,
-    x265: ENCODING_MARK,
+    'theatrical': SPECIAL_EDITION_MARK,
+    'final': SPECIAL_EDITION_MARK / 2,
+    'cut': SPECIAL_EDITION_MARK / 2,
+    'bluray': RIP_MARK,
+    'hddvd': RIP_MARK,
+    'webrip': RIP_MARK,
+    'hdtv': RIP_MARK,
+    'web': RIP_MARK / 2,
+    'dl': RIP_MARK / 2,
+    'x264': ENCODING_MARK,
+    'x265': ENCODING_MARK,
     '1080p': DIMENSION_MARK,
     '720p': DIMENSION_MARK,
     '5.1': AUDIO_MARK,
-    dts: AUDIO_MARK,
-    dd5: AUDIO_MARK,
-    ac3: AUDIO_MARK,
-    the: COMMON_WORDS_MARK
+    'dts': AUDIO_MARK,
+    'dd5': AUDIO_MARK,
+    'ac3': AUDIO_MARK,
+    'the': COMMON_WORDS_MARK
 };
 
 interface IFileClassification {
