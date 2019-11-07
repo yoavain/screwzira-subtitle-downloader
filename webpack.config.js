@@ -4,7 +4,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-    mode: "production",
+    mode: 'production',
     entry: './_compile/index.js',
     target: 'node',
     node: {
@@ -31,7 +31,7 @@ module.exports = {
             },
             {
                 from: 'resources/notif-icons/',
-                to: '../dist/notif-icons/',
+                to: '../dist/notif-icons/'
             }
         ])
     ],

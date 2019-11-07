@@ -59,10 +59,6 @@
     }
   },
   "lint-staged": {
-    "*.ts": "npm run prettier-eslint",
-    "*.json": [
-      "prettier --write",
-      "git add"
-    ]
+    "*.(ts|js)": "npm run prettier-eslint"
   }
 }
