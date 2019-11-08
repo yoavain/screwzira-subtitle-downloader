@@ -9,10 +9,10 @@ import { ISzNotifier, NotificationIcon } from './szNotifier';
 export interface IScrewziraUtils {
     // new(logger: ISzLogger, notifier: ISzNotifier, classifier: ISzClassifier): ScrewziraUtils;
     findClosestMatch: (filenameNoExtension: string, list, excludeList: string[]) => string;
-    handleResponse: (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string) => void;
+    handleResponse: (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string, contextMessage: string) => void;
     handleMovie: (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) => void;
     handleEpisode: (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) => void;
-    downloadBestMatch: (subtitleID: string, filenameNoExtension: string, relativePath: string) => void;
+    downloadBestMatch: (subtitleID: string, filenameNoExtension: string, relativePath: string, contextMessage: string) => void;
 }
 
 export interface IFindFilmResponse {
@@ -58,16 +58,16 @@ export class ScrewziraUtils implements IScrewziraUtils {
         }
     };
 
-    public handleResponse = (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string): void => {
+    public handleResponse = (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string, contextMessage: string): void => {
         if (!error && response.statusCode === 200) {
             const results: IFindFilmResponse[] = body && JSON.parse(body).Results;
             if (Array.isArray(results) && results.length) {
                 const subtitleID: string = this.findClosestMatch(filenameNoExtension, results, excludeList);
-                this.downloadBestMatch(subtitleID, filenameNoExtension, relativePath);
+                this.downloadBestMatch(subtitleID, filenameNoExtension, relativePath, contextMessage);
             }
             else {
                 this.logger.info('No subtitle found');
-                this.notifier.notif('No subtitle found', NotificationIcon.WARNING, true);
+                this.notifier.notif(`No subtitle found for ${contextMessage}`, NotificationIcon.WARNING, true);
             }
         }
         else {
@@ -79,7 +79,8 @@ export class ScrewziraUtils implements IScrewziraUtils {
     };
 
     public handleMovie = (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) => {
-        this.logger.info(`Handling Movie: "${movieName}" (${movieYear})`);
+        const contextMessage: string = `Movie: "${this.toTitleCase(movieName)}" (${movieYear})`;
+        this.logger.info(`Handling ${contextMessage}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindFilm`,
             method: 'POST',
@@ -100,12 +101,13 @@ export class ScrewziraUtils implements IScrewziraUtils {
         this.logger.debug(`Handle movie request options: ${JSON.stringify(options)}`);
 
         request(options, (error, response, body) => {
-            this.handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath);
+            this.handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath, contextMessage);
         });
     };
 
     public handleEpisode = (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string): void => {
-        this.logger.info(`Handling Series "${series}" Season ${season} Episode ${episode}`);
+        const contextMessage: string = `Series "${this.toTitleCase(series)}" Season ${season} Episode ${episode}`;
+        this.logger.info(`Handling ${contextMessage}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindSeries`,
             method: 'POST',
@@ -126,11 +128,11 @@ export class ScrewziraUtils implements IScrewziraUtils {
         this.logger.debug(`Handle episode request options: ${JSON.stringify(options)}`);
 
         request(options, (error, response, body) => {
-            this.handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath);
+            this.handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath, contextMessage);
         });
     };
 
-    public downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string): void => {
+    public downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string, contextMessage: string): void => {
         this.logger.info(`Downloading: ${subtitleID}`);
         const options: request.Options = {
             url: `${this.baseUrl}/Download`,
@@ -151,19 +153,23 @@ export class ScrewziraUtils implements IScrewziraUtils {
                 // Check if already exists
                 if (this.classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
                     this.logger.warn('Hebrew subtitles already exist');
-                    this.notifier.notif('Hebrew subtitles already exist', NotificationIcon.WARNING);
+                    this.notifier.notif(`Hebrew subtitles already exist for ${contextMessage}`, NotificationIcon.WARNING);
                     return;
                 }
 
                 const destination: string = path.resolve(relativePath, filenameNoExtension + '.Hebrew.srt');
                 this.logger.verbose(`writing response to ${destination}`);
                 fs.writeFileSync(destination, body);
-                this.notifier.notif(`Successfully downloaded "${destination}"`, NotificationIcon.DOWNLOAD);
+                this.notifier.notif(`Successfully downloaded Subtitles for ${contextMessage}`, NotificationIcon.DOWNLOAD);
             }
             else {
                 this.logger.error(error);
-                this.notifier.notif('Failed downloading subtitle', NotificationIcon.FAILED);
+                this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationIcon.FAILED);
             }
         });
     };
+
+    toTitleCase = (str: string): string => {
+        return str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+    }
 }
