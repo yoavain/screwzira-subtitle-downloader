@@ -79,7 +79,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
     };
 
     public handleMovie = (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) => {
-        const contextMessage: string = `Movie: "${this.toTitleCase(movieName)}" (${movieYear})`;
+        const contextMessage = `Movie: "${this.toTitleCase(movieName)}" (${movieYear})`;
         this.logger.info(`Handling ${contextMessage}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindFilm`,
@@ -106,7 +106,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
     };
 
     public handleEpisode = (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string): void => {
-        const contextMessage: string = `Series "${this.toTitleCase(series)}" Season ${season} Episode ${episode}`;
+        const contextMessage = `Series "${this.toTitleCase(series)}" Season ${season} Episode ${episode}`;
         this.logger.info(`Handling ${contextMessage}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindSeries`,
@@ -170,6 +170,6 @@ export class ScrewziraUtils implements IScrewziraUtils {
     };
 
     toTitleCase = (str: string): string => {
-        return str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-    }
+        return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+    };
 }
