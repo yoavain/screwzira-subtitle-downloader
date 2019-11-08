@@ -51,7 +51,7 @@ export class SzNotifier implements ISzNotifier {
             this.notifier.notify(notification);
             this.notifier.on('log', () => {
                 const file = path.join(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader.log');
-                execFile(file, { shell: 'cmd' });
+                execFile(file, { shell: 'powershell' });
             });
         }
         else {
