@@ -1,4 +1,4 @@
-import * as path from "path";
+import * as path from 'path';
 
 const SONARR = 'sonarr';
 const INPUT = 'input';
@@ -19,7 +19,7 @@ export class SzArgsParser implements ISzArgsParser {
     private readonly snoreToastPath: string;
 
     constructor(argv: string[]) {
-        if (argv.length >= 2 && (argv[argv.length - 2].endsWith(".exe") || argv[argv.length - 2].endsWith(".js")) && ![SONARR, INPUT, QUIET].includes(argv[argv.length - 1])) {
+        if (argv.length >= 2 && (argv[argv.length - 2].endsWith('.exe') || argv[argv.length - 2].endsWith('.js')) && ![SONARR, INPUT, QUIET].includes(argv[argv.length - 1])) {
             this.input = argv[argv.length - 1];
         }
         else {
@@ -33,7 +33,7 @@ export class SzArgsParser implements ISzArgsParser {
             }
             this.quiet = argv.indexOf(QUIET) >= 0;
         }
-        this.snoreToastPath = argv[0].endsWith("screwzira-downloader.exe") ? path.join(argv[0], "../", "snoretoast-x64.exe") : null;
+        this.snoreToastPath = argv[0].endsWith('screwzira-downloader.exe') ? path.join(argv[0], '../', 'snoretoast-x64.exe') : null;
     }
 
     public isSonarrMode(): boolean {
@@ -56,8 +56,7 @@ export class SzArgsParser implements ISzArgsParser {
         return `\nOptions:\n\t${INPUT}\tinput file\n\t${SONARR}\tsonnar mode (input is taken from ENV VAR ${SONARR_EPISODE_FILE_PATH})\n\t${QUIET}\tquiet mode (no notifications)\n`;
     };
 
-
     private getSonarrEpisodePathEnvVar = (): string => {
         return process.env[SONARR_EPISODE_FILE_PATH];
-    }
+    };
 }

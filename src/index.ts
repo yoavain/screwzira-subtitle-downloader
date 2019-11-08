@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as fsextra from 'fs-extra';
 import * as path from 'path';
 import { IScrewziraUtils, ScrewziraUtils } from './screwziraUtils';
-import { ISzArgsParser, SzArgsParser } from "./szArgsParser";
+import { ISzArgsParser, SzArgsParser } from './szArgsParser';
 import { IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier } from './szClassifier';
 import { ISzConfig, SzConfig } from './szConfig';
 import { ISzLogger, SzLogger } from './szLogger';
@@ -33,17 +33,17 @@ const szClassifier: ISzClassifier = new SzClassifier(szLogger, szConfig);
 const screwziraUtils: IScrewziraUtils = new ScrewziraUtils(szLogger, szNotifier, szClassifier);
 
 // handle single file
-const handleSingleFile = (fullpath: string, fileExists: boolean) => {
-    const relativePath: string = fullpath.substr(0, fullpath.lastIndexOf("/"));
+const handleSingleFile = (fullpath: string, fileExists: boolean): void => {
+    const relativePath: string = fullpath.substr(0, fullpath.lastIndexOf('/'));
     const split: string[] = fullpath.split('/');
     const filename: string = split[split.length - 1];
-    const filenameNoExtension: string = filename.substr(0, filename.lastIndexOf("."));
+    const filenameNoExtension: string = filename.substr(0, filename.lastIndexOf('.'));
     const parentFolder: string = fileExists && split.length > 1 ? split[split.length - 2] : undefined;
 
     // Check if already exists
     if (szClassifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
-        szLogger.warn(`Hebrew subtitles already exist`);
-        szNotifier.notif(`Hebrew subtitles already exist`, NotificationIcon.WARNING);
+        szLogger.warn('Hebrew subtitles already exist');
+        szNotifier.notif('Hebrew subtitles already exist', NotificationIcon.WARNING);
         return;
     }
 
@@ -51,23 +51,22 @@ const handleSingleFile = (fullpath: string, fileExists: boolean) => {
 
     szLogger.verbose(`Classification response: ${JSON.stringify(classification)}`);
 
-    if (classification?.type === "movie") {
+    if (classification?.type === 'movie') {
         const movieFile: IMovieFileClassification = classification as IMovieFileClassification;
         screwziraUtils.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
     }
-    else if (classification?.type === "episode") {
+    else if (classification?.type === 'episode') {
         const tvEpisode: ITvEpisodeFileClassification = classification as ITvEpisodeFileClassification;
         screwziraUtils.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
     }
     else {
-        szNotifier.notif(`Unable to classify input file as movie or episode`, NotificationIcon.FAILED);
+        szNotifier.notif('Unable to classify input file as movie or episode', NotificationIcon.FAILED);
     }
 };
 
-
 // Batch
-const batchInterval: number = 3000; // milliseconds
-let batchCounter: number = 0;
+const batchInterval = 3000; // milliseconds
+let batchCounter = 0;
 const getWaitTimeMs = (): number => {
     batchCounter += 1;
     return batchCounter * batchInterval;
@@ -75,20 +74,20 @@ const getWaitTimeMs = (): number => {
 
 const getFileExtension = (fullPath: string): string => {
     const ext: string = path.extname(fullPath);
-    return ext?.length > 1 && ext.startsWith(".") ? ext.substr(1) : undefined;
+    return ext?.length > 1 && ext.startsWith('.') ? ext.substr(1) : undefined;
 };
 
-const handleFolder = (dir: string) => {
-    let noFileHandled: boolean = true;
-    fs.readdirSync(dir).forEach(file => {
-        const fullPath: string = path.join(dir, file).replace(/\\/g, "/");
+const handleFolder = (dir: string): void => {
+    let noFileHandled = true;
+    fs.readdirSync(dir).forEach((file) => {
+        const fullPath: string = path.join(dir, file).replace(/\\/g, '/');
         if (fs.lstatSync(fullPath).isDirectory()) {
             szLogger.verbose(`Handling sub-folder ${fullPath}`);
             handleFolder(fullPath);
         }
         else {
             if (szConfig.getExtensions().includes(getFileExtension(fullPath))) {
-                noFileHandled = true;
+                noFileHandled = false;
                 const waitTimeMs: number = getWaitTimeMs();
                 szLogger.verbose(`Waiting ${waitTimeMs}ms to handle file ${fullPath}`);
                 setTimeout(handleSingleFile, waitTimeMs, fullPath, true);
@@ -96,8 +95,8 @@ const handleFolder = (dir: string) => {
         }
     });
     if (noFileHandled) {
-        szLogger.warn(`No file handled`);
-        szNotifier.notif(`No file handled`, NotificationIcon.WARNING);
+        szLogger.warn('No file handled');
+        szNotifier.notif('No file handled', NotificationIcon.WARNING);
     }
 };
 
@@ -106,18 +105,19 @@ szLogger.verbose(`Argv: ${process.argv.join(' ')}`);
 szLogger.verbose(`Sonar Mode: ${szArgsParser.isSonarrMode()}`);
 szLogger.verbose(`Quiet Mode: ${szArgsParser.isQuiet()}`);
 const input: string = szArgsParser.getInput();
-if (typeof input === "string") {
+if (typeof input === 'string') {
     szLogger.info(`*** Looking for subtitle for "${input}" ***`);
-    const fullpath: string = input.replace(/\\/g, "/");
+    const fullpath: string = input.replace(/\\/g, '/');
     try {
         if (fs.lstatSync(fullpath).isDirectory()) {
-            handleFolder(fullpath)
+            handleFolder(fullpath);
         }
         else {
             handleSingleFile(fullpath, false);
         }
-    } catch (e) {
-        if(e.code === 'ENOENT'){
+    }
+    catch (e) {
+        if (e.code === 'ENOENT') {
             // no such file or directory - treat as file
             handleSingleFile(fullpath, false);
         }
@@ -128,7 +128,7 @@ if (typeof input === "string") {
 }
 else {
     szLogger.error('*** Missing input file ***');
-    szNotifier.notif(`Missing input file`, NotificationIcon.FAILED);
+    szNotifier.notif('Missing input file', NotificationIcon.FAILED);
     // tslint:disable-next-line:no-console
     console.log(`Usage:${szArgsParser.getHelp()}`);
 }

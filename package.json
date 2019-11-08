@@ -1,59 +1,66 @@
 {
-  "name": "screwzira-downloader",
-  "version": "2.4.2",
-  "description": "",
-  "main": "_build/index.js",
-  "scripts": {
-    "build": "npm run tslint && npm run tsc && npm run test && npm run webpack && npm run nexe && npm run installer",
-    "tslint": "tslint src/**/*.ts",
-    "tslint:fix": "npm run tslint -- --fix",
-    "test": "jest --coverage",
-    "tsc": "tsc",
-    "webpack": "webpack",
-    "nexe": "nexe -t windows-x64-12.13.0 -o dist/screwzira-downloader.exe",
-    "check-csc": "ts-node -e \"require(\"\"./launcher/launcherCompiler\"\").checkCscInPath(true)\"",
-    "rebuild-launcher": "csc /t:winexe /out:resources/bin/screwzira-downloader-launcher.exe /win32icon:launcher/launcher.ico launcher/launcher.cs",
-    "start": "ts-node src/index.ts",
-    "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"../bin/nsis-3.04/makensis.exe\" screwzira.nsi && cd .."
-  },
-  "author": "yoavain",
-  "license": "ISC",
-  "dependencies": {
-    "fs-extra": "^8.1.0",
-    "node-notifier": "^6.0.0",
-    "numeral": "^2.0.6",
-    "request": "^2.88.0",
-    "winston": "^3.2.1"
-  },
-  "bundledDependencies": [
-    "request"
-  ],
-  "devDependencies": {
-    "@types/cross-spawn": "^6.0.1",
-    "@types/fs-extra": "^8.0.1",
-    "@types/jest": "^24.0.19",
-    "@types/node": "^12.11.7",
-    "@types/node-notifier": "^5.4.0",
-    "@types/request": "^2.48.3",
-    "clean-webpack-plugin": "^3.0.0",
-    "copy-webpack-plugin": "^5.0.4",
-    "cross-env": "^6.0.3",
-    "cross-spawn": "^7.0.1",
-    "husky": "^3.0.9",
-    "jest": "^24.9.0",
-    "nexe": "^3.3.2",
-    "prettier": "^1.18.2",
-    "ts-jest": "^24.1.0",
-    "ts-node": "^8.4.1",
-    "tslint": "^5.20.0",
-    "tslint-config-prettier": "^1.18.0",
-    "typescript": "3.7.0-beta",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/screwzira-downloader-launcher.exe"
+    "name": "screwzira-downloader",
+    "version": "2.5.0",
+    "description": "",
+    "main": "_build/index.js",
+    "scripts": {
+        "build": "npm run prettier-eslint && npm run tsc && npm run test && npm run webpack && npm run nexe && npm run installer",
+        "prettier-eslint": "prettier-eslint --write src/**/*.ts",
+        "prettier": "prettier --write *.json .eslintrc.js .prettierrc tsconfig.json webpack.config.js",
+        "test": "jest --coverage",
+        "tsc": "tsc",
+        "webpack": "webpack",
+        "nexe": "nexe -t windows-x64-12.13.0 -o dist/screwzira-downloader.exe",
+        "check-csc": "ts-node -e \"require(\"\"./launcher/launcherCompiler\"\").checkCscInPath(true)\"",
+        "rebuild-launcher": "csc /t:winexe /out:resources/bin/screwzira-downloader-launcher.exe /win32icon:launcher/launcher.ico launcher/launcher.cs",
+        "start": "ts-node src/index.ts",
+        "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"../bin/nsis-3.04/makensis.exe\" screwzira.nsi && cd .."
+    },
+    "author": "yoavain",
+    "license": "ISC",
+    "dependencies": {
+        "fs-extra": "^8.1.0",
+        "node-notifier": "^6.0.0",
+        "numeral": "^2.0.6",
+        "request": "^2.88.0",
+        "winston": "^3.2.1"
+    },
+    "bundledDependencies": [
+        "request"
+    ],
+    "devDependencies": {
+        "@types/cross-spawn": "^6.0.1",
+        "@types/fs-extra": "^8.0.1",
+        "@types/jest": "^24.0.22",
+        "@types/node": "^12.12.6",
+        "@types/node-notifier": "^5.4.0",
+        "@types/request": "^2.48.3",
+        "@typescript-eslint/eslint-plugin": "^2.6.1",
+        "@typescript-eslint/parser": "^2.6.1",
+        "clean-webpack-plugin": "^3.0.0",
+        "copy-webpack-plugin": "^5.0.5",
+        "cross-env": "^6.0.3",
+        "cross-spawn": "^7.0.1",
+        "eslint": "^6.6.0",
+        "husky": "^3.0.9",
+        "jest": "^24.9.0",
+        "lint-staged": "^9.4.2",
+        "nexe": "^3.3.2",
+        "prettier": "github:prettier/prettier#master",
+        "prettier-eslint-cli": "^5.0.0",
+        "ts-jest": "^24.1.0",
+        "ts-node": "^8.4.1",
+        "typescript": "3.7.2",
+        "webpack": "^4.41.2",
+        "webpack-cli": "^3.3.10"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged && git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/screwzira-downloader-launcher.exe"
+        }
+    },
+    "lint-staged": {
+        "*.(ts|js)": "prettier-eslint --write",
+        "*.json": "prettier --write"
     }
-  }
 }

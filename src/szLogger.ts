@@ -1,6 +1,6 @@
 import * as winston from 'winston';
 
-const {combine, timestamp, printf, label} = winston.format;
+const { combine, timestamp, printf, label } = winston.format;
 
 export interface ISzLogger {
     // new(logFile: string): SzLogger;
@@ -18,47 +18,46 @@ export class SzLogger implements ISzLogger {
 
     constructor(logFile: string) {
         this.transports = {
-            file: new winston.transports.File({filename: logFile})
+            file: new winston.transports.File({ filename: logFile })
         };
         this.logger = winston.createLogger({
             level: 'debug',
             format: combine(
-                label({label: '[my-label]'}),
-                timestamp({format: 'YYYY-MM-DD HH:mm:ss.SSS'}),
-                printf(info => `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`)
+                label({ label: '[my-label]' }),
+                timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+                printf((info) => `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`)
             ),
             transports: [this.transports.file]
         });
     }
 
-    public setLogLevel = (level: string) => {
+    public setLogLevel = (level: string): void => {
         if (level) {
             this.transports.file.level = level;
         }
     };
 
-    public info = (message: string) => {
+    public info = (message: string): void => {
         this.log('info', message);
     };
 
-    public debug = (message: string) => {
+    public debug = (message: string): void => {
         this.log('debug', message);
     };
 
-    public verbose = (message: string) => {
+    public verbose = (message: string): void => {
         this.log('verbose', message);
     };
 
-    public warn = (message: string) => {
+    public warn = (message: string): void => {
         this.log('warn', message);
     };
 
-    public error = (message: string) => {
+    public error = (message: string): void => {
         this.log('error', message);
     };
 
-
-    private log = (level: string, message: string) => {
+    private log = (level: string, message: string): void => {
         this.logger.log(level, message);
     };
 }
