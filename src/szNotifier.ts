@@ -1,8 +1,6 @@
-import { NodeNotifier, WindowsToaster } from 'node-notifier';
+import notifier, { NodeNotifier } from 'node-notifier';
 import * as path from 'path';
-import { execFile } from "child_process";
-import notifier from "node-notifier";
-import * as path from "path";
+import { execFile } from 'child_process';
 import { ISzLogger } from './szLogger';
 
 const WindowsToaster = notifier.WindowsToaster;
@@ -40,21 +38,21 @@ export class SzNotifier implements ISzNotifier {
     }
 
     public notif = (message: string, notificationIcon: NotificationIcon, openLog?: boolean) => {
-        this.logger.verbose(`Looking for icon in: ${path.join("notif-icons", notificationIcon)}`);
+        this.logger.verbose(`Looking for icon in: ${path.join('notif-icons', notificationIcon)}`);
         if (this.notifier) {
             const notification: Notification = {
                 title: 'Screwzira Subtitle Downloader',
                 message,
-                icon: path.join("notif-icons", notificationIcon)
+                icon: path.join('notif-icons', notificationIcon)
             };
             if (openLog) {
-                notification.actions = ["Log"]
+                notification.actions = ['Log'];
             }
             this.notifier.notify(notification);
-            this.notifier.on("log", () => {
-                const file = path.join(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader.log");
-                execFile(file,  { shell: "cmd" });
-            })
+            this.notifier.on('log', () => {
+                const file = path.join(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader.log');
+                execFile(file, { shell: 'cmd' });
+            });
         }
         else {
             this.logger.info(`Quiet Mode. Skipping notification message: ${message}`);
