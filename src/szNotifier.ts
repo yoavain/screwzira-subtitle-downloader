@@ -46,7 +46,7 @@ export class SzNotifier implements ISzNotifier {
                 icon: path.join('notif-icons', notificationIcon)
             };
             if (openLog) {
-                notification.actions = ['Log'];
+                notification.actions = ['Log', 'Close'];
             }
             this.notifier.notify(notification);
             this.notifier.on('log', () => {
