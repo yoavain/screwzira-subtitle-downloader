@@ -79,7 +79,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
     };
 
     public handleMovie = (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) => {
-        const contextMessage = `Movie: "${this.toTitleCase(movieName)}" (${movieYear})`;
+        const contextMessage = `movie "${this.toTitleCase(movieName)}" (${movieYear})`;
         this.logger.info(`Handling ${contextMessage}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindFilm`,
@@ -106,7 +106,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
     };
 
     public handleEpisode = (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string): void => {
-        const contextMessage = `Series "${this.toTitleCase(series)}" Season ${season} Episode ${episode}`;
+        const contextMessage = `series "${this.toTitleCase(series)}" Season ${season} Episode ${episode}`;
         this.logger.info(`Handling ${contextMessage}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindSeries`,
