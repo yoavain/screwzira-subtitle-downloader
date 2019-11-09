@@ -106,7 +106,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
     };
 
     public handleEpisode = (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string): void => {
-        const contextMessage = `series "${this.toTitleCase(series)}" Season ${season} Episode ${episode}`;
+        const contextMessage = `series "${this.toTitleCase(series)}" season ${season} episode ${episode}`;
         this.logger.info(`Handling ${contextMessage}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindSeries`,
