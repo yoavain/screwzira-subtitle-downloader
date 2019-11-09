@@ -46,7 +46,7 @@
         "jest": "^24.9.0",
         "lint-staged": "^9.4.2",
         "nexe": "^3.3.2",
-        "prettier": "github:prettier/prettier#master",
+        "prettier": "^1.19.0",
         "prettier-eslint-cli": "^5.0.0",
         "ts-jest": "^24.1.0",
         "ts-node": "^8.4.1",
