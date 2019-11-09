@@ -1,6 +1,12 @@
-import { NodeNotifier, WindowsToaster } from 'node-notifier';
+import notifier, { NodeNotifier } from 'node-notifier';
 import * as path from 'path';
+import { execFile } from 'child_process';
 import { ISzLogger } from './szLogger';
+
+const WindowsToaster = notifier.WindowsToaster;
+
+declare type NodeNotifier = any;
+declare type Notification = any;
 
 export enum NotificationIcon {
     LOGO = 'sz-logo-300.png',
@@ -12,7 +18,7 @@ export enum NotificationIcon {
 
 export interface ISzNotifier {
     // new(logger: ISzLogger, snoreToastPath: string, quiet: boolean): SzNotifier
-    notif: (message: string, notificationIcon?: NotificationIcon) => void;
+    notif: (message: string, notificationIcon: NotificationIcon, openLog?: boolean) => void;
 }
 
 export class SzNotifier implements ISzNotifier {
@@ -31,13 +37,21 @@ export class SzNotifier implements ISzNotifier {
         }
     }
 
-    public notif = (message: string, notificationIcon: NotificationIcon = NotificationIcon.LOGO): void => {
+    public notif = (message: string, notificationIcon: NotificationIcon, openLog?: boolean) => {
         this.logger.verbose(`Looking for icon in: ${path.join('notif-icons', notificationIcon)}`);
         if (this.notifier) {
-            this.notifier.notify({
+            const notification: Notification = {
                 title: 'Screwzira Subtitle Downloader',
                 message,
                 icon: path.join('notif-icons', notificationIcon)
+            };
+            if (openLog) {
+                notification.actions = ['Log', 'Close'];
+            }
+            this.notifier.notify(notification);
+            this.notifier.on('log', () => {
+                const file = path.join(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader.log');
+                execFile(file, { shell: 'powershell' });
             });
         }
         else {
