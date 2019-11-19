@@ -1,28 +1,28 @@
-import * as fs from 'fs';
-import * as fsextra from 'fs-extra';
-import * as path from 'path';
-import { IScrewziraUtils, ScrewziraUtils } from './screwziraUtils';
-import { ISzArgsParser, SzArgsParser } from './szArgsParser';
-import { IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier } from './szClassifier';
-import { ISzConfig, SzConfig } from './szConfig';
-import { ISzLogger, SzLogger } from './szLogger';
-import { ISzNotifier, NotificationIcon, SzNotifier } from './szNotifier';
+import * as fs from "fs";
+import * as fsextra from "fs-extra";
+import * as path from "path";
+import { IScrewziraUtils, ScrewziraUtils } from "./screwziraUtils";
+import { ISzArgsParser, SzArgsParser } from "./szArgsParser";
+import { IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier } from "./szClassifier";
+import { ISzConfig, SzConfig } from "./szConfig";
+import { ISzLogger, SzLogger } from "./szLogger";
+import { ISzNotifier, NotificationIcon, SzNotifier } from "./szNotifier";
 
 // Make sure the log directory is there
-fsextra.ensureDirSync(path.resolve(process.env.ProgramData, 'Screwzira-Downloader'));
+fsextra.ensureDirSync(path.resolve(process.env.ProgramData, "Screwzira-Downloader"));
 
 // CLI Args Parser
 const szArgsParser: ISzArgsParser = new SzArgsParser(process.argv);
 
 // Logger
-const logFile: string = path.resolve(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader.log');
+const logFile: string = path.resolve(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader.log");
 const szLogger: ISzLogger = new SzLogger(logFile);
 
 // Notifier
 const szNotifier: ISzNotifier = new SzNotifier(szLogger, szArgsParser.getSnoreToastPath(), szArgsParser.isQuiet());
 
 // Config
-const confFile: string = path.resolve(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader-config.json');
+const confFile: string = path.resolve(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader-config.json");
 const szConfig: ISzConfig = new SzConfig(confFile, szLogger);
 szLogger.setLogLevel(szConfig.getLogLevel());
 
@@ -34,16 +34,16 @@ const screwziraUtils: IScrewziraUtils = new ScrewziraUtils(szLogger, szNotifier,
 
 // handle single file
 const handleSingleFile = (fullpath: string, fileExists: boolean): void => {
-    const relativePath: string = fullpath.substr(0, fullpath.lastIndexOf('/'));
-    const split: string[] = fullpath.split('/');
+    const relativePath: string = fullpath.substr(0, fullpath.lastIndexOf("/"));
+    const split: string[] = fullpath.split("/");
     const filename: string = split[split.length - 1];
-    const filenameNoExtension: string = filename.substr(0, filename.lastIndexOf('.'));
+    const filenameNoExtension: string = filename.substr(0, filename.lastIndexOf("."));
     const parentFolder: string = fileExists && split.length > 1 ? split[split.length - 2] : undefined;
 
     // Check if already exists
     if (szClassifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
-        szLogger.warn('Hebrew subtitles already exist');
-        szNotifier.notif('Hebrew subtitles already exist', NotificationIcon.WARNING);
+        szLogger.warn("Hebrew subtitles already exist");
+        szNotifier.notif("Hebrew subtitles already exist", NotificationIcon.WARNING);
         return;
     }
 
@@ -51,16 +51,16 @@ const handleSingleFile = (fullpath: string, fileExists: boolean): void => {
 
     szLogger.verbose(`Classification response: ${JSON.stringify(classification)}`);
 
-    if (classification?.type === 'movie') {
+    if (classification?.type === "movie") {
         const movieFile: IMovieFileClassification = classification as IMovieFileClassification;
         screwziraUtils.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
     }
-    else if (classification?.type === 'episode') {
+    else if (classification?.type === "episode") {
         const tvEpisode: ITvEpisodeFileClassification = classification as ITvEpisodeFileClassification;
         screwziraUtils.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
     }
     else {
-        szNotifier.notif('Unable to classify input file as movie or episode', NotificationIcon.FAILED);
+        szNotifier.notif("Unable to classify input file as movie or episode", NotificationIcon.FAILED);
     }
 };
 
@@ -74,13 +74,13 @@ const getWaitTimeMs = (): number => {
 
 const getFileExtension = (fullPath: string): string => {
     const ext: string = path.extname(fullPath);
-    return ext?.length > 1 && ext.startsWith('.') ? ext.substr(1) : undefined;
+    return ext?.length > 1 && ext.startsWith(".") ? ext.substr(1) : undefined;
 };
 
 const handleFolder = (dir: string): void => {
     let noFileHandled = true;
     fs.readdirSync(dir).forEach((file) => {
-        const fullPath: string = path.join(dir, file).replace(/\\/g, '/');
+        const fullPath: string = path.join(dir, file).replace(/\\/g, "/");
         if (fs.lstatSync(fullPath).isDirectory()) {
             szLogger.verbose(`Handling sub-folder ${fullPath}`);
             handleFolder(fullPath);
@@ -95,19 +95,19 @@ const handleFolder = (dir: string): void => {
         }
     });
     if (noFileHandled) {
-        szLogger.warn('No file handled');
-        szNotifier.notif('No file handled', NotificationIcon.WARNING);
+        szLogger.warn("No file handled");
+        szNotifier.notif("No file handled", NotificationIcon.WARNING);
     }
 };
 
 // Main
-szLogger.verbose(`Argv: ${process.argv.join(' ')}`);
+szLogger.verbose(`Argv: ${process.argv.join(" ")}`);
 szLogger.verbose(`Sonar Mode: ${szArgsParser.isSonarrMode()}`);
 szLogger.verbose(`Quiet Mode: ${szArgsParser.isQuiet()}`);
 const input: string = szArgsParser.getInput();
-if (typeof input === 'string') {
+if (typeof input === "string") {
     szLogger.info(`*** Looking for subtitle for "${input}" ***`);
-    const fullpath: string = input.replace(/\\/g, '/');
+    const fullpath: string = input.replace(/\\/g, "/");
     try {
         if (fs.lstatSync(fullpath).isDirectory()) {
             handleFolder(fullpath);
@@ -117,7 +117,7 @@ if (typeof input === 'string') {
         }
     }
     catch (e) {
-        if (e.code === 'ENOENT') {
+        if (e.code === "ENOENT") {
             // no such file or directory - treat as file
             handleSingleFile(fullpath, false);
         }
@@ -127,8 +127,8 @@ if (typeof input === 'string') {
     }
 }
 else {
-    szLogger.error('*** Missing input file ***');
-    szNotifier.notif('Missing input file', NotificationIcon.FAILED);
+    szLogger.error("*** Missing input file ***");
+    szNotifier.notif("Missing input file", NotificationIcon.FAILED);
     // tslint:disable-next-line:no-console
     console.log(`Usage:${szArgsParser.getHelp()}`);
 }

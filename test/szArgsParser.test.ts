@@ -1,9 +1,9 @@
-import {ISzArgsParser, SzArgsParser} from "../src/szArgsParser";
+import { ISzArgsParser, SzArgsParser } from "../src/szArgsParser";
 
-const SONARR = 'sonarr';
-const INPUT = 'input';
-const QUIET = 'quiet';
-const SONARR_EPISODE_FILE_PATH = 'sonarr_episodefile_path';
+const SONARR = "sonarr";
+const INPUT = "input";
+const QUIET = "quiet";
+const SONARR_EPISODE_FILE_PATH = "sonarr_episodefile_path";
 
 const NODE = "node.exe";
 const SCRIPT = "index.js";
@@ -26,7 +26,6 @@ describe("test parse", () => {
         expect(szArgsParser.getInput()).toEqual(MKV);
         expect(szArgsParser.isQuiet()).toEqual(false);
         expect(szArgsParser.isSonarrMode()).toEqual(false);
-
     });
     it("test input", () => {
         const szArgsParser: ISzArgsParser = new SzArgsParser([NODE, SCRIPT, INPUT, MKV]);
