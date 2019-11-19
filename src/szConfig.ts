@@ -1,6 +1,6 @@
-import * as fs from 'fs';
-import * as fsextra from 'fs-extra';
-import { ISzLogger } from './szLogger';
+import * as fs from "fs";
+import * as fsextra from "fs-extra";
+import { ISzLogger } from "./szLogger";
 
 interface IReplacePairs {
     [key: string]: string;
@@ -12,8 +12,8 @@ interface IConfig {
     replacePairs: IReplacePairs;
 }
 
-const defaultExtensions: string[] = ['mkv', 'mp4', 'avi'];
-const defaultConf: IConfig = { logLevel: 'debug', extensions: defaultExtensions, replacePairs: {} };
+const defaultExtensions: string[] = ["mkv", "mp4", "avi"];
+const defaultConf: IConfig = { logLevel: "debug", extensions: defaultExtensions, replacePairs: {} };
 
 export interface ISzConfig {
     // new(confFile: string, logger: ISzLogger): SzConfig;
@@ -38,7 +38,7 @@ export class SzConfig implements ISzConfig {
             conf = fsextra.readJsonSync(confFile);
         }
         catch (e) {
-            this.logger.error('Configuration file corrupted. Using default.');
+            this.logger.error("Configuration file corrupted. Using default.");
             conf = defaultConf;
         }
         this.logLevel = conf?.logLevel;
@@ -47,8 +47,8 @@ export class SzConfig implements ISzConfig {
         this.replacePairs = conf?.replacePairs ? Object.freeze(JSON.parse(JSON.stringify(conf.replacePairs).toLowerCase())) : Object.freeze({});
         this.logger.debug(
             `Replace pairs (${Object.keys(this.replacePairs).length}): ${Object.keys(this.replacePairs)
-                .map((pairKey) => pairKey + ' => ' + this.replacePairs[pairKey])
-                .join('; ')}`
+                .map((pairKey) => pairKey + " => " + this.replacePairs[pairKey])
+                .join("; ")}`
         );
     }
 

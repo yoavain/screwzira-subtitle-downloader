@@ -1,7 +1,7 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { ISzConfig } from './szConfig';
-import { ISzLogger } from './szLogger';
+import * as fs from "fs";
+import * as path from "path";
+import { ISzConfig } from "./szConfig";
+import { ISzLogger } from "./szLogger";
 
 // RegEx
 const episodeRegex = /(.+?)[Ss]?0?(\d+)?[xeE]0?(\d+)/;
@@ -19,24 +19,24 @@ export const DIMENSION_MARK = 0.8;
 export const AUDIO_MARK = 0.5;
 export const COMMON_WORDS_MARK = 0.1;
 const WORD_WEIGHTS: IWordWeight = {
-    'theatrical': SPECIAL_EDITION_MARK,
-    'final': SPECIAL_EDITION_MARK / 2,
-    'cut': SPECIAL_EDITION_MARK / 2,
-    'bluray': RIP_MARK,
-    'hddvd': RIP_MARK,
-    'webrip': RIP_MARK,
-    'hdtv': RIP_MARK,
-    'web': RIP_MARK / 2,
-    'dl': RIP_MARK / 2,
-    'x264': ENCODING_MARK,
-    'x265': ENCODING_MARK,
-    '1080p': DIMENSION_MARK,
-    '720p': DIMENSION_MARK,
-    '5.1': AUDIO_MARK,
-    'dts': AUDIO_MARK,
-    'dd5': AUDIO_MARK,
-    'ac3': AUDIO_MARK,
-    'the': COMMON_WORDS_MARK
+    "theatrical": SPECIAL_EDITION_MARK,
+    "final": SPECIAL_EDITION_MARK / 2,
+    "cut": SPECIAL_EDITION_MARK / 2,
+    "bluray": RIP_MARK,
+    "hddvd": RIP_MARK,
+    "webrip": RIP_MARK,
+    "hdtv": RIP_MARK,
+    "web": RIP_MARK / 2,
+    "dl": RIP_MARK / 2,
+    "x264": ENCODING_MARK,
+    "x265": ENCODING_MARK,
+    "1080p": DIMENSION_MARK,
+    "720p": DIMENSION_MARK,
+    "5.1": AUDIO_MARK,
+    "dts": AUDIO_MARK,
+    "dd5": AUDIO_MARK,
+    "ac3": AUDIO_MARK,
+    "the": COMMON_WORDS_MARK
 };
 
 interface IFileClassification {
@@ -81,16 +81,16 @@ export class SzClassifier implements ISzClassifier {
     public cleanText = (text: string): string => {
         return text
             .toLowerCase()
-            .replace(/[.|-]/g, ' ')
+            .replace(/[.|-]/g, " ")
             .trim();
     };
 
     public splitText = (text: string): string[] => {
-        return text.split(' ');
+        return text.split(" ");
     };
 
     public isSubtitlesAlreadyExist = (relativePath: string, filenameNoExtension: string): boolean => {
-        const destination: string = path.resolve(relativePath, filenameNoExtension + '.Hebrew.srt');
+        const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
         return fs.existsSync(destination);
     };
 
@@ -100,7 +100,7 @@ export class SzClassifier implements ISzClassifier {
 
         const commonWords: string[] = split1.filter((word1) => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
         const mark: number = this.calculateSimilarityMark(commonWords);
-        this.logger.debug(`"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join('#')}] with total mark: ${mark}`);
+        this.logger.debug(`"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}] with total mark: ${mark}`);
         return { commonWords, mark };
     };
 
@@ -124,7 +124,7 @@ export class SzClassifier implements ISzClassifier {
         if (episodeMatch?.length >= 3 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
             this.logger.verbose(`Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
-                type: 'episode',
+                type: "episode",
                 series: this.config.replaceTitleIfNeeded(this.cleanText(episodeMatch[1])),
                 season: Number(episodeMatch[2]),
                 episode: Number(episodeMatch[3])
@@ -135,7 +135,7 @@ export class SzClassifier implements ISzClassifier {
             if (movieMatch?.length >= 2 && movieMatch[1] && movieMatch[2]) {
                 this.logger.verbose(`Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
-                    type: 'movie',
+                    type: "movie",
                     movieName: this.config.replaceTitleIfNeeded(this.cleanText(movieMatch[1])),
                     movieYear: Number(movieMatch[2])
                 };
@@ -145,7 +145,7 @@ export class SzClassifier implements ISzClassifier {
                 if (movieMatchFromParent?.length >= 2 && movieMatchFromParent[1] && movieMatchFromParent[2]) {
                     this.logger.verbose(`Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
                     return {
-                        type: 'movie',
+                        type: "movie",
                         movieName: this.config.replaceTitleIfNeeded(this.cleanText(movieMatchFromParent[1])),
                         movieYear: Number(movieMatchFromParent[2])
                     };

@@ -1,10 +1,10 @@
-import * as fs from 'fs';
-import numeral from 'numeral';
-import * as path from 'path';
-import request from 'request';
-import { ICommonWordsInSentenceResponse, ISzClassifier } from './szClassifier';
-import { ISzLogger } from './szLogger';
-import { ISzNotifier, NotificationIcon } from './szNotifier';
+import * as fs from "fs";
+import numeral from "numeral";
+import * as path from "path";
+import request from "request";
+import { ICommonWordsInSentenceResponse, ISzClassifier } from "./szClassifier";
+import { ISzLogger } from "./szLogger";
+import { ISzNotifier, NotificationIcon } from "./szNotifier";
 
 export interface IScrewziraUtils {
     // new(logger: ISzLogger, notifier: ISzNotifier, classifier: ISzClassifier): ScrewziraUtils;
@@ -22,8 +22,8 @@ export interface IFindFilmResponse {
 
 export class ScrewziraUtils implements IScrewziraUtils {
     // Request Info
-    private readonly baseUrl: string = 'http://api.screwzira.com';
-    private readonly userAgent: string = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36';
+    private readonly baseUrl: string = "http://api.screwzira.com";
+    private readonly userAgent: string = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3528.4 Safari/537.36";
 
     private logger: ISzLogger;
     private notifier: ISzNotifier;
@@ -36,7 +36,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
     }
 
     public findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
-        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list?.map((item) => item.SubtitleName).join(', ')}]`);
+        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list?.map((item) => item.SubtitleName).join(", ")}]`);
         if (list?.length > 0) {
             let maxCommonWords: ICommonWordsInSentenceResponse = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
             let maxIndex = 0;
@@ -51,8 +51,8 @@ export class ScrewziraUtils implements IScrewziraUtils {
             const bestMatch: IFindFilmResponse = list[maxIndex];
             this.logger.info(`filename:  "${filenameNoExtension}"`);
             this.logger.info(`best match: "${bestMatch.SubtitleName}"`);
-            this.logger.info(`common words: ["${maxCommonWords.commonWords.join('", "')}"]`);
-            this.logger.info(`common words mark: ${numeral(maxCommonWords.mark).format('0.00')}`);
+            this.logger.info(`common words: ["${maxCommonWords.commonWords.join("\", \"")}"]`);
+            this.logger.info(`common words mark: ${numeral(maxCommonWords.mark).format("0.00")}`);
 
             return bestMatch.Identifier;
         }
@@ -66,7 +66,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
                 this.downloadBestMatch(subtitleID, filenameNoExtension, relativePath, contextMessage);
             }
             else {
-                this.logger.info('No subtitle found');
+                this.logger.info("No subtitle found");
                 this.notifier.notif(`No subtitle found for ${contextMessage}`, NotificationIcon.WARNING, true);
             }
         }
@@ -83,13 +83,13 @@ export class ScrewziraUtils implements IScrewziraUtils {
         this.logger.info(`Handling ${contextMessage}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindFilm`,
-            method: 'POST',
-            headers: { 'User-Agent': this.userAgent },
+            method: "POST",
+            headers: { "User-Agent": this.userAgent },
             json: {
                 request: {
                     SearchPhrase: movieName,
-                    SearchType: 'FilmName',
-                    Version: '1.0',
+                    SearchType: "FilmName",
+                    Version: "1.0",
                     Year: movieYear
                 }
             }
@@ -110,13 +110,13 @@ export class ScrewziraUtils implements IScrewziraUtils {
         this.logger.info(`Handling ${contextMessage}`);
         const options: request.Options = {
             url: `${this.baseUrl}/FindSeries`,
-            method: 'POST',
-            headers: { 'User-Agent': this.userAgent },
+            method: "POST",
+            headers: { "User-Agent": this.userAgent },
             json: {
                 request: {
                     SearchPhrase: series,
-                    SearchType: 'FilmName',
-                    Version: '1.0',
+                    SearchType: "FilmName",
+                    Version: "1.0",
                     Season: season,
                     Episode: episode
                 }
@@ -136,8 +136,8 @@ export class ScrewziraUtils implements IScrewziraUtils {
         this.logger.info(`Downloading: ${subtitleID}`);
         const options: request.Options = {
             url: `${this.baseUrl}/Download`,
-            method: 'POST',
-            headers: { 'User-Agent': this.userAgent, 'Accept': '*/*' },
+            method: "POST",
+            headers: { "User-Agent": this.userAgent, "Accept": "*/*" },
             encoding: null,
             json: {
                 request: {
@@ -152,12 +152,12 @@ export class ScrewziraUtils implements IScrewziraUtils {
             if (!error && response.statusCode === 200) {
                 // Check if already exists
                 if (this.classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
-                    this.logger.warn('Hebrew subtitles already exist');
+                    this.logger.warn("Hebrew subtitles already exist");
                     this.notifier.notif(`Hebrew subtitles already exist for ${contextMessage}`, NotificationIcon.WARNING);
                     return;
                 }
 
-                const destination: string = path.resolve(relativePath, filenameNoExtension + '.Hebrew.srt');
+                const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
                 this.logger.verbose(`writing response to ${destination}`);
                 fs.writeFileSync(destination, body);
                 this.notifier.notif(`Successfully downloaded Subtitles for ${contextMessage}`, NotificationIcon.DOWNLOAD);

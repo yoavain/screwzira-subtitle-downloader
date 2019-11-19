@@ -1,21 +1,26 @@
-import {
-    DIMENSION_MARK,
-    ENCODING_MARK,
-    ISzClassifier,
-    RIP_MARK,
-    SPECIAL_EDITION_MARK,
-    SzClassifier
-} from "../src/szClassifier";
-import {ISzConfig, SzConfig} from "../src/szConfig";
-import {ISzLogger} from "../src/szLogger";
+import { DIMENSION_MARK, ENCODING_MARK, ISzClassifier, RIP_MARK, SPECIAL_EDITION_MARK, SzClassifier } from "../src/szClassifier";
+import { ISzConfig, SzConfig } from "../src/szConfig";
+import { ISzLogger } from "../src/szLogger";
 
 const mockLogger: ISzLogger = {
-    setLogLevel() { jest.fn() },
-    info() { jest.fn() },
-    debug() { jest.fn() },
-    verbose() { jest.fn() },
-    warn() { jest.fn() },
-    error() { jest.fn() }
+    setLogLevel() {
+        jest.fn();
+    },
+    info() {
+        jest.fn();
+    },
+    debug() {
+        jest.fn();
+    },
+    verbose() {
+        jest.fn();
+    },
+    warn() {
+        jest.fn();
+    },
+    error() {
+        jest.fn();
+    }
 };
 
 const mockConfig: ISzConfig = new SzConfig("resources/screwzira-downloader-config.json", mockLogger);

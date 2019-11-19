@@ -1,7 +1,7 @@
-import notifier, { NodeNotifier } from 'node-notifier';
-import * as path from 'path';
-import { execFile } from 'child_process';
-import { ISzLogger } from './szLogger';
+import notifier, { NodeNotifier } from "node-notifier";
+import * as path from "path";
+import { execFile } from "child_process";
+import { ISzLogger } from "./szLogger";
 
 const WindowsToaster = notifier.WindowsToaster;
 
@@ -9,11 +9,11 @@ declare type NodeNotifier = any;
 declare type Notification = any;
 
 export enum NotificationIcon {
-    LOGO = 'sz-logo-300.png',
-    DOWNLOAD = 'sz-download-300.png',
-    WARNING = 'sz-warning-300.png',
-    NOT_FOUND = 'sz-not-found-300.png',
-    FAILED = 'sz-failed-300.png'
+    LOGO = "sz-logo-300.png",
+    DOWNLOAD = "sz-download-300.png",
+    WARNING = "sz-warning-300.png",
+    NOT_FOUND = "sz-not-found-300.png",
+    FAILED = "sz-failed-300.png"
 }
 
 export interface ISzNotifier {
@@ -33,25 +33,25 @@ export class SzNotifier implements ISzNotifier {
             this.notifier = new WindowsToaster({ withFallback: false, customPath: snoreToastPath });
         }
         else {
-            this.logger.debug('Quiet Mode. Not initializing notifier');
+            this.logger.debug("Quiet Mode. Not initializing notifier");
         }
     }
 
     public notif = (message: string, notificationIcon: NotificationIcon, openLog?: boolean) => {
-        this.logger.verbose(`Looking for icon in: ${path.join('notif-icons', notificationIcon)}`);
+        this.logger.verbose(`Looking for icon in: ${path.join("notif-icons", notificationIcon)}`);
         if (this.notifier) {
             const notification: Notification = {
-                title: 'Screwzira Subtitle Downloader',
+                title: "Screwzira Subtitle Downloader",
                 message,
-                icon: path.join('notif-icons', notificationIcon)
+                icon: path.join("notif-icons", notificationIcon)
             };
             if (openLog) {
-                notification.actions = ['Log', 'Close'];
+                notification.actions = ["Log", "Close"];
             }
             this.notifier.notify(notification);
-            this.notifier.on('log', () => {
-                const file = path.join(process.env.ProgramData, 'Screwzira-Downloader', 'screwzira-downloader.log');
-                execFile(file, { shell: 'powershell' });
+            this.notifier.on("log", () => {
+                const file = path.join(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader.log");
+                execFile(file, { shell: "powershell" });
             });
         }
         else {
