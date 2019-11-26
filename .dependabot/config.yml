@@ -18,5 +18,8 @@ update_configs:
           dependency_name: "prettier-eslint"
           version_requirement: "9.0.1"
       - match:
+          dependency_name: "eslint"
+          version_requirement: "6.7.1"
+      - match:
           # Due to use of self-built tar.gz
           dependency_name: "*node-notifier*"
