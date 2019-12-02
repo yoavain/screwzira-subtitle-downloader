@@ -79,21 +79,21 @@ SectionEnd
 Section "MKV" SEC03
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  ReadRegStr $MkvProgID HKLM "SOFTWARE\Classes\.mkv" ""
+  ReadRegStr $MkvProgID HKCU "SOFTWARE\Classes\.mkv" ""
   WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
   WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" input "%1"'
 SectionEnd
 Section "AVI" SEC04
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-    ReadRegStr $AviProgID HKLM "SOFTWARE\Classes\.avi" ""
+    ReadRegStr $AviProgID HKCU "SOFTWARE\Classes\.avi" ""
     WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
     WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" input "%1"'
 SectionEnd
 Section "MP4" SEC05
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-    ReadRegStr $Mp4ProgID HKLM "SOFTWARE\Classes\.mp4" ""
+    ReadRegStr $Mp4ProgID HKCU "SOFTWARE\Classes\.mp4" ""
     WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
     WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" input "%1"'
 SectionEnd
@@ -144,11 +144,11 @@ Section Uninstall
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
   DeleteRegKey HKCR "Folder\shell\${PRODUCT_NAME}"
-  ReadRegStr $MkvProgID HKLM "SOFTWARE\Classes\.mkv" ""
+  ReadRegStr $MkvProgID HKCU "SOFTWARE\Classes\.mkv" ""
   DeleteRegKey HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}"
-  ReadRegStr $AviProgID HKLM "SOFTWARE\Classes\.mkv" ""
+  ReadRegStr $AviProgID HKCU "SOFTWARE\Classes\.mkv" ""
   DeleteRegKey HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}"
-  ReadRegStr $Mp4ProgID HKLM "SOFTWARE\Classes\.mkv" ""
+  ReadRegStr $Mp4ProgID HKCU "SOFTWARE\Classes\.mkv" ""
   DeleteRegKey HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}"
   SetAutoClose true
 SectionEnd
