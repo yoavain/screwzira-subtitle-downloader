@@ -34,7 +34,7 @@
         "@types/jest": "24.0.23",
         "@types/node": "12.12.20",
         "@types/numeral": "0.0.26",
-        "@types/request": "2.48.3",
+        "@types/request": "2.48.4",
         "@typescript-eslint/eslint-plugin": "2.12.0",
         "@typescript-eslint/parser": "2.12.0",
         "clean-webpack-plugin": "3.0.0",
