@@ -10,7 +10,7 @@ module.exports = {
     },
     parser: "@typescript-eslint/parser",
     parserOptions: {
-        project: "./tsconfig.json",
+        project: "./tsconfig.all.json",
         ecmaVersion: 2018,
         sourceType: "module"
     },
@@ -21,7 +21,7 @@ module.exports = {
         "max-depth": ["error", 3],
         "max-statements-per-line": ["error", { max: 1 }],
         "max-lines": ["error", { max: 250, skipBlankLines: true, skipComments: true }],
-        "max-lines-per-function": ["error", { max: 50, skipBlankLines: true, skipComments: true }],
+        "max-lines-per-function": ["warn", { max: 50, skipBlankLines: true, skipComments: true }],
         "@typescript-eslint/ban-ts-ignore": ["warn"],
         "@typescript-eslint/interface-name-prefix": [0, "never"],
         "arrow-parens": ["error"],

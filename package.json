@@ -1,11 +1,12 @@
 {
     "name": "screwzira-downloader",
-    "version": "2.5.5",
+    "version": "2.5.6",
     "description": "",
     "main": "_build/index.js",
     "scripts": {
-        "build": "npm run prettier-eslint && npm run tsc && npm run test && npm run webpack && npm run nexe && npm run installer",
-        "prettier-eslint": "prettier-eslint --write src/**/*.ts test/**/*.ts",
+        "build": "npm run eslint && npm run tsc && npm run test && npm run webpack && npm run nexe && npm run installer",
+        "eslint": "eslint src/**/*.ts test/**/*.ts",
+        "eslint:fix": "npm run eslint --fix",
         "prettier": "prettier --write *.json .eslintrc.js .prettierrc tsconfig.json webpack.config.js",
         "test": "jest --coverage",
         "tsc": "tsc",
@@ -41,14 +42,12 @@
         "copy-webpack-plugin": "5.1.1",
         "cross-env": "6.0.3",
         "cross-spawn": "7.0.1",
-        "eslint": "6.6.0",
+        "eslint": "6.8.0",
         "husky": "3.1.0",
         "jest": "24.9.0",
-        "lint-staged": "9.5.0",
+        "lint-staged": "10.0.0-beta.13",
         "nexe": "3.3.2",
         "prettier": "1.19.1",
-        "prettier-eslint": "9.0.0",
-        "prettier-eslint-cli": "5.0.0",
         "ts-jest": "24.2.0",
         "ts-node": "8.5.4",
         "typescript": "3.7.4",
@@ -62,12 +61,10 @@
     },
     "lint-staged": {
         "*.(ts|js)": [
-            "prettier-eslint --write",
-            "git add"
+            "eslint --fix"
         ],
         "*.json": [
-            "prettier --write",
-            "git add"
+            "prettier --write"
         ]
     }
 }
