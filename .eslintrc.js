@@ -1,9 +1,10 @@
 module.exports = {
     env: {
         es6: true,
-        node: true
+        node: true,
+        jest: true,
+        "jest/globals": true
     },
-    extends: ["eslint:recommended", "plugin:@typescript-eslint/eslint-recommended", "plugin:@typescript-eslint/recommended"],
     globals: {
         Atomics: "readonly",
         SharedArrayBuffer: "readonly"
@@ -14,7 +15,15 @@ module.exports = {
         ecmaVersion: 2018,
         sourceType: "module"
     },
-    plugins: ["@typescript-eslint"],
+    plugins: ["node", "@typescript-eslint", "import", "jest"],
+    extends: [
+        "eslint:recommended",
+        "plugin:node/recommended",
+        "plugin:import/errors",
+        "plugin:import/warnings",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
     rules: {
         // code
         "max-params": ["warn", 3],
@@ -26,10 +35,47 @@ module.exports = {
         "@typescript-eslint/interface-name-prefix": [0, "never"],
         "arrow-parens": ["error"],
         "quote-props": ["error", "consistent-as-needed", { numbers: true }],
+        "no-unused-vars": "error",
+        "no-useless-escape": "error",
+        "no-empty-pattern": "error",
+        "no-eval": "error",
+        "no-implied-eval": "error",
+        "no-prototype-builtins": "error",
+        "no-sync": 0,
+        "node/exports-style": ["error", "module.exports"],
+        "node/no-unpublished-require": 0,
+        "node/no-extraneous-import": 0,
+        "node/no-deprecated-api": ["warn"],
+        "node/no-missing-require": [
+            "error",
+            {
+                tryExtensions: [".ts", ".js", ".d.ts", ".json", ".node"]
+            }
+        ],
+        "node/no-missing-import": [
+            "error",
+            {
+                tryExtensions: [".ts", ".js", ".d.ts", ".json", ".node"]
+            }
+        ],
+        "node/no-unpublished-import": 0,
+        "node/no-unsupported-features/es-syntax": 0,
+        "import/extensions": [
+            "error",
+            {
+                ts: "never",
+                js: "never",
+                json: "always"
+            }
+        ],
+        "import/named": "warn",
+        "import/no-duplicates": "error",
+        "import/no-unresolved": ["warn"],
+        "@typescript-eslint/no-unused-vars": "warn",
 
         // Style
         "max-len": [`error`, { code: 200 }],
-        indent: ["error", 4],
+        indent: ["error", 4, { SwitchCase: 1 }],
         "linebreak-style": ["error", "windows"],
         quotes: ["error", "double"],
         semi: ["error", "always"],
@@ -38,6 +84,8 @@ module.exports = {
         "no-mixed-spaces-and-tabs": "error",
         "arrow-spacing": ["error"],
         "comma-dangle": ["error", "never"],
-        "comma-style": ["error"]
+        "comma-style": ["error"],
+        "no-extra-semi": "error",
+        "comma-spacing": "error"
     }
 };
