@@ -6,7 +6,7 @@
     "scripts": {
         "build": "npm run eslint && npm run tsc && npm run test && npm run webpack && npm run nexe && npm run installer",
         "eslint": "eslint src/**/*.ts test/**/*.ts",
-        "eslint:fix": "npm run eslint --fix",
+        "eslint:fix": "npm run eslint -- --fix",
         "prettier": "prettier --write *.json .eslintrc.js .prettierrc tsconfig.json webpack.config.js",
         "test": "jest --coverage",
         "tsc": "tsc",
