@@ -1,6 +1,6 @@
 {
     "name": "screwzira-downloader",
-    "version": "2.5.7",
+    "version": "2.6.0",
     "description": "",
     "main": "_build/index.js",
     "scripts": {
@@ -15,7 +15,7 @@
         "check-csc": "ts-node -e \"require(\"\"./launcher/launcherCompiler\"\").checkCscInPath(true)\"",
         "rebuild-launcher": "csc /t:winexe /out:resources/bin/screwzira-downloader-launcher.exe /win32icon:launcher/launcher.ico launcher/launcher.cs",
         "start": "ts-node src/index.ts",
-        "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"../bin/nsis-3.04/makensis.exe\" screwzira.nsi && cd .."
+        "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"../bin/nsis-3.05/makensis.exe\" screwzira.nsi && cd .."
     },
     "author": "yoavain",
     "license": "ISC",
