@@ -1,6 +1,6 @@
 {
     "name": "screwzira-downloader",
-    "version": "2.6.0",
+    "version": "2.6.1",
     "description": "",
     "main": "_build/index.js",
     "scripts": {
@@ -46,12 +46,12 @@
         "eslint-plugin-import": "2.19.1",
         "eslint-plugin-jest": "23.3.0",
         "eslint-plugin-node": "11.0.0",
-        "husky": "3.1.0",
+        "husky": "4.0.0",
         "jest": "24.9.0",
         "lint-staged": "10.0.0-beta.13",
         "nexe": "3.3.2",
         "prettier": "1.19.1",
-        "ts-jest": "24.2.0",
+        "ts-jest": "24.3.0",
         "ts-node": "8.5.4",
         "typescript": "3.7.4",
         "webpack": "4.41.5",
