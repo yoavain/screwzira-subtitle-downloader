@@ -46,7 +46,7 @@
         "eslint-plugin-import": "2.19.1",
         "eslint-plugin-jest": "23.3.0",
         "eslint-plugin-node": "11.0.0",
-        "husky": "4.0.1",
+        "husky": "4.0.3",
         "jest": "24.9.0",
         "lint-staged": "10.0.0-beta.13",
         "nexe": "3.3.2",
