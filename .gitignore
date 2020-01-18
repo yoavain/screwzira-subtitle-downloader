@@ -10,3 +10,4 @@ installer/*.reg
 installer/*.bat
 /.vscode/
 *.iml
+/coverage/
