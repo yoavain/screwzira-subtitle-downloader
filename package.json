@@ -23,7 +23,7 @@
         "fs-extra": "8.1.0",
         "node-notifier": "file://./bin/node-notifier/node-notifier-7.0.0.tgz",
         "numeral": "2.0.6",
-        "request": "2.88.0",
+        "request": "2.88.2",
         "winston": "3.2.1"
     },
     "bundledDependencies": [
