@@ -11,7 +11,7 @@
         "test": "jest --coverage",
         "tsc": "tsc",
         "webpack": "webpack",
-        "nexe": "nexe -t windows-x64-12.14.1 -o dist/screwzira-downloader.exe",
+        "nexe": "nexe -t windows-x64-12.15.0 -o dist/screwzira-downloader.exe",
         "check-csc": "ts-node -e \"require(\"\"./launcher/launcherCompiler\"\").checkCscInPath(true)\"",
         "rebuild-launcher": "csc /t:winexe /out:resources/bin/screwzira-downloader-launcher.exe /win32icon:launcher/launcher.ico launcher/launcher.cs",
         "start": "ts-node src/index.ts",
