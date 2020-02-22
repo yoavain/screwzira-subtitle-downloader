@@ -71,4 +71,14 @@ describe("test classify", () => {
         const actual: IMovieFileClassification | ITvEpisodeFileClassification = szClassifier.classify("living.with.yourself.s01e01.internal.hdr.1080p.web.h265-paleale", "");
         expect(actual).toEqual({ type: "episode", series: "living with yourself", season: 1, episode: 1 });
     });
+    it("test frozen 2 classification", () => {
+        const szClassifier: ISzClassifier = new SzClassifier(mockLogger, mockConfig);
+        const actual: IMovieFileClassification | ITvEpisodeFileClassification = szClassifier.classify("Frozen.2.2019.1080p.AMZN.WEB-DL.DDP5.1.H264-CMRG", "");
+        expect(actual).toEqual({ type: "movie", movieName: "frozen 2", movieYear: 2019 });
+    });
+    it("test findAlternativeName - frozen 2", () => {
+        const szClassifier: ISzClassifier = new SzClassifier(mockLogger, mockConfig);
+        const alternativeMovieName: string = szClassifier.findAlternativeName("frozen 2");
+        expect(alternativeMovieName).toEqual("frozen ii");
+    });
 });
