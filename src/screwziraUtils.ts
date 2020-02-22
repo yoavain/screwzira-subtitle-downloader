@@ -8,11 +8,8 @@ import { ISzNotifier, NotificationIcon } from "./szNotifier";
 
 export interface IScrewziraUtils {
     // new(logger: ISzLogger, notifier: ISzNotifier, classifier: ISzClassifier): ScrewziraUtils;
-    findClosestMatch: (filenameNoExtension: string, list, excludeList: string[]) => string;
-    handleResponse: (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string, contextMessage: string) => void;
     handleMovie: (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) => void;
     handleEpisode: (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) => void;
-    downloadBestMatch: (subtitleID: string, filenameNoExtension: string, relativePath: string, contextMessage: string) => void;
 }
 
 export interface IFindFilmResponse {
@@ -34,49 +31,6 @@ export class ScrewziraUtils implements IScrewziraUtils {
         this.notifier = notifier;
         this.classifier = classifier;
     }
-
-    public findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
-        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list?.map((item) => item.SubtitleName).join(", ")}]`);
-        if (list?.length > 0) {
-            let maxCommonWords: ICommonWordsInSentenceResponse = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
-            let maxIndex = 0;
-            list.forEach((item, index) => {
-                const commonWords: ICommonWordsInSentenceResponse = this.classifier.commonWordsInSentences(filenameNoExtension, item.SubtitleName, excludeList);
-                if (commonWords.mark > maxCommonWords.mark) {
-                    maxCommonWords = commonWords;
-                    maxIndex = index;
-                }
-            });
-
-            const bestMatch: IFindFilmResponse = list[maxIndex];
-            this.logger.info(`filename:  "${filenameNoExtension}"`);
-            this.logger.info(`best match: "${bestMatch.SubtitleName}"`);
-            this.logger.info(`common words: ["${maxCommonWords.commonWords.join("\", \"")}"]`);
-            this.logger.info(`common words mark: ${numeral(maxCommonWords.mark).format("0.00")}`);
-
-            return bestMatch.Identifier;
-        }
-    };
-
-    public handleResponse = (error: any, response: request.Response, body: string, excludeList: string[], filenameNoExtension: string, relativePath: string, contextMessage: string): void => {
-        if (!error && response.statusCode === 200) {
-            const results: IFindFilmResponse[] = body && JSON.parse(body).Results;
-            if (Array.isArray(results) && results.length) {
-                const subtitleID: string = this.findClosestMatch(filenameNoExtension, results, excludeList);
-                this.downloadBestMatch(subtitleID, filenameNoExtension, relativePath, contextMessage);
-            }
-            else {
-                this.logger.info("No subtitle found");
-                this.notifier.notif(`No subtitle found for ${contextMessage}`, NotificationIcon.WARNING, true);
-            }
-        }
-        else {
-            this.logger.error(error);
-            if (response) {
-                this.logger.error(JSON.stringify(response));
-            }
-        }
-    };
 
     public handleMovie = (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) => {
         const contextMessage = `movie "${this.toTitleCase(movieName)}" (${movieYear})`;
@@ -100,9 +54,7 @@ export class ScrewziraUtils implements IScrewziraUtils {
 
         this.logger.debug(`Handle movie request options: ${JSON.stringify(options)}`);
 
-        request(options, (error, response, body) => {
-            this.handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath, contextMessage);
-        });
+        this.requestSubtitles(options, excludeList, filenameNoExtension, relativePath, contextMessage, true);
     };
 
     public handleEpisode = (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string): void => {
@@ -127,12 +79,11 @@ export class ScrewziraUtils implements IScrewziraUtils {
 
         this.logger.debug(`Handle episode request options: ${JSON.stringify(options)}`);
 
-        request(options, (error, response, body) => {
-            this.handleResponse(error, response, body, excludeList, filenameNoExtension, relativePath, contextMessage);
-        });
+        this.requestSubtitles(options, excludeList, filenameNoExtension, relativePath, contextMessage);
     };
 
-    public downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string, contextMessage: string): void => {
+
+    private downloadBestMatch = (subtitleID: string, filenameNoExtension: string, relativePath: string, contextMessage: string): void => {
         this.logger.info(`Downloading: ${subtitleID}`);
         const options: request.Options = {
             url: `${this.baseUrl}/Download`,
@@ -169,7 +120,87 @@ export class ScrewziraUtils implements IScrewziraUtils {
         });
     };
 
-    toTitleCase = (str: string): string => {
+    private requestSubtitles = (options: request.UrlOptions & request.CoreOptions,
+        excludeList: string[], filenameNoExtension: string, relativePath: string, contextMessage: string, allowRetry?: boolean) => {
+        request(options, (error, response, body) => {
+            if (!error && response.statusCode === 200) {
+                const results: IFindFilmResponse[] = this.parseResults(body);
+                if (results && results.length > 0) {
+                    this.handleResults(results, excludeList, filenameNoExtension, relativePath, contextMessage);
+                    return;
+                }
+
+                if (allowRetry) {
+                    const alternativeName: string = this.classifier.findAlternativeName(options.json?.request?.SearchPhrase);
+
+                    // retry
+                    if (alternativeName) {
+                        this.logger.info(`Retrying with "${alternativeName}"`);
+                        const optionsWithAlternativeName = { ...options };
+                        optionsWithAlternativeName.json.request.SearchPhrase = alternativeName;
+                        this.requestSubtitles(optionsWithAlternativeName, excludeList, filenameNoExtension, relativePath, contextMessage, false);
+                        return;
+                    }
+                }
+
+                this.handleNoSubtitlesFound(contextMessage);
+            }
+            else {
+                this.handleError(error, response);
+            }
+        });
+    }
+
+    private findClosestMatch = (filenameNoExtension: string, list: IFindFilmResponse[], excludeList: string[]): string => {
+        this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${list?.map((item) => item.SubtitleName).join(", ")}]`);
+        if (list?.length > 0) {
+            let maxCommonWords: ICommonWordsInSentenceResponse = this.classifier.commonWordsInSentences(filenameNoExtension, list[0].SubtitleName, excludeList);
+            let maxIndex = 0;
+            list.forEach((item, index) => {
+                const commonWords: ICommonWordsInSentenceResponse = this.classifier.commonWordsInSentences(filenameNoExtension, item.SubtitleName, excludeList);
+                if (commonWords.mark > maxCommonWords.mark) {
+                    maxCommonWords = commonWords;
+                    maxIndex = index;
+                }
+            });
+
+            const bestMatch: IFindFilmResponse = list[maxIndex];
+            this.logger.info(`filename:  "${filenameNoExtension}"`);
+            this.logger.info(`best match: "${bestMatch.SubtitleName}"`);
+            this.logger.info(`common words: ["${maxCommonWords.commonWords.join("\", \"")}"]`);
+            this.logger.info(`common words mark: ${numeral(maxCommonWords.mark).format("0.00")}`);
+
+            return bestMatch.Identifier;
+        }
+    };
+
+    private parseResults = (body: string): IFindFilmResponse[] => {
+        const results: IFindFilmResponse[] = body && JSON.parse(body).Results;
+        if (Array.isArray(results)) {
+            return body && JSON.parse(body).Results;
+        }
+    }
+
+    private handleResults = (results: IFindFilmResponse[], excludeList: string[], filenameNoExtension: string, relativePath: string, contextMessage: string): void => {
+        if (Array.isArray(results) && results.length) {
+            const subtitleID: string = this.findClosestMatch(filenameNoExtension, results, excludeList);
+            this.downloadBestMatch(subtitleID, filenameNoExtension, relativePath, contextMessage);
+        }
+    };
+
+    private handleError = (error: any, response: request.Response) => {
+        this.logger.error(error);
+        if (response) {
+            this.logger.error(JSON.stringify(response));
+        }
+    }
+
+    private handleNoSubtitlesFound = (contextMessage: string) => {
+        this.logger.info("No subtitle found");
+        this.notifier.notif(`No subtitle found for ${contextMessage}`, NotificationIcon.WARNING, true);
+    }
+
+    private toTitleCase = (str: string): string => {
         return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
     };
 }

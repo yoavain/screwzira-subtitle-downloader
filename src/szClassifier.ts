@@ -67,6 +67,7 @@ export interface ISzClassifier {
     commonWordsInSentences: (s1: string, s2: string, excludeList: string[]) => ICommonWordsInSentenceResponse;
     calculateSimilarityMark: (words: string[]) => number;
     classify: (filenameNoExtension: string, parentFolder: string) => IMovieFileClassification | ITvEpisodeFileClassification;
+    findAlternativeName: (movieName: string) => string;
 }
 
 export class SzClassifier implements ISzClassifier {
@@ -154,4 +155,46 @@ export class SzClassifier implements ISzClassifier {
         }
         return undefined;
     };
+
+    /**
+     * Id movie name ends with a number < 10, assume an alternative name can be in ROMAN representation
+     * @param movieName
+     */
+    public findAlternativeName = (movieName: string): string => {
+        const movieNameParts = movieName.split(" ");
+        if (movieNameParts.length > 1) {
+            const lastMovieNamePart: string = movieNameParts.pop();
+            const sequelNumber = Number(lastMovieNamePart);
+            if (!isNaN(sequelNumber) && sequelNumber < 10) {
+                return `${movieNameParts.join(" ")} ${this.intToRomanUpto9(sequelNumber).toLowerCase()}`;
+            }
+        }
+        return undefined;
+    }
+
+    intToRomanUpto9 = (num: number): string => {
+        switch (num) {
+            case 1:
+                return "I";
+            case 2:
+                return "II";
+            case 3:
+                return "III";
+            case 4:
+                return "IV";
+            case 5:
+                return "V";
+            case 6:
+                return "VI";
+            case 7:
+                return "VII";
+            case 8:
+                return "VIII";
+            case 9:
+                return "IX";
+            default:
+                throw new Error("Unexpected input");
+
+        }
+    }
 }
