@@ -41,7 +41,7 @@ module.exports = {
         "no-eval": "error",
         "no-implied-eval": "error",
         "no-prototype-builtins": "error",
-        "no-sync": 0,
+        "node/no-sync": 0,
         "node/exports-style": ["error", "module.exports"],
         "node/no-unpublished-require": 0,
         "node/no-extraneous-import": 0,
