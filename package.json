@@ -1,6 +1,6 @@
 {
     "name": "screwzira-downloader",
-    "version": "2.8.1",
+    "version": "2.9.0",
     "description": "",
     "main": "_build/index.js",
     "scripts": {
@@ -31,7 +31,7 @@
     ],
     "devDependencies": {
         "@types/cross-spawn": "6.0.2",
-        "@types/fs-extra": "8.1.0",
+        "@types/fs-extra": "9.0.0",
         "@types/jest": "25.2.2",
         "@types/node": "14.0.1",
         "@types/numeral": "0.0.28",
@@ -39,7 +39,7 @@
         "@typescript-eslint/eslint-plugin": "2.33.0",
         "@typescript-eslint/parser": "2.33.0",
         "clean-webpack-plugin": "3.0.0",
-        "copy-webpack-plugin": "5.1.1",
+        "copy-webpack-plugin": "6.0.0",
         "cross-env": "7.0.2",
         "cross-spawn": "7.0.2",
         "eslint": "7.0.0",
@@ -51,7 +51,7 @@
         "lint-staged": "10.2.2",
         "nexe": "3.3.2",
         "prettier": "2.0.5",
-        "ts-jest": "25.5.1",
+        "ts-jest": "26.0.0",
         "ts-node": "8.10.1",
         "typescript": "3.9.2",
         "webpack": "4.43.0",

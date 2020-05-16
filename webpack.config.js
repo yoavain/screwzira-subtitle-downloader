@@ -18,22 +18,24 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new webpack.IgnorePlugin(/\.(css|less)$/),
-        new CopyWebpackPlugin([
-            {
-                from: "node_modules/node-notifier/vendor/snoreToast/snoretoast-x64.exe",
-                to: "../dist/snoretoast-x64.exe",
-                toType: "file"
-            },
-            {
-                from: "resources/bin/screwzira-downloader-launcher.exe",
-                to: "../dist/screwzira-downloader-launcher.exe",
-                toType: "file"
-            },
-            {
-                from: "resources/notif-icons/",
-                to: "../dist/notif-icons/"
-            }
-        ])
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: "node_modules/node-notifier/vendor/snoreToast/snoretoast-x64.exe",
+                    to: "../dist/snoretoast-x64.exe",
+                    toType: "file"
+                },
+                {
+                    from: "resources/bin/screwzira-downloader-launcher.exe",
+                    to: "../dist/screwzira-downloader-launcher.exe",
+                    toType: "file"
+                },
+                {
+                    from: "resources/notif-icons/",
+                    to: "../dist/notif-icons/"
+                }
+            ]
+        })
     ],
     devtool: "source-map"
 };
