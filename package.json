@@ -20,7 +20,7 @@
     "author": "yoavain",
     "license": "ISC",
     "dependencies": {
-        "fs-extra": "9.0.0",
+        "fs-extra": "9.0.1",
         "node-notifier": "7.0.1",
         "numeral": "2.0.6",
         "request": "2.88.2",
