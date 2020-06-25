@@ -5,7 +5,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     mode: "production",
-    entry: "./_compile/index.js",
+    entry: "./src/index.ts",
     target: "node",
     node: {
         __filename: true,
@@ -14,6 +14,23 @@ module.exports = {
     output: {
         path: path.join(__dirname, "_build"),
         filename: "index.js"
+    },
+    module: {
+        rules: [
+            {
+                test: /\.ts$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
+            },
+        ],
+    },
+    resolve: {
+        extensions: ['.ts', '.js'],
+        alias: {
+            "~src": path.resolve(__dirname, 'src'),
+            "~test": path.resolve(__dirname, 'test'),
+            "~resources": path.resolve(__dirname, 'resources')
+        }
     },
     plugins: [
         new CleanWebpackPlugin(),

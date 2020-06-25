@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-import { ISzConfig } from "./szConfig";
-import { ISzLogger } from "./szLogger";
+import { ISzConfig } from "~src/szConfig";
+import { ISzLogger } from "~src/szLogger";
 
 // RegEx
 const episodeRegex = /(.+?)[Ss]?0?(\d+)?[xeE]0?(\d+)/;

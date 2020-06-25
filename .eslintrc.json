@@ -20,7 +20,13 @@
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
-    "plugins": ["node", "@typescript-eslint", "import", "jest", "security"],
+    "plugins": [
+        "node",
+        "@typescript-eslint",
+        "import",
+        "jest",
+        "security"
+    ],
     "extends": [
         "eslint:recommended",
         "plugin:node/recommended",
@@ -30,10 +36,29 @@
         "plugin:@typescript-eslint/recommended",
         "plugin:security/recommended"
     ],
+    "settings": {
+        "import/parsers": {
+            "@typescript-eslint/parser": [
+                ".ts",
+                ".tsx"
+            ]
+        },
+        "import/resolver": {
+            "typescript": {
+                "alwaysTryTypes": true
+            }
+        }
+    },
     "rules": {
         // code
-        "max-params": ["warn", 3],
-        "max-depth": ["error", 3],
+        "max-params": [
+            "warn",
+            3
+        ],
+        "max-depth": [
+            "error",
+            3
+        ],
         "max-statements-per-line": [
             "error",
             {
@@ -73,22 +98,28 @@
         "no-implied-eval": "error",
         "no-prototype-builtins": "error",
         "node/no-sync": 0,
-        "node/exports-style": ["error", "module.exports"],
+        "node/exports-style": [
+            "error",
+            "module.exports"
+        ],
         "node/no-unpublished-require": 0,
         "node/no-extraneous-import": 0,
-        "node/no-deprecated-api": ["warn"],
+        "node/no-deprecated-api": [
+            "warn"
+        ],
         "node/no-missing-require": [
             "error",
             {
-                "tryExtensions": [".ts", ".js", ".d.ts", ".json", ".node"]
+                "tryExtensions": [
+                    ".ts",
+                    ".js",
+                    ".d.ts",
+                    ".json",
+                    ".node"
+                ]
             }
         ],
-        "node/no-missing-import": [
-            "error",
-            {
-                "tryExtensions": [".ts", ".js", ".d.ts", ".json", ".node"]
-            }
-        ],
+        "node/no-missing-import": 0,
         "node/no-unpublished-import": 0,
         "node/no-unsupported-features/es-syntax": 0,
         "import/extensions": [
@@ -101,7 +132,7 @@
         ],
         "import/named": "warn",
         "import/no-duplicates": "error",
-        "import/no-unresolved": ["warn"],
+        "import/no-unresolved": "error",
         "@typescript-eslint/no-unused-vars": "warn",
         // Style
         "max-len": [

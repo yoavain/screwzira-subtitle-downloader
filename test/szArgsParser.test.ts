@@ -1,4 +1,4 @@
-import { ISzArgsParser, SzArgsParser } from "../src/szArgsParser";
+import { ISzArgsParser, SzArgsParser } from "~src/szArgsParser";
 
 const SONARR = "sonarr";
 const INPUT = "input";

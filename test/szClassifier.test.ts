@@ -1,6 +1,6 @@
-import { DIMENSION_MARK, ENCODING_MARK, IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, RIP_MARK, SPECIAL_EDITION_MARK, SzClassifier } from "../src/szClassifier";
-import { ISzConfig, SzConfig } from "../src/szConfig";
-import { ISzLogger } from "../src/szLogger";
+import { DIMENSION_MARK, ENCODING_MARK, IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, RIP_MARK, SPECIAL_EDITION_MARK, SzClassifier } from "~src/szClassifier";
+import { ISzConfig, SzConfig } from "~src/szConfig";
+import { ISzLogger } from "~src/szLogger";
 
 const mockLogger: ISzLogger = {
     setLogLevel() {
