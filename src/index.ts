@@ -1,12 +1,12 @@
 import * as fs from "fs";
 import * as fsextra from "fs-extra";
 import * as path from "path";
-import { IScrewziraUtils, ScrewziraUtils } from "./screwziraUtils";
-import { ISzArgsParser, SzArgsParser } from "./szArgsParser";
-import { IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier } from "./szClassifier";
-import { ISzConfig, SzConfig } from "./szConfig";
-import { ISzLogger, SzLogger } from "./szLogger";
-import { ISzNotifier, NotificationIcon, SzNotifier } from "./szNotifier";
+import { IScrewziraUtils, ScrewziraUtils } from "~src/screwziraUtils";
+import { ISzArgsParser, SzArgsParser } from "~src/szArgsParser";
+import { IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier } from "~src/szClassifier";
+import { ISzConfig, SzConfig } from "~src/szConfig";
+import { ISzLogger, SzLogger } from "~src/szLogger";
+import { ISzNotifier, NotificationIcon, SzNotifier } from "~src/szNotifier";
 
 // Make sure the log directory is there
 fsextra.ensureDirSync(path.resolve(process.env.ProgramData, "Screwzira-Downloader"));

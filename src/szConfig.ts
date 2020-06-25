@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as fsextra from "fs-extra";
-import { ISzLogger } from "./szLogger";
+import { ISzLogger } from "~src/szLogger";
 
 interface IReplacePairs {
     [key: string]: string;

@@ -2,9 +2,9 @@ import * as fs from "fs";
 import numeral from "numeral";
 import * as path from "path";
 import request from "request";
-import { ICommonWordsInSentenceResponse, ISzClassifier } from "./szClassifier";
-import { ISzLogger } from "./szLogger";
-import { ISzNotifier, NotificationIcon } from "./szNotifier";
+import { ICommonWordsInSentenceResponse, ISzClassifier } from "~src/szClassifier";
+import { ISzLogger } from "~src/szLogger";
+import { ISzNotifier, NotificationIcon } from "~src/szNotifier";
 
 export interface IScrewziraUtils {
     // new(logger: ISzLogger, notifier: ISzNotifier, classifier: ISzClassifier): ScrewziraUtils;

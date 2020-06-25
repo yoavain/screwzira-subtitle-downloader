@@ -1,7 +1,7 @@
 import notifier, { NodeNotifier } from "node-notifier";
 import * as path from "path";
 import { execFile } from "child_process";
-import { ISzLogger } from "./szLogger";
+import { ISzLogger } from "~src/szLogger";
 
 const WindowsToaster = notifier.WindowsToaster;
 
