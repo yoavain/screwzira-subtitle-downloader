@@ -11,3 +11,4 @@ installer/*.bat
 /.vscode/
 *.iml
 /coverage/
+/lsp/
