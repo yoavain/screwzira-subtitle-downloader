@@ -42,7 +42,7 @@
         "copy-webpack-plugin": "6.0.3",
         "cross-env": "7.0.2",
         "cross-spawn": "7.0.3",
-        "eslint": "7.4.0",
+        "eslint": "7.5.0",
         "eslint-import-resolver-typescript": "2.0.0",
         "eslint-plugin-import": "2.22.0",
         "eslint-plugin-jest": "23.18.0",
