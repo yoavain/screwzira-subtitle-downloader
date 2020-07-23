@@ -33,7 +33,7 @@
         "@types/cross-spawn": "6.0.2",
         "@types/fs-extra": "9.0.1",
         "@types/jest": "26.0.6",
-        "@types/node": "14.0.24",
+        "@types/node": "14.0.25",
         "@types/numeral": "0.0.28",
         "@types/request": "2.48.5",
         "@typescript-eslint/eslint-plugin": "3.7.0",
