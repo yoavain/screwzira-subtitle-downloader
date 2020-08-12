@@ -20,13 +20,7 @@
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
-    "plugins": [
-        "node",
-        "@typescript-eslint",
-        "import",
-        "jest",
-        "security"
-    ],
+    "plugins": ["node", "@typescript-eslint", "import", "jest", "security"],
     "extends": [
         "eslint:recommended",
         "plugin:node/recommended",
@@ -38,10 +32,7 @@
     ],
     "settings": {
         "import/parsers": {
-            "@typescript-eslint/parser": [
-                ".ts",
-                ".tsx"
-            ]
+            "@typescript-eslint/parser": [".ts", ".tsx"]
         },
         "import/resolver": {
             "typescript": {
@@ -51,14 +42,8 @@
     },
     "rules": {
         // code
-        "max-params": [
-            "warn",
-            3
-        ],
-        "max-depth": [
-            "error",
-            3
-        ],
+        "max-params": ["warn", 6],
+        "max-depth": ["error", 4],
         "max-statements-per-line": [
             "error",
             {
@@ -98,25 +83,14 @@
         "no-implied-eval": "error",
         "no-prototype-builtins": "error",
         "node/no-sync": 0,
-        "node/exports-style": [
-            "error",
-            "module.exports"
-        ],
+        "node/exports-style": ["error", "module.exports"],
         "node/no-unpublished-require": 0,
         "node/no-extraneous-import": 0,
-        "node/no-deprecated-api": [
-            "warn"
-        ],
+        "node/no-deprecated-api": ["warn"],
         "node/no-missing-require": [
             "error",
             {
-                "tryExtensions": [
-                    ".ts",
-                    ".js",
-                    ".d.ts",
-                    ".json",
-                    ".node"
-                ]
+                "tryExtensions": [".ts", ".js", ".d.ts", ".json", ".node"]
             }
         ],
         "node/no-missing-import": 0,
