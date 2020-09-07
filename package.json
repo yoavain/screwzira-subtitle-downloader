@@ -44,7 +44,7 @@
         "eslint-plugin-jest": "24.0.0",
         "eslint-plugin-node": "11.1.0",
         "eslint-plugin-security": "1.4.0",
-        "husky": "4.2.5",
+        "husky": "4.3.0",
         "jest": "26.4.2",
         "lint-staged": "10.3.0",
         "nexe": "3.3.7",
