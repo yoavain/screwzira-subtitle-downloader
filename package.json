@@ -48,7 +48,7 @@
         "jest": "26.4.2",
         "lint-staged": "10.3.0",
         "nexe": "3.3.7",
-        "prettier": "2.1.1",
+        "prettier": "2.1.2",
         "ts-jest": "26.3.0",
         "ts-loader": "8.0.3",
         "ts-node": "9.0.0",
