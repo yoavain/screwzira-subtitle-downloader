@@ -10,6 +10,8 @@
 ![renovate](https://badges.renovateapi.com/github/yoavain/screwzira-subtitle-downloader)
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=yoavain.screwzira-subtitle-downloader)
 
+# Unfortunately www.screwzira.com is currently down, and www.ktuvit.me does not have the API
+
 ## A tool for downloading Hebrew subtitles from screwzira.com using their API
 
 Installer adds right-click context to folders and to mkv/avi/mp4 file types.
