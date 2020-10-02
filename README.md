@@ -10,7 +10,7 @@
 ![renovate](https://badges.renovateapi.com/github/yoavain/screwzira-subtitle-downloader)
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=yoavain.screwzira-subtitle-downloader)
 
-# Unfortunately www.screwzira.com is currently down, and www.ktuvit.me does not have the API
+# Unfortunately www.screwzira.com is currently down<br/>Working on migrating to a new API from www.ktuvit.me
 
 ## A tool for downloading Hebrew subtitles from screwzira.com using their API
 
