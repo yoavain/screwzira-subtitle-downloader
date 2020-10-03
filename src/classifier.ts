@@ -1,7 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
-import { ISzConfig } from "~src/szConfig";
-import { ISzLogger } from "~src/szLogger";
+import { ConfigInterface } from "~src/config";
+import { LoggerInterface } from "~src/logger";
+import { cleanText, splitText } from "~src/stringUtils";
 
 // RegEx
 const episodeRegex = /(.+?)[Ss]?0?(\d+)?[xeE]0?(\d+)/;
@@ -39,65 +40,51 @@ const WORD_WEIGHTS: IWordWeight = {
     "the": COMMON_WORDS_MARK
 };
 
-interface IFileClassification {
+interface FileClassificationInterface {
     type: string;
 }
 
-export interface IMovieFileClassification extends IFileClassification {
+export interface MovieFileClassificationInterface extends FileClassificationInterface {
     movieName: string;
     movieYear: number;
 }
 
-export interface ITvEpisodeFileClassification extends IFileClassification {
+export interface TvEpisodeFileClassificationInterface extends FileClassificationInterface {
     series: string;
     season: number;
     episode: number;
 }
 
-export interface ICommonWordsInSentenceResponse {
+export interface CommonWordsInSentenceResponseInterface {
     commonWords: string[];
     mark: number;
 }
 
-export interface ISzClassifier {
-    // new(logger: ISzLogger, config: ISzConfig): any;
-    cleanText: (text: string) => string;
-    splitText: (text: string) => string[];
+export interface ClassifierInterface {
     isSubtitlesAlreadyExist: (relativePath: string, filenameNoExtension: string) => boolean;
-    commonWordsInSentences: (s1: string, s2: string, excludeList: string[]) => ICommonWordsInSentenceResponse;
+    commonWordsInSentences: (s1: string, s2: string, excludeList: string[]) => CommonWordsInSentenceResponseInterface;
     calculateSimilarityMark: (words: string[]) => number;
-    classify: (filenameNoExtension: string, parentFolder: string) => IMovieFileClassification | ITvEpisodeFileClassification;
+    classify: (filenameNoExtension: string, parentFolder: string) => MovieFileClassificationInterface | TvEpisodeFileClassificationInterface;
     findAlternativeName: (movieName: string) => string;
 }
 
-export class SzClassifier implements ISzClassifier {
-    private readonly logger: ISzLogger;
-    private readonly config: ISzConfig;
+export class Classifier implements ClassifierInterface {
+    private readonly logger: LoggerInterface;
+    private readonly config: ConfigInterface;
 
-    constructor(logger: ISzLogger, config: ISzConfig) {
+    constructor(logger: LoggerInterface, config: ConfigInterface) {
         this.logger = logger;
         this.config = config;
     }
-
-    public cleanText = (text: string): string => {
-        return text
-            .toLowerCase()
-            .replace(/[.|-]/g, " ")
-            .trim();
-    };
-
-    public splitText = (text: string): string[] => {
-        return text.split(" ");
-    };
 
     public isSubtitlesAlreadyExist = (relativePath: string, filenameNoExtension: string): boolean => {
         const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
         return fs.existsSync(destination);
     };
 
-    public commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): ICommonWordsInSentenceResponse => {
-        const split1: string[] = this.splitText(this.cleanText(s1));
-        const split2: string[] = this.splitText(this.cleanText(s2));
+    public commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): CommonWordsInSentenceResponseInterface => {
+        const split1: string[] = splitText(cleanText(s1));
+        const split2: string[] = splitText(cleanText(s2));
 
         const commonWords: string[] = split1.filter((word1) => word1.length > 1 && !excludeList.includes(word1) && split2.includes(word1));
         const mark: number = this.calculateSimilarityMark(commonWords);
@@ -120,13 +107,13 @@ export class SzClassifier implements ISzClassifier {
      * @param filenameNoExtension
      * @param parentFolder
      */
-    public classify = (filenameNoExtension: string, parentFolder: string): IMovieFileClassification | ITvEpisodeFileClassification => {
+    public classify = (filenameNoExtension: string, parentFolder: string): MovieFileClassificationInterface | TvEpisodeFileClassificationInterface => {
         const episodeMatch: RegExpExecArray = episodeRegex.exec(filenameNoExtension);
         if (episodeMatch?.length >= 3 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
             this.logger.verbose(`Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
                 type: "episode",
-                series: this.config.replaceTitleIfNeeded(this.cleanText(episodeMatch[1])),
+                series: this.config.replaceTitleIfNeeded(cleanText(episodeMatch[1])),
                 season: Number(episodeMatch[2]),
                 episode: Number(episodeMatch[3])
             };
@@ -137,7 +124,7 @@ export class SzClassifier implements ISzClassifier {
                 this.logger.verbose(`Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
                     type: "movie",
-                    movieName: this.config.replaceTitleIfNeeded(this.cleanText(movieMatch[1])),
+                    movieName: this.config.replaceTitleIfNeeded(cleanText(movieMatch[1])),
                     movieYear: Number(movieMatch[2])
                 };
             }
@@ -147,7 +134,7 @@ export class SzClassifier implements ISzClassifier {
                     this.logger.verbose(`Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
                     return {
                         type: "movie",
-                        movieName: this.config.replaceTitleIfNeeded(this.cleanText(movieMatchFromParent[1])),
+                        movieName: this.config.replaceTitleIfNeeded(cleanText(movieMatchFromParent[1])),
                         movieYear: Number(movieMatchFromParent[2])
                     };
                 }

@@ -5,7 +5,7 @@ const INPUT = "input";
 const QUIET = "quiet";
 const SONARR_EPISODE_FILE_PATH = "sonarr_episodefile_path";
 
-export interface ISzArgsParser {
+export interface ArgsParserInterface {
     isSonarrMode: () => boolean;
     getInput: () => string;
     isQuiet: () => boolean;
@@ -13,7 +13,7 @@ export interface ISzArgsParser {
     getHelp: () => string;
 }
 
-export class SzArgsParser implements ISzArgsParser {
+export class ArgsParser implements ArgsParserInterface {
     private readonly sonarrMode: boolean;
     private readonly input: string;
     private readonly quiet: boolean;
@@ -22,8 +22,7 @@ export class SzArgsParser implements ISzArgsParser {
     constructor(argv: string[]) {
         if (argv.length >= 2 && (argv[argv.length - 2].endsWith(".exe") || argv[argv.length - 2].endsWith(".js")) && ![SONARR, INPUT, QUIET].includes(argv[argv.length - 1])) {
             this.input = argv[argv.length - 1];
-        }
-        else {
+        } else {
             const indexOfInput: number = argv.indexOf(INPUT);
             if (indexOfInput >= 0 && indexOfInput + 1 < argv.length) {
                 this.input = argv[indexOfInput + 1];

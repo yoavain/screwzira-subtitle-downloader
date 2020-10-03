@@ -1,43 +1,41 @@
 import * as fs from "fs";
 import * as fsextra from "fs-extra";
-import { ISzLogger } from "~src/szLogger";
+import { LoggerInterface } from "~src/logger";
 
-interface IReplacePairs {
+interface ReplacePairsInterface {
     [key: string]: string;
 }
 
-interface IConfig {
+interface ConfigurationInterface {
     logLevel: string;
     extensions: string[];
-    replacePairs: IReplacePairs;
+    replacePairs: ReplacePairsInterface;
 }
 
 const defaultExtensions: string[] = ["mkv", "mp4", "avi"];
-const defaultConf: IConfig = { logLevel: "debug", extensions: defaultExtensions, replacePairs: {} };
+const defaultConf: ConfigurationInterface = { logLevel: "debug", extensions: defaultExtensions, replacePairs: {} };
 
-export interface ISzConfig {
-    // new(confFile: string, logger: ISzLogger): SzConfig;
+export interface ConfigInterface {
     replaceTitleIfNeeded: (text: string) => string;
     getLogLevel: () => string;
     getExtensions: () => string[];
 }
 
-export class SzConfig implements ISzConfig {
+export class Config implements ConfigInterface {
     private readonly logLevel: string;
-    private readonly logger: ISzLogger;
-    private readonly replacePairs: IReplacePairs;
+    private readonly logger: LoggerInterface;
+    private readonly replacePairs: ReplacePairsInterface;
     private readonly extensions: string[];
 
-    constructor(confFile: string, logger: ISzLogger) {
+    constructor(confFile: string, logger: LoggerInterface) {
         this.logger = logger;
         if (!fs.existsSync(confFile)) {
             fsextra.outputJsonSync(confFile, defaultConf);
         }
-        let conf: IConfig;
+        let conf: ConfigurationInterface;
         try {
             conf = fsextra.readJsonSync(confFile);
-        }
-        catch (e) {
+        } catch (e) {
             this.logger.error("Configuration file corrupted. Using default.");
             conf = defaultConf;
         }

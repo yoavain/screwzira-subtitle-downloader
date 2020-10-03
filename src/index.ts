@@ -1,39 +1,41 @@
 import * as fs from "fs";
 import * as fsextra from "fs-extra";
 import * as path from "path";
-import { IScrewziraUtils, ScrewziraUtils } from "~src/screwziraUtils";
-import { ISzArgsParser, SzArgsParser } from "~src/szArgsParser";
-import { IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier } from "~src/szClassifier";
-import { ISzConfig, SzConfig } from "~src/szConfig";
-import { ISzLogger, SzLogger } from "~src/szLogger";
-import { ISzNotifier, NotificationIcon, SzNotifier } from "~src/szNotifier";
+import { ScrewziraParser } from "~src/parsers/screwzira/screwziraParser";
+import { ArgsParser, ArgsParserInterface } from "~src/argsParser";
+import { Logger, LoggerInterface } from "~src/logger";
+import { Notifier, NotifierInterface } from "~src/notifier";
+import { Config } from "~src/config";
+import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
+import { Classifier, ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
+import { ParserInterface } from "~src/parsers/parserInterface";
 
 // Make sure the log directory is there
 fsextra.ensureDirSync(path.resolve(process.env.ProgramData, "Screwzira-Downloader"));
 
 // CLI Args Parser
-const szArgsParser: ISzArgsParser = new SzArgsParser(process.argv);
+const szArgsParser: ArgsParserInterface = new ArgsParser(process.argv);
 
 // Logger
 const logFile: string = path.resolve(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader.log");
-const szLogger: ISzLogger = new SzLogger(logFile);
+const szLogger: LoggerInterface = new Logger(logFile);
 
 // Notifier
-const szNotifier: ISzNotifier = new SzNotifier(szLogger, szArgsParser.getSnoreToastPath(), szArgsParser.isQuiet());
+const szNotifier: NotifierInterface = new Notifier(szLogger, szArgsParser.getSnoreToastPath(), szArgsParser.isQuiet());
 
 // Config
-const confFile: string = path.resolve(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader-config.json");
-const szConfig: ISzConfig = new SzConfig(confFile, szLogger);
+const confFile: string = path.resolve(process.env.ProgramData, "Ktuvit-Downloader", "ktuvit-downloader-config.json");
+const szConfig: Config = new Config(confFile, szLogger);
 szLogger.setLogLevel(szConfig.getLogLevel());
 
 // File classifier
-const szClassifier: ISzClassifier = new SzClassifier(szLogger, szConfig);
+const classifier: ClassifierInterface = new Classifier(szLogger, szConfig);
 
 // Screwzira Utils
-const screwziraUtils: IScrewziraUtils = new ScrewziraUtils(szLogger, szNotifier, szClassifier);
+const screwziraUtils: ParserInterface = new ScrewziraParser(szLogger, szNotifier, classifier);
 
 // handle single file
-const handleSingleFile = (fullpath: string, fileExists: boolean): void => {
+const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<void> => {
     const relativePath: string = fullpath.substr(0, fullpath.lastIndexOf("/"));
     const split: string[] = fullpath.split("/");
     const filename: string = split[split.length - 1];
@@ -41,23 +43,23 @@ const handleSingleFile = (fullpath: string, fileExists: boolean): void => {
     const parentFolder: string = fileExists && split.length > 1 ? split[split.length - 2] : undefined;
 
     // Check if already exists
-    if (szClassifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
+    if (classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
         szLogger.warn("Hebrew subtitles already exist");
         szNotifier.notif("Hebrew subtitles already exist", NotificationIcon.WARNING);
         return;
     }
 
-    const classification: IMovieFileClassification | ITvEpisodeFileClassification = szClassifier.classify(filenameNoExtension, parentFolder);
+    const classification: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = classifier.classify(filenameNoExtension, parentFolder);
 
     szLogger.verbose(`Classification response: ${JSON.stringify(classification)}`);
 
     if (classification?.type === "movie") {
-        const movieFile: IMovieFileClassification = classification as IMovieFileClassification;
-        screwziraUtils.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
+        const movieFile: MovieFileClassificationInterface = classification as MovieFileClassificationInterface;
+        await screwziraUtils.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
     }
     else if (classification?.type === "episode") {
-        const tvEpisode: ITvEpisodeFileClassification = classification as ITvEpisodeFileClassification;
-        screwziraUtils.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
+        const tvEpisode: TvEpisodeFileClassificationInterface = classification as TvEpisodeFileClassificationInterface;
+        await screwziraUtils.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
     }
     else {
         szNotifier.notif("Unable to classify input file as movie or episode", NotificationIcon.FAILED);

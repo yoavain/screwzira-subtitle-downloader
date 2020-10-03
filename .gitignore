@@ -6,6 +6,7 @@ dist/**
 .vs/**
 deploy.bat
 installer/Screwzira-Downloader_*.exe
+installer/Ktuvit-Downloader_*.exe
 installer/*.reg
 installer/*.bat
 /.vscode/

@@ -3,7 +3,7 @@
 Unicode True
 
 ; HM NIS Edit Wizard helper defines
-!define PRODUCT_NAME "Screwzira-Downloader"
+!define PRODUCT_NAME "Ktuvit-Downloader"
 !define PRODUCT_VERSION "$%BUILD_VERSION%"
 !define PRODUCT_PUBLISHER "yoavain"
 !define PRODUCT_WEB_SITE "https://github.com/yoavain/screwzira-subtitle-downloader"
@@ -60,8 +60,8 @@ ShowUnInstDetails show
 
 Section "Main" SEC00
 SetOutPath "$INSTDIR"
-File "..\dist\screwzira-downloader.exe"
-File "..\dist\screwzira-downloader-launcher.exe"
+File "..\dist\ktuvit-downloader.exe"
+File "..\dist\ktuvit-downloader-launcher.exe"
 File "..\dist\snoretoast-x64.exe"
 SectionEnd
 Section "Icons" SEC01
@@ -75,29 +75,29 @@ SectionEnd
 Section "Directory" SEC02
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
-  WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" input "%1"'
+  WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
+  WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
 SectionEnd
 Section "MKV" SEC03
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   ReadRegStr $MkvProgID HKCU "SOFTWARE\Classes\.mkv" ""
-  WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
-  WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" input "%1"'
+  WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
+  WriteRegStr HKLM "SOFTWARE\Classes\$MkvProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
 SectionEnd
 Section "AVI" SEC04
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
     ReadRegStr $AviProgID HKCU "SOFTWARE\Classes\.avi" ""
-    WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
-    WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" input "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
+    WriteRegStr HKLM "SOFTWARE\Classes\$AviProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
 SectionEnd
 Section "MP4" SEC05
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
     ReadRegStr $Mp4ProgID HKCU "SOFTWARE\Classes\.mp4" ""
-    WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\screwzira-downloader-launcher.exe,0'
-    WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\screwzira-downloader-launcher.exe" input "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
+    WriteRegStr HKLM "SOFTWARE\Classes\$Mp4ProgID\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
 SectionEnd
 
 Section -Post
@@ -138,8 +138,8 @@ FunctionEnd
 
 Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}_Uninst.exe"
-  Delete "$INSTDIR\screwzira-downloader.exe"
-  Delete "$INSTDIR\screwzira-downloader-launcher.exe"
+  Delete "$INSTDIR\ktuvit-downloader.exe"
+  Delete "$INSTDIR\ktuvit-downloader-launcher.exe"
   Delete "$INSTDIR\snoretoast-x64.exe"
   RMDir /r "$INSTDIR\notif-icons"
   RMDir "$INSTDIR"

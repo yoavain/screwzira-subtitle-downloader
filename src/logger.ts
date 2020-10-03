@@ -2,8 +2,7 @@ import * as winston from "winston";
 
 const { combine, timestamp, printf, label } = winston.format;
 
-export interface ISzLogger {
-    // new(logFile: string): SzLogger;
+export interface LoggerInterface {
     setLogLevel: (level: string) => void;
     info: (message: string) => void;
     debug: (message: string) => void;
@@ -12,7 +11,7 @@ export interface ISzLogger {
     error: (message: string) => void;
 }
 
-export class SzLogger implements ISzLogger {
+export class Logger implements LoggerInterface {
     private transports: { file: winston.transports.FileTransportInstance };
     private logger: winston.Logger;
 
