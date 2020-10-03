@@ -32,8 +32,6 @@ logger.setLogLevel(config.getLogLevel());
 const classifier: ClassifierInterface = new Classifier(logger, config);
 
 // Ktuvit parser
-logger.info(JSON.stringify({ email: KTUVIT_EMAIL, pass: KTUVIT_PASSWORD }));
-console.log(JSON.stringify({ email: KTUVIT_EMAIL, pass: KTUVIT_PASSWORD }));
 const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier);
 
 // handle single file

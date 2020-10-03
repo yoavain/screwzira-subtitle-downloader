@@ -61,7 +61,7 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/ktuvit-downloader-launcher.exe"
+            "pre-commit": "lint-staged && git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/screwzira-downloader-launcher.exe"
         }
     },
     "lint-staged": {
