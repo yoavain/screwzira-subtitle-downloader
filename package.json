@@ -1,7 +1,7 @@
 {
     "name": "ktuvit-downloader",
     "version": "5.0.0",
-    "description": "",
+    "description": "Download Hebrew subtitles from Ktuvit.me",
     "main": "_build/index.js",
     "scripts": {
         "build": "npm run eslint && npm run type-check && npm run test && npm run webpack && npm run nexe && npm run installer",
