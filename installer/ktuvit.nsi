@@ -66,11 +66,11 @@ File "..\dist\snoretoast-x64.exe"
 SectionEnd
 Section "Icons" SEC01
 SetOutPath "$INSTDIR\notif-icons"
-File "..\dist\notif-icons\ktuvit\sz-logo-300.png"
-File "..\dist\notif-icons\ktuvit\sz-download-300.png"
-File "..\dist\notif-icons\ktuvit\sz-not-found-300.png"
-File "..\dist\notif-icons\ktuvit\sz-failed-300.png"
-File "..\dist\notif-icons\ktuvit\sz-warning-300.png"
+File "..\dist\notif-icons\ktuvit\logo-300.png"
+File "..\dist\notif-icons\ktuvit\download-300.png"
+File "..\dist\notif-icons\ktuvit\not-found-300.png"
+File "..\dist\notif-icons\ktuvit\failed-300.png"
+File "..\dist\notif-icons\ktuvit\warning-300.png"
 SectionEnd
 Section "Directory" SEC02
   SetOutPath "$INSTDIR"

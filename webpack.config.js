@@ -52,8 +52,8 @@ module.exports = {
                     toType: "file"
                 },
                 {
-                    from: "resources/notif-icons/",
-                    to: "../dist/notif-icons/"
+                    from: "resources/notif-icons/ktuvit/",
+                    to: "../dist/notif-icons/ktuvit/"
                 }
             ]
         })
