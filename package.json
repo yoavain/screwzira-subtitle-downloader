@@ -6,7 +6,7 @@
     "scripts": {
         "build": "npm run eslint && npm run type-check && npm run test && npm run webpack && npm run nexe && npm run installer",
         "eslint": "eslint src/ test/",
-        "eslint:fix": "npm run eslint -- --fix",
+        "eslint:fix": "eslint --fix src/ test/",
         "prettier": "prettier --write *.json .eslintrc.json .prettierrc tsconfig.json webpack.config.js",
         "test": "jest --coverage",
         "type-check": "tsc --build tsconfig.all.json",
@@ -66,7 +66,7 @@
     },
     "lint-staged": {
         "*.(ts|js)": [
-            "npm run eslint:fix"
+            "eslint --fix"
         ],
         "*.json": [
             "prettier --write"
