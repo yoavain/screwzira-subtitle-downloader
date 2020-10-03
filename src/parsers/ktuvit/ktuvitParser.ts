@@ -89,7 +89,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             return;
         }
 
-        const success: boolean = await this.downloadFile(movieId, downloadIdentifier, filenameNoExtension, relativePath, contextMessage);
+        const success: boolean = await this.downloadFile(movieId, downloadIdentifier, filenameNoExtension, relativePath);
         if (!success) {
             this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationIcon.FAILED);
             return;
@@ -126,10 +126,12 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             response = await got.post(options);
             if (response.statusCode === 200) {
                 this.cookie = response.headers["set-cookie"];
-            } else {
+            }
+            else {
                 this.handleError(response.error, response);
             }
-        } catch (error) {
+        }
+        catch (error) {
             this.handleError(error, response);
         }
     };
@@ -166,10 +168,12 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             response = await got.post(options);
             if (response.statusCode === 200) {
                 return parseMovieId(response.body.d, movieName, movieYear);
-            } else {
+            }
+            else {
                 this.handleError(response.error, response);
             }
-        } catch (error) {
+        }
+        catch (error) {
             this.handleError(error, response);
         }
     }
@@ -188,10 +192,12 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             response = await got.get(options);
             if (response.statusCode === 200) {
                 return parseMovieSubtitles(response.body);
-            } else {
+            }
+            else {
                 this.handleError(response.error, response);
             }
-        } catch (error) {
+        }
+        catch (error) {
             this.handleError(error, response);
         }
     }
@@ -225,15 +231,17 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             response = await got.post(options);
             if (response.statusCode === 200) {
                 return parseDownloadIdentifier(response.body.d);
-            } else {
+            }
+            else {
                 this.logger.error(response.error);
             }
-        } catch (error) {
+        }
+        catch (error) {
             this.logger.error(error);
         }
     };
 
-    private downloadFile = async (movieId: string, downloadIdentifier: string, filenameNoExtension: string, relativePath: string, contextMessage: string): Promise<boolean> => {
+    private downloadFile = async (movieId: string, downloadIdentifier: string, filenameNoExtension: string, relativePath: string): Promise<boolean> => {
         this.logger.info(`Downloading: ${downloadIdentifier}`);
         const options: OptionsOfBufferResponseBody = {
             url: `${this.baseUrl}/Services/DownloadFile.ashx?DownloadIdentifier=${downloadIdentifier}`,
@@ -256,10 +264,12 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
                 this.logger.verbose(`writing response to ${destination}`);
                 fs.writeFileSync(destination, response.body);
                 return true;
-            } else {
+            }
+            else {
                 this.logger.error(response.error);
             }
-        } catch (error) {
+        }
+        catch (error) {
             this.logger.error(error);
         }
     };

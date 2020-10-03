@@ -22,7 +22,8 @@ export class ArgsParser implements ArgsParserInterface {
     constructor(argv: string[]) {
         if (argv.length >= 2 && (argv[argv.length - 2].endsWith(".exe") || argv[argv.length - 2].endsWith(".js")) && ![SONARR, INPUT, QUIET].includes(argv[argv.length - 1])) {
             this.input = argv[argv.length - 1];
-        } else {
+        }
+        else {
             const indexOfInput: number = argv.indexOf(INPUT);
             if (indexOfInput >= 0 && indexOfInput + 1 < argv.length) {
                 this.input = argv[indexOfInput + 1];
