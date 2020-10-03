@@ -6,7 +6,7 @@ import { Logger, LoggerInterface } from "~src/logger";
 import { Notifier, NotifierInterface } from "~src/notifier";
 import { Config } from "~src/config";
 import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
-import { Classifier, ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
+import { Classifier, ClassifierInterface, FileClassification, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { ParserInterface } from "~src/parsers/parserInterface";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 
@@ -53,11 +53,11 @@ const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<
 
     logger.verbose(`Classification response: ${JSON.stringify(classification)}`);
 
-    if (classification?.type === "movie") {
+    if (classification?.type === FileClassification.MOVIE) {
         const movieFile: MovieFileClassificationInterface = classification as MovieFileClassificationInterface;
         await ktuvitParser.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
     }
-    else if (classification?.type === "episode") {
+    else if (classification?.type === FileClassification.EPISODE) {
         const tvEpisode: TvEpisodeFileClassificationInterface = classification as TvEpisodeFileClassificationInterface;
         await ktuvitParser.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
     }

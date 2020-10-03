@@ -40,8 +40,13 @@ const WORD_WEIGHTS: IWordWeight = {
     "the": COMMON_WORDS_MARK
 };
 
+export enum FileClassification {
+    MOVIE= "movie",
+    EPISODE = "episode"
+}
+
 interface FileClassificationInterface {
-    type: string;
+    type: FileClassification;
 }
 
 export interface MovieFileClassificationInterface extends FileClassificationInterface {
@@ -112,7 +117,7 @@ export class Classifier implements ClassifierInterface {
         if (episodeMatch?.length >= 3 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
             this.logger.verbose(`Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
-                type: "episode",
+                type: FileClassification.EPISODE,
                 series: this.config.replaceTitleIfNeeded(cleanText(episodeMatch[1])),
                 season: Number(episodeMatch[2]),
                 episode: Number(episodeMatch[3])
@@ -123,7 +128,7 @@ export class Classifier implements ClassifierInterface {
             if (movieMatch?.length >= 2 && movieMatch[1] && movieMatch[2]) {
                 this.logger.verbose(`Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
-                    type: "movie",
+                    type: FileClassification.MOVIE,
                     movieName: this.config.replaceTitleIfNeeded(cleanText(movieMatch[1])),
                     movieYear: Number(movieMatch[2])
                 };
@@ -133,7 +138,7 @@ export class Classifier implements ClassifierInterface {
                 if (movieMatchFromParent?.length >= 2 && movieMatchFromParent[1] && movieMatchFromParent[2]) {
                     this.logger.verbose(`Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
                     return {
-                        type: "movie",
+                        type: FileClassification.MOVIE,
                         movieName: this.config.replaceTitleIfNeeded(cleanText(movieMatchFromParent[1])),
                         movieYear: Number(movieMatchFromParent[2])
                     };
