@@ -18,23 +18,23 @@ const szArgsParser: ArgsParserInterface = new ArgsParser(process.argv);
 
 // Logger
 const logFile: string = path.resolve(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader.log");
-const szLogger: LoggerInterface = new Logger(logFile);
+const logger: LoggerInterface = new Logger(logFile);
 
 // Notifier
-const szNotifier: NotifierInterface = new Notifier(szLogger, szArgsParser.getSnoreToastPath(), szArgsParser.isQuiet());
+const notifier: NotifierInterface = new Notifier(logger, szArgsParser.getSnoreToastPath(), szArgsParser.isQuiet());
 
 // Config
 const confFile: string = path.resolve(process.env.ProgramData, "Ktuvit-Downloader", "ktuvit-downloader-config.json");
-const szConfig: Config = new Config(confFile, szLogger);
-szLogger.setLogLevel(szConfig.getLogLevel());
+const config: Config = new Config(confFile, logger);
+logger.setLogLevel(config.getLogLevel());
 
 // File classifier
-const classifier: ClassifierInterface = new Classifier(szLogger, szConfig);
+const classifier: ClassifierInterface = new Classifier(logger, config);
 
 // Ktuvit parser
 const email: string = process.env.KTUVIT_EMAIL;
 const password: string = process.env.KTUVIT_EMAIL;
-const ktuvitParser: ParserInterface = new KtuvitParser(email, password, szLogger, szNotifier, classifier);
+const ktuvitParser: ParserInterface = new KtuvitParser(email, password, logger, notifier, classifier);
 
 // handle single file
 const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<void> => {
@@ -46,14 +46,14 @@ const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<
 
     // Check if already exists
     if (classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
-        szLogger.warn("Hebrew subtitles already exist");
-        szNotifier.notif("Hebrew subtitles already exist", NotificationIcon.WARNING);
+        logger.warn("Hebrew subtitles already exist");
+        notifier.notif("Hebrew subtitles already exist", NotificationIcon.WARNING);
         return;
     }
 
     const classification: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = classifier.classify(filenameNoExtension, parentFolder);
 
-    szLogger.verbose(`Classification response: ${JSON.stringify(classification)}`);
+    logger.verbose(`Classification response: ${JSON.stringify(classification)}`);
 
     if (classification?.type === "movie") {
         const movieFile: MovieFileClassificationInterface = classification as MovieFileClassificationInterface;
@@ -64,7 +64,7 @@ const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<
         await ktuvitParser.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
     }
     else {
-        szNotifier.notif("Unable to classify input file as movie or episode", NotificationIcon.FAILED);
+        notifier.notif("Unable to classify input file as movie or episode", NotificationIcon.FAILED);
     }
 };
 
@@ -86,31 +86,31 @@ const handleFolder = (dir: string): void => {
     fs.readdirSync(dir).forEach((file) => {
         const fullPath: string = path.join(dir, file).replace(/\\/g, "/");
         if (fs.lstatSync(fullPath).isDirectory()) {
-            szLogger.verbose(`Handling sub-folder ${fullPath}`);
+            logger.verbose(`Handling sub-folder ${fullPath}`);
             handleFolder(fullPath);
         }
         else {
-            if (szConfig.getExtensions().includes(getFileExtension(fullPath))) {
+            if (config.getExtensions().includes(getFileExtension(fullPath))) {
                 noFileHandled = false;
                 const waitTimeMs: number = getWaitTimeMs();
-                szLogger.verbose(`Waiting ${waitTimeMs}ms to handle file ${fullPath}`);
+                logger.verbose(`Waiting ${waitTimeMs}ms to handle file ${fullPath}`);
                 setTimeout(handleSingleFile, waitTimeMs, fullPath, true);
             }
         }
     });
     if (noFileHandled) {
-        szLogger.warn("No file handled");
-        szNotifier.notif("No file handled", NotificationIcon.WARNING);
+        logger.warn("No file handled");
+        notifier.notif("No file handled", NotificationIcon.WARNING);
     }
 };
 
 // Main
-szLogger.verbose(`Argv: ${process.argv.join(" ")}`);
-szLogger.verbose(`Sonar Mode: ${szArgsParser.isSonarrMode()}`);
-szLogger.verbose(`Quiet Mode: ${szArgsParser.isQuiet()}`);
+logger.verbose(`Argv: ${process.argv.join(" ")}`);
+logger.verbose(`Sonar Mode: ${szArgsParser.isSonarrMode()}`);
+logger.verbose(`Quiet Mode: ${szArgsParser.isQuiet()}`);
 const input: string = szArgsParser.getInput();
 if (typeof input === "string") {
-    szLogger.info(`*** Looking for subtitle for "${input}" ***`);
+    logger.info(`*** Looking for subtitle for "${input}" ***`);
     const fullpath: string = input.replace(/\\/g, "/");
     try {
         if (fs.lstatSync(fullpath).isDirectory()) {
@@ -126,13 +126,13 @@ if (typeof input === "string") {
             handleSingleFile(fullpath, false);
         }
         else {
-            szLogger.error(`Cannot handle ${fullpath}`);
+            logger.error(`Cannot handle ${fullpath}`);
         }
     }
 }
 else {
-    szLogger.error("*** Missing input file ***");
-    szNotifier.notif("Missing input file", NotificationIcon.FAILED);
+    logger.error("*** Missing input file ***");
+    notifier.notif("Missing input file", NotificationIcon.FAILED);
     // tslint:disable-next-line:no-console
     console.log(`Usage:${szArgsParser.getHelp()}`);
 }
