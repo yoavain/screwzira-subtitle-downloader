@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import * as fsextra from "fs-extra";
 import * as path from "path";
-import { ScrewziraParser } from "~src/parsers/screwzira/screwziraParser";
 import { ArgsParser, ArgsParserInterface } from "~src/argsParser";
 import { Logger, LoggerInterface } from "~src/logger";
 import { Notifier, NotifierInterface } from "~src/notifier";
@@ -9,6 +8,7 @@ import { Config } from "~src/config";
 import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
 import { Classifier, ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { ParserInterface } from "~src/parsers/parserInterface";
+import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 
 // Make sure the log directory is there
 fsextra.ensureDirSync(path.resolve(process.env.ProgramData, "Screwzira-Downloader"));
@@ -31,8 +31,10 @@ szLogger.setLogLevel(szConfig.getLogLevel());
 // File classifier
 const classifier: ClassifierInterface = new Classifier(szLogger, szConfig);
 
-// Screwzira Utils
-const screwziraUtils: ParserInterface = new ScrewziraParser(szLogger, szNotifier, classifier);
+// Ktuvit parser
+const email: string = process.env.KTUVIT_EMAIL;
+const password: string = process.env.KTUVIT_EMAIL;
+const ktuvitParser: ParserInterface = new KtuvitParser(email, password, szLogger, szNotifier, classifier);
 
 // handle single file
 const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<void> => {
@@ -55,11 +57,11 @@ const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<
 
     if (classification?.type === "movie") {
         const movieFile: MovieFileClassificationInterface = classification as MovieFileClassificationInterface;
-        await screwziraUtils.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
+        await ktuvitParser.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
     }
     else if (classification?.type === "episode") {
         const tvEpisode: TvEpisodeFileClassificationInterface = classification as TvEpisodeFileClassificationInterface;
-        await screwziraUtils.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
+        await ktuvitParser.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
     }
     else {
         szNotifier.notif("Unable to classify input file as movie or episode", NotificationIcon.FAILED);

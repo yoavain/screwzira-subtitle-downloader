@@ -41,6 +41,9 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
+      env:
+        KTUVIT_EMAIL: ${{ secrets.KTUVIT_EMAIL }}
+        KTUVIT_PASSWORD: ${{ secrets.KTUVIT_PASSWORD }}
 
     - name: Release
       uses: softprops/action-gh-release@v1
