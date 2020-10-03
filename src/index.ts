@@ -11,13 +11,13 @@ import { ParserInterface } from "~src/parsers/parserInterface";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 
 // Make sure the log directory is there
-fsextra.ensureDirSync(path.resolve(process.env.ProgramData, "Screwzira-Downloader"));
+fsextra.ensureDirSync(path.resolve(process.env.ProgramData, "Ktuvit-Downloader"));
 
 // CLI Args Parser
 const argsParser: ArgsParserInterface = new ArgsParser(process.argv);
 
 // Logger
-const logFile: string = path.resolve(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader.log");
+const logFile: string = path.resolve(process.env.ProgramData, "Ktuvit-Downloader", "ktuvit-downloader.log");
 const logger: LoggerInterface = new Logger(logFile);
 
 // Notifier
