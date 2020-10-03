@@ -11,7 +11,7 @@
         "test": "jest --coverage",
         "type-check": "tsc --build tsconfig.all.json",
         "webpack": "webpack",
-        "nexe": "nexe -t windows-x64-12.18.2 -o dist/screwzira-downloader.exe",
+        "nexe": "nexe -t windows-x64-12.18.2 -o dist/ktuvit-downloader.exe",
         "check-csc": "ts-node -e \"require(\"\"./launcher/launcherCompiler\"\").checkCscInPath(true)\"",
         "rebuild-launcher": "csc /t:winexe /out:resources/bin/ktuvit-downloader-launcher.exe /win32icon:launcher/launcher.ico launcher/launcher.cs",
         "start": "ts-node src/index.ts",
@@ -61,7 +61,7 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "lint-staged && git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/screwzira-downloader-launcher.exe"
+            "pre-commit": "lint-staged && git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/ktuvit-downloader-launcher.exe"
         }
     },
     "lint-staged": {
