@@ -6,7 +6,7 @@
     "scripts": {
         "build": "npm run eslint && npm run type-check && npm run test && npm run webpack && npm run nexe && npm run installer",
         "eslint": "eslint src/ test/",
-        "eslint:fix": "eslint --fix src/ test/",
+        "eslint:fix": "npm run eslint -- --fix",
         "prettier": "prettier --write *.json .eslintrc.json .prettierrc tsconfig.json webpack.config.js",
         "test": "jest --coverage",
         "type-check": "tsc --build tsconfig.all.json",
@@ -61,7 +61,7 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "lint-staged && git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/ktuvit-downloader-launcher.exe"
+            "pre-commit": "git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-csc && npm run rebuild-launcher && git add resources/bin/ktuvit-downloader-launcher.exe"
         }
     },
     "lint-staged": {
