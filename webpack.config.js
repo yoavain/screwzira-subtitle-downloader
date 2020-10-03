@@ -35,8 +35,8 @@ module.exports = {
     plugins: [
         new CleanWebpackPlugin(),
         new webpack.DefinePlugin({
-            "process.env.KTUVIT_EMAIL": JSON.stringify(process.env.KTUVIT_EMAIL),
-            "process.env.KTUVIT_PASSWORD": JSON.stringify(process.env.KTUVIT_PASSWORD)
+            KTUVIT_EMAIL: JSON.stringify(process.env.KTUVIT_EMAIL),
+            KTUVIT_PASSWORD: JSON.stringify(process.env.KTUVIT_PASSWORD)
         }),
         new webpack.IgnorePlugin(/\.(css|less)$/),
         new CopyWebpackPlugin({

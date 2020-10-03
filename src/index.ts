@@ -14,14 +14,14 @@ import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 fsextra.ensureDirSync(path.resolve(process.env.ProgramData, "Screwzira-Downloader"));
 
 // CLI Args Parser
-const szArgsParser: ArgsParserInterface = new ArgsParser(process.argv);
+const argsParser: ArgsParserInterface = new ArgsParser(process.argv);
 
 // Logger
 const logFile: string = path.resolve(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader.log");
 const logger: LoggerInterface = new Logger(logFile);
 
 // Notifier
-const notifier: NotifierInterface = new Notifier(logger, szArgsParser.getSnoreToastPath(), szArgsParser.isQuiet());
+const notifier: NotifierInterface = new Notifier(logger, argsParser.getSnoreToastPath(), argsParser.isQuiet());
 
 // Config
 const confFile: string = path.resolve(process.env.ProgramData, "Ktuvit-Downloader", "ktuvit-downloader-config.json");
@@ -32,9 +32,9 @@ logger.setLogLevel(config.getLogLevel());
 const classifier: ClassifierInterface = new Classifier(logger, config);
 
 // Ktuvit parser
-const email: string = process.env.KTUVIT_EMAIL;
-const password: string = process.env.KTUVIT_EMAIL;
-const ktuvitParser: ParserInterface = new KtuvitParser(email, password, logger, notifier, classifier);
+logger.info(JSON.stringify({ email: KTUVIT_EMAIL, pass: KTUVIT_PASSWORD }));
+console.log(JSON.stringify({ email: KTUVIT_EMAIL, pass: KTUVIT_PASSWORD }));
+const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier);
 
 // handle single file
 const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<void> => {
@@ -106,9 +106,9 @@ const handleFolder = (dir: string): void => {
 
 // Main
 logger.verbose(`Argv: ${process.argv.join(" ")}`);
-logger.verbose(`Sonar Mode: ${szArgsParser.isSonarrMode()}`);
-logger.verbose(`Quiet Mode: ${szArgsParser.isQuiet()}`);
-const input: string = szArgsParser.getInput();
+logger.verbose(`Sonar Mode: ${argsParser.isSonarrMode()}`);
+logger.verbose(`Quiet Mode: ${argsParser.isQuiet()}`);
+const input: string = argsParser.getInput();
 if (typeof input === "string") {
     logger.info(`*** Looking for subtitle for "${input}" ***`);
     const fullpath: string = input.replace(/\\/g, "/");
@@ -134,5 +134,5 @@ else {
     logger.error("*** Missing input file ***");
     notifier.notif("Missing input file", NotificationIcon.FAILED);
     // tslint:disable-next-line:no-console
-    console.log(`Usage:${szArgsParser.getHelp()}`);
+    console.log(`Usage:${argsParser.getHelp()}`);
 }
