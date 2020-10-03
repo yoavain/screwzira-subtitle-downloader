@@ -35,7 +35,8 @@ export class Config implements ConfigInterface {
         let conf: ConfigurationInterface;
         try {
             conf = fsextra.readJsonSync(confFile);
-        } catch (e) {
+        }
+        catch (e) {
             this.logger.error("Configuration file corrupted. Using default.");
             conf = defaultConf;
         }

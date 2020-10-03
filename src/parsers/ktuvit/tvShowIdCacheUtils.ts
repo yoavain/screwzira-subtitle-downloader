@@ -26,7 +26,8 @@ export class TvShowIdCache {
                 this.cache.setKey(tvShowName, tvShowId);
                 this.cache.save(true);
             }
-        } catch (e) {
+        }
+        catch (e) {
             // do nothing
         }
         return tvShowId;

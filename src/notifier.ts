@@ -26,7 +26,8 @@ export class Notifier implements NotifierInterface {
             this.logger.debug(`snoreToastPath: ${snoreToastPath}`);
             // @ts-ignore
             this.notifier = new WindowsToaster({ withFallback: false, customPath: snoreToastPath });
-        } else {
+        }
+        else {
             this.logger.debug("Quiet Mode. Not initializing notifier");
         }
     }

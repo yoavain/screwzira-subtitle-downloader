@@ -96,11 +96,13 @@ export class ScrewziraParser extends CommonParser implements ParserInterface {
                 this.logger.verbose(`writing response to ${destination}`);
                 fs.writeFileSync(destination, response.body);
                 this.notifier.notif(`Successfully downloaded Subtitles for ${contextMessage}`, NotificationIcon.DOWNLOAD);
-            } else {
+            }
+            else {
                 this.logger.error(response.error);
                 this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationIcon.FAILED);
             }
-        } catch (error) {
+        }
+        catch (error) {
             this.logger.error(error);
             this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationIcon.FAILED);
         }
@@ -131,10 +133,12 @@ export class ScrewziraParser extends CommonParser implements ParserInterface {
                 }
 
                 this.handleNoSubtitlesFound(contextMessage);
-            } else {
+            }
+            else {
                 this.handleError(response.error, response);
             }
-        } catch (error) {
+        }
+        catch (error) {
             this.handleError(error, response);
         }
     }
