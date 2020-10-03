@@ -47,8 +47,8 @@ module.exports = {
                     toType: "file"
                 },
                 {
-                    from: "resources/bin/screwzira-downloader-launcher.exe",
-                    to: "../dist/screwzira-downloader-launcher.exe",
+                    from: "resources/bin/ktuvit-downloader-launcher.exe",
+                    to: "../dist/ktuvit-downloader-launcher.exe",
                     toType: "file"
                 },
                 {
