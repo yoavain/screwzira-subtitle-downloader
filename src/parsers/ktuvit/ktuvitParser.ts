@@ -3,8 +3,8 @@ import type { Subtitle } from "~src/parsers/commonParser";
 import { CommonParser } from "~src/parsers/commonParser";
 import { parseDownloadIdentifier, parseMovieId, parseMovieSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
 import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
+import * as fs from "fs";
 import * as path from "path";
-import fs from "fs";
 import type { OptionsOfBufferResponseBody, OptionsOfJSONResponseBody, OptionsOfTextResponseBody } from "got";
 import got from "got";
 import type { ParserInterface } from "~src/parsers/parserInterface";
@@ -50,7 +50,6 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         this.password = password;
     }
 
-    // eslint-disable-next-line no-unused-vars
     async handleMovie(movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string): Promise<void> {
         const contextMessage = `movie "${toTitleCase(movieName)}" (${movieYear})`;
         this.logger.info(`Handling ${contextMessage}`);
@@ -102,10 +101,9 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
 
 
     // eslint-disable-next-line no-unused-vars
-    handleEpisode(series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string): Promise<void> {
-        return Promise.resolve(undefined);
+    async handleEpisode(series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string): Promise<void> {
+        return undefined;
     }
-
 
     private login = async (email: string, password: string): Promise<void> => {
         const options: OptionsOfJSONResponseBody = {
