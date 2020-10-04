@@ -1,8 +1,8 @@
+import { cleanText, splitText } from "~src/stringUtils";
 import * as fs from "fs";
 import * as path from "path";
-import { ConfigInterface } from "~src/config";
-import { LoggerInterface } from "~src/logger";
-import { cleanText, splitText } from "~src/stringUtils";
+import type { ConfigInterface } from "~src/config";
+import type { LoggerInterface } from "~src/logger";
 
 // RegEx
 const episodeRegex = /(.+?)[Ss]?0?(\d+)?[xeE]0?(\d+)/;

@@ -1,4 +1,5 @@
-import { ArgsParser, ArgsParserInterface } from "~src/argsParser";
+import type { ArgsParserInterface } from "~src/argsParser";
+import { ArgsParser } from "~src/argsParser";
 
 const SONARR = "sonarr";
 const INPUT = "input";

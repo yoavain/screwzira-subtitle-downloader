@@ -1,5 +1,5 @@
-import { GetMovieResponse } from "~src/parsers/ktuvit/ktuvitParser";
-import { Subtitle } from "~src/parsers/commonParser";
+import type { Subtitle } from "~src/parsers/commonParser";
+import type { GetMovieResponse } from "~src/parsers/ktuvit/ktuvitParser";
 
 export const parseMovieId = (queryBody: string, movieName: string, movieYear: number): string => {
     const results: GetMovieResponse[] = queryBody && JSON.parse(queryBody).Films;

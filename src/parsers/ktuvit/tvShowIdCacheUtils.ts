@@ -1,6 +1,6 @@
-import { Logger } from "~src/logger";
 import type { Cache } from "flat-cache";
 import * as flatCache from "flat-cache";
+import type { Logger } from "~src/logger";
 
 export type FetchFunction = () => Promise<string>
 

@@ -1,13 +1,15 @@
-import { LoggerInterface } from "~src/logger";
-import { NotifierInterface } from "~src/notifier";
-import { ClassifierInterface } from "~src/classifier";
 import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
-import { ParserInterface } from "~src/parsers/parserInterface";
 import { toTitleCase } from "~src/stringUtils";
-import { CommonParser, Subtitle } from "~src/parsers/commonParser";
+import type { Subtitle } from "~src/parsers/commonParser";
+import { CommonParser } from "~src/parsers/commonParser";
 import * as fs from "fs";
 import * as path from "path";
-import got, { OptionsOfBufferResponseBody, OptionsOfJSONResponseBody } from "got";
+import type { OptionsOfBufferResponseBody, OptionsOfJSONResponseBody } from "got";
+import got from "got";
+import type { LoggerInterface } from "~src/logger";
+import type { NotifierInterface } from "~src/notifier";
+import type { ClassifierInterface } from "~src/classifier";
+import type { ParserInterface } from "~src/parsers/parserInterface";
 
 export class ScrewziraParser extends CommonParser implements ParserInterface {
     private readonly baseUrl: string = "http://api.screwzira.com";

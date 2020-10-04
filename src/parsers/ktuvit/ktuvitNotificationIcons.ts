@@ -1,4 +1,4 @@
-import { NotificationIconsInterface } from "~src/parsers/notificationIconsInterface";
+import type { NotificationIconsInterface } from "~src/parsers/notificationIconsInterface";
 
 export const KtuvitNotificationIcons: NotificationIconsInterface = {
     LOGO: "ktuvit/logo-300.png",

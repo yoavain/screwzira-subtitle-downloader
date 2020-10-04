@@ -108,6 +108,7 @@
         "import/no-duplicates": "error",
         "import/no-unresolved": "error",
         "@typescript-eslint/no-unused-vars": "warn",
+        "@typescript-eslint/consistent-type-imports": ["error", { "prefer": "type-imports" }],
         // Style
         "max-len": [
             "error",

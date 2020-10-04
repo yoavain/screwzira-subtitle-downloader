@@ -1,4 +1,4 @@
-import { NotificationIconsInterface } from "~src/parsers/notificationIconsInterface";
+import type { NotificationIconsInterface } from "~src/parsers/notificationIconsInterface";
 
 export const ScrewziraNotificationIcons: NotificationIconsInterface = {
     LOGO: "screwzira/logo-300.png",

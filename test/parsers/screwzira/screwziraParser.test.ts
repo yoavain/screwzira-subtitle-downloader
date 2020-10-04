@@ -6,14 +6,15 @@ const mockFsWriteFileSync = jest.fn((destination, response) => {
 });
 fs.writeFileSync = mockFsWriteFileSync;
 
-import { ParserInterface } from "~src/parsers/parserInterface";
-import * as path from "path";
+import type { ClassifierInterface } from "~src/classifier";
+import { Classifier } from "~src/classifier";
 import { ScrewziraParser } from "~src/parsers/screwzira/screwziraParser";
-import { Classifier, ClassifierInterface } from "~src/classifier";
-import { LoggerInterface } from "~src/logger";
-import { NotifierInterface } from "~src/notifier";
-import { ConfigInterface } from "~src/config";
 import { MockConfig, MockLogger, MockNotifier } from "~test/__mocks__";
+import * as path from "path";
+import type { ParserInterface } from "~src/parsers/parserInterface";
+import type { LoggerInterface } from "~src/logger";
+import type { NotifierInterface } from "~src/notifier";
+import type { ConfigInterface } from "~src/config";
 
 describe("Test screwzira parser", () => {
     it.skip("Test fetch file", async () => {

@@ -5,24 +5,14 @@
         "esModuleInterop": true,
         "allowJs": true,
         "target": "es6",
-        "lib": [
-            "es6",
-            "es2017"
-        ],
+        "lib": ["es6", "es2017"],
         "baseUrl": ".",
         "paths": {
-            "~src/*": [
-                "src/*"
-            ],
-            "~test/*": [
-                "test/*"
-            ],
-            "~resources/*": [
-                "resources/*"
-            ]
-        }
+            "~src/*": ["src/*"],
+            "~test/*": ["test/*"],
+            "~resources/*": ["resources/*"]
+        },
+        "importsNotUsedAsValues": "error"
     },
-    "include": [
-        "./src/**/*"
-    ]
+    "include": ["./src/**/*"]
 }

@@ -1,9 +1,10 @@
-import notifier, { NodeNotifier } from "node-notifier";
+import { ScrewziraNotificationIcons } from "~src/parsers/screwzira/screwziraNotificationIcons";
+import type { NodeNotifier } from "node-notifier";
+import notifier from "node-notifier";
 import * as path from "path";
 import { execFile } from "child_process";
-import { LoggerInterface } from "~src/logger";
-import { NotificationIcon, NotificationIconsInterface } from "~src/parsers/notificationIconsInterface";
-import { ScrewziraNotificationIcons } from "~src/parsers/screwzira/screwziraNotificationIcons";
+import type { LoggerInterface } from "~src/logger";
+import type { NotificationIcon, NotificationIconsInterface } from "~src/parsers/notificationIconsInterface";
 
 const WindowsToaster = notifier.WindowsToaster;
 

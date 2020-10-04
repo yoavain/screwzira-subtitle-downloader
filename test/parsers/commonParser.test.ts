@@ -1,9 +1,11 @@
-import { LoggerInterface } from "~src/logger";
-import { NotifierInterface } from "~src/notifier";
-import { ConfigInterface } from "~src/config";
-import { Classifier, ClassifierInterface } from "~src/classifier";
-import { CommonParser, Subtitle } from "~src/parsers/commonParser";
+import type { ClassifierInterface } from "~src/classifier";
+import { Classifier } from "~src/classifier";
+import type { Subtitle } from "~src/parsers/commonParser";
+import { CommonParser } from "~src/parsers/commonParser";
 import { MockConfig, MockLogger, MockNotifier } from "~test/__mocks__";
+import type { LoggerInterface } from "~src/logger";
+import type { NotifierInterface } from "~src/notifier";
+import type { ConfigInterface } from "~src/config";
 
 describe("Test CommonParser", () => {
     it("Test findClosestMatch", () => {

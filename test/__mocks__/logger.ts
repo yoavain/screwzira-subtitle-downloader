@@ -1,4 +1,4 @@
-import { LoggerInterface } from "~src/logger";
+import type { LoggerInterface } from "~src/logger";
 
 export class MockLogger implements LoggerInterface {
     setLogLevel = () => null;

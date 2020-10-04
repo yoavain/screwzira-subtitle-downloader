@@ -1,9 +1,9 @@
-import { LoggerInterface } from "~src/logger";
-import { NotifierInterface } from "~src/notifier";
-import { ClassifierInterface, CommonWordsInSentenceResponseInterface } from "~src/classifier";
 import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
 import numeral from "numeral";
 import { cleanText, splitText } from "~src/stringUtils";
+import type { LoggerInterface } from "~src/logger";
+import type { NotifierInterface } from "~src/notifier";
+import type { ClassifierInterface, CommonWordsInSentenceResponseInterface } from "~src/classifier";
 
 export interface Subtitle {
     name: string;

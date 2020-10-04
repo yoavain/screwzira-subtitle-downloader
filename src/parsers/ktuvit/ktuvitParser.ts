@@ -1,14 +1,16 @@
-import { ParserInterface } from "~src/parsers/parserInterface";
-import { LoggerInterface } from "~src/logger";
-import { NotifierInterface } from "~src/notifier";
-import { ClassifierInterface } from "~src/classifier";
 import { toTitleCase } from "~src/stringUtils";
-import { CommonParser, Subtitle } from "~src/parsers/commonParser";
-import got, { OptionsOfBufferResponseBody, OptionsOfJSONResponseBody, OptionsOfTextResponseBody } from "got";
+import type { Subtitle } from "~src/parsers/commonParser";
+import { CommonParser } from "~src/parsers/commonParser";
 import { parseDownloadIdentifier, parseMovieId, parseMovieSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
 import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
-import path from "path";
+import * as path from "path";
 import fs from "fs";
+import type { OptionsOfBufferResponseBody, OptionsOfJSONResponseBody, OptionsOfTextResponseBody } from "got";
+import got from "got";
+import type { ParserInterface } from "~src/parsers/parserInterface";
+import type { LoggerInterface } from "~src/logger";
+import type { NotifierInterface } from "~src/notifier";
+import type { ClassifierInterface } from "~src/classifier";
 
 export type GetMovieResponse = {
     EngName: string,

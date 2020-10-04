@@ -7,13 +7,14 @@ const mockFsWriteFileSync = jest.fn((destination, response) => {
 fs.writeFileSync = mockFsWriteFileSync;
 
 import * as path from "path";
-import { ParserInterface } from "~src/parsers/parserInterface";
-import { Classifier, ClassifierInterface } from "~src/classifier";
-import { LoggerInterface } from "~src/logger";
-import { NotifierInterface } from "~src/notifier";
-import { ConfigInterface } from "~src/config";
+import type { ClassifierInterface } from "~src/classifier";
+import { Classifier } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 import { MockConfig, MockLogger, MockNotifier } from "~test/__mocks__";
+import type { ParserInterface } from "~src/parsers/parserInterface";
+import type { LoggerInterface } from "~src/logger";
+import type { NotifierInterface } from "~src/notifier";
+import type { ConfigInterface } from "~src/config";
 
 describe("Test ktuvit parser", () => {
     it("Test fetch file", async () => {

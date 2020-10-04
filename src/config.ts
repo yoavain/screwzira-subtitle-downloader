@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as fsextra from "fs-extra";
-import { LoggerInterface } from "~src/logger";
+import type { LoggerInterface } from "~src/logger";
 
 interface ReplacePairsInterface {
     [key: string]: string;

@@ -1,15 +1,8 @@
-import {
-    Classifier,
-    ClassifierInterface,
-    DIMENSION_MARK,
-    ENCODING_MARK,
-    MovieFileClassificationInterface,
-    RIP_MARK,
-    SPECIAL_EDITION_MARK,
-    TvEpisodeFileClassificationInterface
-} from "~src/classifier";
-import { Config, ConfigInterface } from "~src/config";
-import { LoggerInterface } from "~src/logger";
+import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
+import { Classifier, DIMENSION_MARK, ENCODING_MARK, RIP_MARK, SPECIAL_EDITION_MARK } from "~src/classifier";
+import type { ConfigInterface } from "~src/config";
+import { Config } from "~src/config";
+import type { LoggerInterface } from "~src/logger";
 
 const mockLogger: LoggerInterface = {
     setLogLevel() {

@@ -1,14 +1,18 @@
+import type { ArgsParserInterface } from "~src/argsParser";
+import { ArgsParser } from "~src/argsParser";
+import type { LoggerInterface } from "~src/logger";
+import { Logger } from "~src/logger";
+import type { NotifierInterface } from "~src/notifier";
+import { Notifier } from "~src/notifier";
+import { Config } from "~src/config";
+import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
+import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
+import { Classifier, FileClassification } from "~src/classifier";
+import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 import * as fs from "fs";
 import * as fsextra from "fs-extra";
 import * as path from "path";
-import { ArgsParser, ArgsParserInterface } from "~src/argsParser";
-import { Logger, LoggerInterface } from "~src/logger";
-import { Notifier, NotifierInterface } from "~src/notifier";
-import { Config } from "~src/config";
-import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
-import { Classifier, ClassifierInterface, FileClassification, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
-import { ParserInterface } from "~src/parsers/parserInterface";
-import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
+import type { ParserInterface } from "~src/parsers/parserInterface";
 
 // Make sure the log directory is there
 fsextra.ensureDirSync(path.resolve(process.env.ProgramData, "Ktuvit-Downloader"));
