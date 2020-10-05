@@ -62,7 +62,6 @@ export class CommonParser {
     }
 
     protected handleNoSubtitlesFound = (contextMessage: string) => {
-        this.logger.info("No subtitle found");
         this.notifier.notif(`No subtitle found for ${contextMessage}`, NotificationType.WARNING, true);
     }
 }

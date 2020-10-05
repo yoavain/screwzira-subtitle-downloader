@@ -48,7 +48,6 @@ const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<
 
     // Check if already exists
     if (classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
-        logger.warn("Hebrew subtitles already exist");
         notifier.notif("Hebrew subtitles already exist", NotificationType.WARNING);
         return;
     }
@@ -99,7 +98,6 @@ const handleFolder = (dir: string): void => {
         }
     });
     if (noFileHandled) {
-        logger.warn("No file handled");
         notifier.notif("No file handled", NotificationType.WARNING);
     }
 };
@@ -131,7 +129,6 @@ if (typeof input === "string") {
     }
 }
 else {
-    logger.error("*** Missing input file ***");
     notifier.notif("Missing input file", NotificationType.FAILED);
     // tslint:disable-next-line:no-console
     console.log(`Usage:${argsParser.getHelp()}`);

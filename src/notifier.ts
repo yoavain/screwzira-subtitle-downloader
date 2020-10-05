@@ -54,9 +54,10 @@ export class Notifier implements NotifierInterface {
         }
     }
 
-    public notif = (message: string, notificationIcon: NotificationType, openLog?: boolean) => {
-        const icon: string = getNotificationIcon(notificationIcon);
+    public notif = (message: string, notificationType: NotificationType, openLog?: boolean) => {
+        const icon: string = getNotificationIcon(notificationType);
         this.logger.verbose(`Looking for icon in: ${path.join(ICONS_PATH, icon)}`);
+        this.logNotification(message, notificationType);
         if (this.notifier) {
             const notification: Notification = {
                 title: PROGRAM_TITLE,
@@ -74,6 +75,21 @@ export class Notifier implements NotifierInterface {
         }
         else {
             this.logger.info(`Quiet Mode. Skipping notification message: ${message}`);
+        }
+    };
+
+    private logNotification = (message: string, notificationType: NotificationType) => {
+        switch (notificationType) {
+            case NotificationType.LOGO:
+            case NotificationType.DOWNLOAD:
+                this.logger.info(message);
+                break;
+            case NotificationType.WARNING:
+            case NotificationType.NOT_FOUND:
+                this.logger.warn(message);
+                break;
+            case NotificationType.FAILED:
+                this.logger.error(message);
         }
     };
 }

@@ -91,7 +91,6 @@ export class ScrewziraParser extends CommonParser implements ParserInterface {
             if (response.statusCode === 200) {
                 // Check if already exists
                 if (this.classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
-                    this.logger.warn("Hebrew subtitles already exist");
                     this.notifier.notif(`Hebrew subtitles already exist for ${contextMessage}`, NotificationType.WARNING);
                     return;
                 }
