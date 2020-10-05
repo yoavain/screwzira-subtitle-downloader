@@ -9,6 +9,8 @@ const episodeRegex = /(.+?)[Ss]?0?(\d+)?[xeE]0?(\d+)/;
 const movieRegex = /([ .\w']+?)[. ](\d{4})[. ]/;
 const movieParentRegex = /((?:[^(]+))\s+(?:\((\d+)\))/;
 
+export const SUBTITLES_SUFFIX = "Hebrew.srt";
+
 interface IWordWeight {
     [key: string]: number;
 }
@@ -83,7 +85,7 @@ export class Classifier implements ClassifierInterface {
     }
 
     public isSubtitlesAlreadyExist = (relativePath: string, filenameNoExtension: string): boolean => {
-        const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
+        const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${SUBTITLES_SUFFIX}`);
         return fs.existsSync(destination);
     };
 
