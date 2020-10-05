@@ -9,13 +9,16 @@ export interface LoggerInterface {
     verbose: (message: string) => void;
     warn: (message: string) => void;
     error: (message: string) => void;
+    getLogFileLocation: () => string;
 }
 
 export class Logger implements LoggerInterface {
+    private readonly logFile: string;
     private transports: { file: winston.transports.FileTransportInstance };
     private logger: winston.Logger;
 
     constructor(logFile: string) {
+        this.logFile = logFile;
         this.transports = {
             file: new winston.transports.File({ filename: logFile })
         };
@@ -55,6 +58,10 @@ export class Logger implements LoggerInterface {
     public error = (message: string): void => {
         this.log("error", message);
     };
+
+    public getLogFileLocation = (): string => {
+        return this.logFile;
+    }
 
     private log = (level: string, message: string): void => {
         this.logger.log(level, message);

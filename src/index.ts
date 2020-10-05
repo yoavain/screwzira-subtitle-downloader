@@ -3,9 +3,8 @@ import { ArgsParser } from "~src/argsParser";
 import type { LoggerInterface } from "~src/logger";
 import { Logger } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
-import { Notifier } from "~src/notifier";
+import { NotificationType, Notifier } from "~src/notifier";
 import { Config } from "~src/config";
-import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
@@ -13,22 +12,23 @@ import * as fs from "fs";
 import * as fsextra from "fs-extra";
 import * as path from "path";
 import type { ParserInterface } from "~src/parsers/parserInterface";
+import { PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PROGRAM_NAME } from "~src/commonConsts";
 
 // Make sure the log directory is there
-fsextra.ensureDirSync(path.resolve(process.env.ProgramData, "Ktuvit-Downloader"));
+fsextra.ensureDirSync(path.resolve(process.env.ProgramData, PROGRAM_NAME));
 
 // CLI Args Parser
 const argsParser: ArgsParserInterface = new ArgsParser(process.argv);
 
 // Logger
-const logFile: string = path.resolve(process.env.ProgramData, "Ktuvit-Downloader", "ktuvit-downloader.log");
+const logFile: string = path.resolve(process.env.ProgramData, PROGRAM_NAME, PROGRAM_LOG_FILENAME);
 const logger: LoggerInterface = new Logger(logFile);
 
 // Notifier
 const notifier: NotifierInterface = new Notifier(logger, argsParser.getSnoreToastPath(), argsParser.isQuiet());
 
 // Config
-const confFile: string = path.resolve(process.env.ProgramData, "Ktuvit-Downloader", "ktuvit-downloader-config.json");
+const confFile: string = path.resolve(process.env.ProgramData, PROGRAM_NAME, PROGRAM_CONFIG_FILENAME);
 const config: Config = new Config(confFile, logger);
 logger.setLogLevel(config.getLogLevel());
 
@@ -49,7 +49,7 @@ const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<
     // Check if already exists
     if (classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
         logger.warn("Hebrew subtitles already exist");
-        notifier.notif("Hebrew subtitles already exist", NotificationIcon.WARNING);
+        notifier.notif("Hebrew subtitles already exist", NotificationType.WARNING);
         return;
     }
 
@@ -64,7 +64,7 @@ const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<
         await ktuvitParser.handleEpisode(classification, filenameNoExtension, relativePath);
     }
     else {
-        notifier.notif("Unable to classify input file as movie or episode", NotificationIcon.FAILED);
+        notifier.notif("Unable to classify input file as movie or episode", NotificationType.FAILED);
     }
 };
 
@@ -100,7 +100,7 @@ const handleFolder = (dir: string): void => {
     });
     if (noFileHandled) {
         logger.warn("No file handled");
-        notifier.notif("No file handled", NotificationIcon.WARNING);
+        notifier.notif("No file handled", NotificationType.WARNING);
     }
 };
 
@@ -132,7 +132,7 @@ if (typeof input === "string") {
 }
 else {
     logger.error("*** Missing input file ***");
-    notifier.notif("Missing input file", NotificationIcon.FAILED);
+    notifier.notif("Missing input file", NotificationType.FAILED);
     // tslint:disable-next-line:no-console
     console.log(`Usage:${argsParser.getHelp()}`);
 }

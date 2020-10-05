@@ -1,8 +1,8 @@
-import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
 import numeral from "numeral";
 import { cleanText, splitText } from "~src/stringUtils";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
+import { NotificationType } from "~src/notifier";
 import type { ClassifierInterface, CommonWordsInSentenceResponseInterface } from "~src/classifier";
 
 export interface Subtitle {
@@ -63,6 +63,6 @@ export class CommonParser {
 
     protected handleNoSubtitlesFound = (contextMessage: string) => {
         this.logger.info("No subtitle found");
-        this.notifier.notif(`No subtitle found for ${contextMessage}`, NotificationIcon.WARNING, true);
+        this.notifier.notif(`No subtitle found for ${contextMessage}`, NotificationType.WARNING, true);
     }
 }

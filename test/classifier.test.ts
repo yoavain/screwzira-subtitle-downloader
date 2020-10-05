@@ -3,27 +3,9 @@ import { Classifier, DIMENSION_MARK, ENCODING_MARK, RIP_MARK, SPECIAL_EDITION_MA
 import type { ConfigInterface } from "~src/config";
 import { Config } from "~src/config";
 import type { LoggerInterface } from "~src/logger";
+import { MockLogger } from "./__mocks__";
 
-const mockLogger: LoggerInterface = {
-    setLogLevel() {
-        jest.fn();
-    },
-    info() {
-        jest.fn();
-    },
-    debug() {
-        jest.fn();
-    },
-    verbose() {
-        jest.fn();
-    },
-    warn() {
-        jest.fn();
-    },
-    error() {
-        jest.fn();
-    }
-};
+const mockLogger: LoggerInterface = new MockLogger();
 
 const mockConfig: ConfigInterface = new Config("resources/screwzira-downloader-config.json", mockLogger);
 

@@ -1,28 +1,49 @@
-import { ScrewziraNotificationIcons } from "~src/parsers/screwzira/screwziraNotificationIcons";
 import type { NodeNotifier } from "node-notifier";
 import notifier from "node-notifier";
 import * as path from "path";
 import { execFile } from "child_process";
 import type { LoggerInterface } from "~src/logger";
-import type { NotificationIcon, NotificationIconsInterface } from "~src/parsers/notificationIconsInterface";
+import { PROGRAM_TITLE } from "~src/commonConsts";
 
 const WindowsToaster = notifier.WindowsToaster;
 
 declare type NodeNotifier = any;
 declare type Notification = any;
 
+const ICONS_PATH = "notif-icons";
+export enum NotificationType {
+    LOGO = "LOGO",
+    DOWNLOAD = "DOWNLOAD",
+    WARNING = "WARNING",
+    NOT_FOUND = "NOT_FOUND",
+    FAILED = "FAILED"
+}
+
+const getNotificationIcon = (notificationType: NotificationType): string => {
+    switch (notificationType) {
+        case NotificationType.LOGO:
+            return "logo-300.png";
+        case NotificationType.DOWNLOAD:
+            return "download-300.png";
+        case NotificationType.WARNING:
+            return "warning-300.png";
+        case NotificationType.NOT_FOUND:
+            return "not-found-300.png";
+        case NotificationType.FAILED:
+            return "failed-300.png";
+    }
+}; 
+
 export interface NotifierInterface {
-    notif: (message: string, notificationIcon: NotificationIcon, openLog?: boolean) => void;
+    notif: (message: string, notificationIcon: NotificationType, openLog?: boolean) => void;
 }
 
 export class Notifier implements NotifierInterface {
     private readonly logger: LoggerInterface;
     private readonly notifier: NodeNotifier;
-    private readonly notificationIcons: NotificationIconsInterface;
 
     constructor(logger: LoggerInterface, snoreToastPath: string, quiet: boolean) {
         this.logger = logger;
-        this.notificationIcons = ScrewziraNotificationIcons;
         if (!quiet) {
             this.logger.debug(`snoreToastPath: ${snoreToastPath}`);
             // @ts-ignore
@@ -33,21 +54,21 @@ export class Notifier implements NotifierInterface {
         }
     }
 
-    public notif = (message: string, notificationIcon: NotificationIcon, openLog?: boolean) => {
-        const icon: string = this.notificationIcons[notificationIcon];
-        this.logger.verbose(`Looking for icon in: ${path.join("notif-icons", icon)}`);
+    public notif = (message: string, notificationIcon: NotificationType, openLog?: boolean) => {
+        const icon: string = getNotificationIcon(notificationIcon);
+        this.logger.verbose(`Looking for icon in: ${path.join(ICONS_PATH, icon)}`);
         if (this.notifier) {
             const notification: Notification = {
-                title: "Screwzira Subtitle Downloader",
+                title: PROGRAM_TITLE,
                 message,
-                icon: path.join("notif-icons", icon)
+                icon: path.join(ICONS_PATH, icon)
             };
             if (openLog) {
                 notification.actions = ["Log", "Close"];
             }
             this.notifier.notify(notification);
             this.notifier.on("log", () => {
-                const file = path.join(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader.log");
+                const file = this.logger.getLogFileLocation();
                 execFile(file, { shell: "powershell" });
             });
         }

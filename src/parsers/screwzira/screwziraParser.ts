@@ -1,4 +1,3 @@
-import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
 import { toTitleCase } from "~src/stringUtils";
 import type { Subtitle } from "~src/parsers/commonParser";
 import { CommonParser } from "~src/parsers/commonParser";
@@ -8,6 +7,7 @@ import type { OptionsOfBufferResponseBody, OptionsOfJSONResponseBody } from "got
 import got from "got";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
+import { NotificationType } from "~src/notifier";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 
@@ -92,23 +92,23 @@ export class ScrewziraParser extends CommonParser implements ParserInterface {
                 // Check if already exists
                 if (this.classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
                     this.logger.warn("Hebrew subtitles already exist");
-                    this.notifier.notif(`Hebrew subtitles already exist for ${contextMessage}`, NotificationIcon.WARNING);
+                    this.notifier.notif(`Hebrew subtitles already exist for ${contextMessage}`, NotificationType.WARNING);
                     return;
                 }
 
                 const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
                 this.logger.verbose(`writing response to ${destination}`);
                 fs.writeFileSync(destination, response.body);
-                this.notifier.notif(`Successfully downloaded Subtitles for ${contextMessage}`, NotificationIcon.DOWNLOAD);
+                this.notifier.notif(`Successfully downloaded Subtitles for ${contextMessage}`, NotificationType.DOWNLOAD);
             }
             else {
                 this.logger.error(response.error);
-                this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationIcon.FAILED);
+                this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationType.FAILED);
             }
         }
         catch (error) {
             this.logger.error(error);
-            this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationIcon.FAILED);
+            this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationType.FAILED);
         }
     };
 

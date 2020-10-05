@@ -2,7 +2,6 @@ import { toTitleCase } from "~src/stringUtils";
 import type { Subtitle } from "~src/parsers/commonParser";
 import { CommonParser } from "~src/parsers/commonParser";
 import { parseDownloadIdentifier, parseMovieId, parseMovieSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
-import { NotificationIcon } from "~src/parsers/notificationIconsInterface";
 import * as fs from "fs";
 import * as path from "path";
 import type { OptionsOfBufferResponseBody, OptionsOfJSONResponseBody, OptionsOfTextResponseBody } from "got";
@@ -10,6 +9,7 @@ import got from "got";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
+import { NotificationType } from "~src/notifier";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 
 export type GetMovieResponse = {
@@ -59,7 +59,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             await this.login(this.email, this.password);
         }
         if (!this.cookie) {
-            this.notifier.notif(`Failed to login to ${this.baseUrl}`, NotificationIcon.FAILED, true);
+            this.notifier.notif(`Failed to login to ${this.baseUrl}`, NotificationType.FAILED, true);
             return;
         }
 
@@ -71,13 +71,13 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             }
         }
         if (!movieId) {
-            this.notifier.notif(`Unable to find movie ID for ${contextMessage}`, NotificationIcon.FAILED, true);
+            this.notifier.notif(`Unable to find movie ID for ${contextMessage}`, NotificationType.FAILED, true);
             return;
         }
 
         const subtitles: Subtitle[] = await this.getMovieSubtitles(movieId, contextMessage);
         if (!subtitles) {
-            this.notifier.notif(`Unable to find subtitles for ${contextMessage}`, NotificationIcon.FAILED, true);
+            this.notifier.notif(`Unable to find subtitles for ${contextMessage}`, NotificationType.FAILED, true);
             return;
         }
 
@@ -87,17 +87,17 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
 
         const downloadIdentifier: string = await this.getDownloadIdentifier(movieId, subtitleId, contextMessage);
         if (!downloadIdentifier) {
-            this.notifier.notif(`Unable to find subtitle download identifier for ${contextMessage}`, NotificationIcon.FAILED, true);
+            this.notifier.notif(`Unable to find subtitle download identifier for ${contextMessage}`, NotificationType.FAILED, true);
             return;
         }
 
         const success: boolean = await this.downloadFile(movieId, downloadIdentifier, filenameNoExtension, relativePath, contextMessage);
         if (!success) {
-            this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationIcon.FAILED);
+            this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationType.FAILED);
             return;
         }
 
-        this.notifier.notif(`Successfully downloaded Subtitles for ${contextMessage}`, NotificationIcon.DOWNLOAD);
+        this.notifier.notif(`Successfully downloaded Subtitles for ${contextMessage}`, NotificationType.DOWNLOAD);
     }
 
 
