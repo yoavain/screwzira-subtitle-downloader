@@ -4,7 +4,7 @@ import type { GetMovieResponse } from "~src/parsers/ktuvit/ktuvitParser";
 export const parseMovieId = (queryBody: string, movieName: string, movieYear: number): string => {
     const results: GetMovieResponse[] = queryBody && JSON.parse(queryBody).Films;
     if (Array.isArray(results)) {
-        return results.find((result: GetMovieResponse) => result.EngName === movieName && result.ReleaseDate === movieYear)?.ID;
+        return results.find((result: GetMovieResponse) => result.EngName?.toLowerCase() === movieName.toLowerCase() && result.ReleaseDate === movieYear)?.ID;
     }
 };
 

@@ -66,8 +66,9 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         let movieId: string = await this.findMovieId(movieName, movieYear, contextMessage);
         if (!movieId) {
             const alternativeName: string = this.classifier.findAlternativeName(movieName);
-            if (movieName !== alternativeName) {
-                movieId = await this.findMovieId(alternativeName, movieYear, contextMessage);
+            if (alternativeName && movieName !== alternativeName) {
+                const alternativeContextMessage = `movie "${toTitleCase(alternativeName)}" (${movieYear})`; 
+                movieId = await this.findMovieId(alternativeName, movieYear, alternativeContextMessage);
             }
         }
         if (!movieId) {
