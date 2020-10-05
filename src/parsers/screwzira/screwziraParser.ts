@@ -8,7 +8,7 @@ import type { OptionsOfBufferResponseBody, OptionsOfJSONResponseBody } from "got
 import got from "got";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
-import type { ClassifierInterface } from "~src/classifier";
+import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 
 export class ScrewziraParser extends CommonParser implements ParserInterface {
@@ -18,7 +18,8 @@ export class ScrewziraParser extends CommonParser implements ParserInterface {
         super(logger, notifier, classifier);
     }
 
-    public handleMovie = async (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string): Promise<void> => {
+    public handleMovie = async (movie: MovieFileClassificationInterface, filenameNoExtension: string, relativePath: string): Promise<void> => {
+        const { movieName, movieYear } = movie;
         const contextMessage = `movie "${toTitleCase(movieName)}" (${movieYear})`;
         this.logger.info(`Handling ${contextMessage}`);
         const options: OptionsOfJSONResponseBody = {
@@ -42,7 +43,8 @@ export class ScrewziraParser extends CommonParser implements ParserInterface {
         await this.requestSubtitles(options, excludeList, filenameNoExtension, relativePath, contextMessage, true);
     };
 
-    public handleEpisode = async (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string): Promise<void> => {
+    public handleEpisode = async (tvEpisode: TvEpisodeFileClassificationInterface, filenameNoExtension: string, relativePath: string): Promise<void> => {
+        const { series, season, episode } = tvEpisode;
         const contextMessage = `series "${toTitleCase(series)}" season ${season} episode ${episode}`;
         this.logger.info(`Handling ${contextMessage}`);
         const options: OptionsOfJSONResponseBody = {

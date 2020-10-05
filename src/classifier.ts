@@ -52,11 +52,13 @@ interface FileClassificationInterface {
 }
 
 export interface MovieFileClassificationInterface extends FileClassificationInterface {
+    type: FileClassification.MOVIE,
     movieName: string;
     movieYear: number;
 }
 
 export interface TvEpisodeFileClassificationInterface extends FileClassificationInterface {
+    type: FileClassification.EPISODE,
     series: string;
     season: number;
     episode: number;

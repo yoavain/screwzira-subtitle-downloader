@@ -7,8 +7,8 @@ const mockFsWriteFileSync = jest.fn((destination, response) => {
 fs.writeFileSync = mockFsWriteFileSync;
 
 import * as path from "path";
-import type { ClassifierInterface } from "~src/classifier";
-import { Classifier, SUBTITLES_SUFFIX } from "~src/classifier";
+import type { ClassifierInterface, MovieFileClassificationInterface } from "~src/classifier";
+import { Classifier, FileClassification, SUBTITLES_SUFFIX } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 import { MockConfig, MockLogger, MockNotifier } from "~test/__mocks__";
 import type { ParserInterface } from "~src/parsers/parserInterface";
@@ -31,10 +31,13 @@ describe("Test ktuvit parser", () => {
         // Ktuvit Parser
         const ktuvitParser: ParserInterface = new KtuvitParser(email, password, logger, notifier, classifier);
 
-        const movieName = "Frozen";
-        const movieYear = 2013;
+        const movieFile: MovieFileClassificationInterface = {
+            type: FileClassification.MOVIE,
+            movieName: "Frozen",
+            movieYear : 2013
+        };
         const filenameNoExtension = "Frozen.2013.1080p.BluRay.x264.SPARKS";
-        await ktuvitParser.handleMovie(movieName, movieYear, filenameNoExtension, ".");
+        await ktuvitParser.handleMovie(movieFile, filenameNoExtension, ".");
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
         expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${SUBTITLES_SUFFIX}`));
         expect(fs.writeFileSync.mock.calls[0][1].length).toBeGreaterThan(0);

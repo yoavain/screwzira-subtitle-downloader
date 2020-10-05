@@ -1,4 +1,6 @@
+import type { MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
+
 export interface ParserInterface {
-    handleMovie: (movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string) => Promise<void>;
-    handleEpisode: (series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string) => Promise<void>;
+    handleMovie: (movie: MovieFileClassificationInterface, filenameNoExtension: string, relativePath: string) => Promise<void>;
+    handleEpisode: (tvEpisode: TvEpisodeFileClassificationInterface, filenameNoExtension: string, relativePath: string) => Promise<void>;
 }

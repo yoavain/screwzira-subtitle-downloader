@@ -58,12 +58,10 @@ const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<
     logger.verbose(`Classification response: ${JSON.stringify(classification)}`);
 
     if (classification?.type === FileClassification.MOVIE) {
-        const movieFile: MovieFileClassificationInterface = classification as MovieFileClassificationInterface;
-        await ktuvitParser.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
+        await ktuvitParser.handleMovie(classification, filenameNoExtension, relativePath);
     }
     else if (classification?.type === FileClassification.EPISODE) {
-        const tvEpisode: TvEpisodeFileClassificationInterface = classification as TvEpisodeFileClassificationInterface;
-        await ktuvitParser.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
+        await ktuvitParser.handleEpisode(classification, filenameNoExtension, relativePath);
     }
     else {
         notifier.notif("Unable to classify input file as movie or episode", NotificationIcon.FAILED);

@@ -10,7 +10,7 @@ import got from "got";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
-import type { ClassifierInterface } from "~src/classifier";
+import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 
 export type GetMovieResponse = {
     EngName: string,
@@ -50,7 +50,8 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         this.password = password;
     }
 
-    async handleMovie(movieName: string, movieYear: number, filenameNoExtension: string, relativePath: string): Promise<void> {
+    async handleMovie(movieFile: MovieFileClassificationInterface, filenameNoExtension: string, relativePath: string): Promise<void> {
+        const { movieName, movieYear } = movieFile;
         const contextMessage = `movie "${toTitleCase(movieName)}" (${movieYear})`;
         this.logger.info(`Handling ${contextMessage}`);
 
@@ -101,7 +102,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
 
 
     // eslint-disable-next-line no-unused-vars
-    async handleEpisode(series: string, season: number, episode: number, filenameNoExtension: string, relativePath: string): Promise<void> {
+    async handleEpisode(tvEpisode: TvEpisodeFileClassificationInterface, filenameNoExtension: string, relativePath: string): Promise<void> {
         return undefined;
     }
 

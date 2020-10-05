@@ -6,8 +6,8 @@ const mockFsWriteFileSync = jest.fn((destination, response) => {
 });
 fs.writeFileSync = mockFsWriteFileSync;
 
-import type { ClassifierInterface } from "~src/classifier";
-import { Classifier } from "~src/classifier";
+import type { ClassifierInterface, MovieFileClassificationInterface } from "~src/classifier";
+import { Classifier, FileClassification } from "~src/classifier";
 import { ScrewziraParser } from "~src/parsers/screwzira/screwziraParser";
 import { MockConfig, MockLogger, MockNotifier } from "~test/__mocks__";
 import * as path from "path";
@@ -28,7 +28,12 @@ describe("Test screwzira parser", () => {
         // Screwzira Parser
         const screwziraParser: ParserInterface = new ScrewziraParser(logger, notifier, classifier);
 
-        await screwziraParser.handleMovie("Frozen", 2013, "Frozen.2013.1080p.BluRay.x264-HebDub", ".");
+        const movieFile: MovieFileClassificationInterface = {
+            type: FileClassification.MOVIE,
+            movieName: "Frozen",
+            movieYear : 2013
+        };
+        await screwziraParser.handleMovie(movieFile, "Frozen.2013.1080p.BluRay.x264-HebDub", ".");
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
         expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "Frozen.2013.1080p.BluRay.x264-HebDub.Hebrew.srt"));
         expect(fs.writeFileSync.mock.calls[0][1].length).toBeGreaterThan(0);
