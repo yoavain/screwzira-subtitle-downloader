@@ -9,10 +9,10 @@ export const parseMovieId = (queryBody: string, movieName: string, movieYear: nu
 };
 
 export const parseMovieSubtitles = (pageBody: string): Subtitle[] => {
-    const subsSplitRegex = /<tr>(.+?)<\/tr>/mgs;
+    const subsSplitRegex = new RegExp("<tr>(.+?)</tr>", "mgs");
     const subtitleSections: RegExpMatchArray = pageBody.match(subsSplitRegex);
     return subtitleSections?.reduce((acc: Subtitle[], part: string) => {
-        const parseSubRegex = /<div style="float.+?>\s+(.+?)<br \/>.+?data-subtitle-id="(.+?)"/mgs;
+        const parseSubRegex = new RegExp("<div style=\"float.+?>\\s+(.+?)<br />.+?data-subtitle-id=\"(.+?)\"", "mgs");
         const parsedSubtitleInfo = parseSubRegex.exec(part);
         if (parsedSubtitleInfo && parsedSubtitleInfo.length >= 3) {
             acc.push({
