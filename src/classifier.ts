@@ -43,7 +43,7 @@ const WORD_WEIGHTS: IWordWeight = {
 };
 
 export enum FileClassification {
-    MOVIE= "movie",
+    MOVIE = "movie",
     EPISODE = "episode"
 }
 
