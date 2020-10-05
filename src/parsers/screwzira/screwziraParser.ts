@@ -18,8 +18,8 @@ export class ScrewziraParser extends CommonParser implements ParserInterface {
         super(logger, notifier, classifier);
     }
 
-    public handleMovie = async (movie: MovieFileClassificationInterface, filenameNoExtension: string, relativePath: string): Promise<void> => {
-        const { movieName, movieYear } = movie;
+    public handleMovie = async (movie: MovieFileClassificationInterface): Promise<void> => {
+        const { filenameNoExtension, relativePath, movieName, movieYear } = movie;
         const contextMessage = `movie "${toTitleCase(movieName)}" (${movieYear})`;
         this.logger.info(`Handling ${contextMessage}`);
         const options: OptionsOfJSONResponseBody = {
@@ -43,8 +43,8 @@ export class ScrewziraParser extends CommonParser implements ParserInterface {
         await this.requestSubtitles(options, excludeList, filenameNoExtension, relativePath, contextMessage, true);
     };
 
-    public handleEpisode = async (tvEpisode: TvEpisodeFileClassificationInterface, filenameNoExtension: string, relativePath: string): Promise<void> => {
-        const { series, season, episode } = tvEpisode;
+    public handleEpisode = async (tvEpisode: TvEpisodeFileClassificationInterface): Promise<void> => {
+        const { filenameNoExtension, relativePath, series, season, episode } = tvEpisode;
         const contextMessage = `series "${toTitleCase(series)}" season ${season} episode ${episode}`;
         this.logger.info(`Handling ${contextMessage}`);
         const options: OptionsOfJSONResponseBody = {

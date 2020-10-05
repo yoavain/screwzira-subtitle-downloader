@@ -50,8 +50,8 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         this.password = password;
     }
 
-    async handleMovie(movieFile: MovieFileClassificationInterface, filenameNoExtension: string, relativePath: string): Promise<void> {
-        const { movieName, movieYear } = movieFile;
+    async handleMovie(movie: MovieFileClassificationInterface): Promise<void> {
+        const { filenameNoExtension, relativePath, movieName, movieYear } = movie;
         const contextMessage = `movie "${toTitleCase(movieName)}" (${movieYear})`;
         this.logger.info(`Handling ${contextMessage}`);
 
@@ -102,7 +102,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
 
 
     // eslint-disable-next-line no-unused-vars
-    async handleEpisode(tvEpisode: TvEpisodeFileClassificationInterface, filenameNoExtension: string, relativePath: string): Promise<void> {
+    async handleEpisode(tvEpisode: TvEpisodeFileClassificationInterface): Promise<void> {
         return undefined;
     }
 

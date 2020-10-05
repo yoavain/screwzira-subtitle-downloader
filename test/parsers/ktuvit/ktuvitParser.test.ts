@@ -31,13 +31,15 @@ describe("Test ktuvit parser", () => {
         // Ktuvit Parser
         const ktuvitParser: ParserInterface = new KtuvitParser(email, password, logger, notifier, classifier);
 
+        const filenameNoExtension = "Frozen.2013.1080p.BluRay.x264.SPARKS";
         const movieFile: MovieFileClassificationInterface = {
+            filenameNoExtension: filenameNoExtension,
+            relativePath: ".",
             type: FileClassification.MOVIE,
             movieName: "Frozen",
             movieYear : 2013
         };
-        const filenameNoExtension = "Frozen.2013.1080p.BluRay.x264.SPARKS";
-        await ktuvitParser.handleMovie(movieFile, filenameNoExtension, ".");
+        await ktuvitParser.handleMovie(movieFile);
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
         expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${SUBTITLES_SUFFIX}`));
         expect(fs.writeFileSync.mock.calls[0][1].length).toBeGreaterThan(0);

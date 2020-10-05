@@ -12,18 +12,36 @@ const mockConfig: ConfigInterface = new Config("resources/screwzira-downloader-c
 describe("test classify", () => {
     it("test movie name ends with number", () => {
         const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
-        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("Deadpool.2.2018.THEATRICAL.1080p.BluRay.x264-ROVERS", "");
-        expect(actual).toEqual({ type: "movie", movieName: "deadpool 2", movieYear: 2018 });
+        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("Deadpool.2.2018.THEATRICAL.1080p.BluRay.x264-ROVERS", ".", "");
+        expect(actual).toEqual({
+            filenameNoExtension: "Deadpool.2.2018.THEATRICAL.1080p.BluRay.x264-ROVERS",
+            relativePath: ".",
+            type: "movie",
+            movieName: "deadpool 2",
+            movieYear: 2018
+        });
     });
     it("test movie name ends with space instead of dot", () => {
         const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
-        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("Deadpool 2 2018 THEATRICAL 1080p BluRay x264-ROVERS", "");
-        expect(actual).toEqual({ type: "movie", movieName: "deadpool 2", movieYear: 2018 });
+        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("Deadpool 2 2018 THEATRICAL 1080p BluRay x264-ROVERS", ".", "");
+        expect(actual).toEqual({
+            filenameNoExtension: "Deadpool 2 2018 THEATRICAL 1080p BluRay x264-ROVERS",
+            relativePath: ".",
+            type: "movie",
+            movieName: "deadpool 2",
+            movieYear: 2018
+        });
     });
     it("test movie name with irrelevant numbers", () => {
         const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
-        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("The.House.That.Jack.Built.2018.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTG", "");
-        expect(actual).toEqual({ type: "movie", movieName: "the house that jack built", movieYear: 2018 });
+        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("The.House.That.Jack.Built.2018.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTG", ".", "");
+        expect(actual).toEqual({
+            filenameNoExtension: "The.House.That.Jack.Built.2018.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTG",
+            relativePath: ".",
+            type: "movie",
+            movieName: "the house that jack built",
+            movieYear: 2018
+        });
     });
     it("test calculateSimilarityMark - unknown words", () => {
         const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
@@ -47,18 +65,38 @@ describe("test classify", () => {
     });
     it("test special episode name (season 00)", () => {
         const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
-        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("Stranger.Things.S00E01.1080p.WEB.x264-STRiFE", "");
-        expect(actual).toEqual({ type: "episode", series: "stranger things", season: 0, episode: 1 });
+        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("Stranger.Things.S00E01.1080p.WEB.x264-STRiFE", ".", "");
+        expect(actual).toEqual({
+            filenameNoExtension: "Stranger.Things.S00E01.1080p.WEB.x264-STRiFE",
+            relativePath: ".",
+            type: "episode",
+            series: "stranger things",
+            season: 0,
+            episode: 1
+        });
     });
     it("test lowercase episode name", () => {
         const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
-        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("living.with.yourself.s01e01.internal.hdr.1080p.web.h265-paleale", "");
-        expect(actual).toEqual({ type: "episode", series: "living with yourself", season: 1, episode: 1 });
+        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("living.with.yourself.s01e01.internal.hdr.1080p.web.h265-paleale", ".", "");
+        expect(actual).toEqual({
+            filenameNoExtension: "living.with.yourself.s01e01.internal.hdr.1080p.web.h265-paleale",
+            relativePath: ".",
+            type: "episode",
+            series: "living with yourself",
+            season: 1,
+            episode: 1
+        });
     });
     it("test frozen 2 classification", () => {
         const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
-        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("Frozen.2.2019.1080p.AMZN.WEB-DL.DDP5.1.H264-CMRG", "");
-        expect(actual).toEqual({ type: "movie", movieName: "frozen 2", movieYear: 2019 });
+        const actual: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = szClassifier.classify("Frozen.2.2019.1080p.AMZN.WEB-DL.DDP5.1.H264-CMRG", ".", "");
+        expect(actual).toEqual({
+            filenameNoExtension: "Frozen.2.2019.1080p.AMZN.WEB-DL.DDP5.1.H264-CMRG",
+            relativePath: ".",
+            type: "movie",
+            movieName: "frozen 2",
+            movieYear: 2019
+        });
     });
     it("test findAlternativeName - frozen 2", () => {
         const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);

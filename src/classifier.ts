@@ -48,6 +48,8 @@ export enum FileClassification {
 }
 
 interface FileClassificationInterface {
+    filenameNoExtension: string,
+    relativePath: string,
     type: FileClassification;
 }
 
@@ -73,7 +75,7 @@ export interface ClassifierInterface {
     isSubtitlesAlreadyExist: (relativePath: string, filenameNoExtension: string) => boolean;
     commonWordsInSentences: (s1: string, s2: string, excludeList: string[]) => CommonWordsInSentenceResponseInterface;
     calculateSimilarityMark: (words: string[]) => number;
-    classify: (filenameNoExtension: string, parentFolder: string) => MovieFileClassificationInterface | TvEpisodeFileClassificationInterface;
+    classify: (filenameNoExtension: string, relativePath: string, parentFolder: string) => MovieFileClassificationInterface | TvEpisodeFileClassificationInterface;
     findAlternativeName: (movieName: string) => string;
 }
 
@@ -114,13 +116,16 @@ export class Classifier implements ClassifierInterface {
      * 2. Try movie regex
      * 3. Try movie folder regex
      * @param filenameNoExtension
+     * @param relativePath
      * @param parentFolder
      */
-    public classify = (filenameNoExtension: string, parentFolder: string): MovieFileClassificationInterface | TvEpisodeFileClassificationInterface => {
+    public classify = (filenameNoExtension: string, relativePath: string, parentFolder: string): MovieFileClassificationInterface | TvEpisodeFileClassificationInterface => {
         const episodeMatch: RegExpExecArray = episodeRegex.exec(filenameNoExtension);
         if (episodeMatch?.length >= 3 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
             this.logger.verbose(`Classification match episode: ${JSON.stringify(episodeMatch)}`);
             return {
+                filenameNoExtension,
+                relativePath,
                 type: FileClassification.EPISODE,
                 series: this.config.replaceTitleIfNeeded(cleanText(episodeMatch[1])),
                 season: Number(episodeMatch[2]),
@@ -132,6 +137,8 @@ export class Classifier implements ClassifierInterface {
             if (movieMatch?.length >= 2 && movieMatch[1] && movieMatch[2]) {
                 this.logger.verbose(`Classification match movie: ${JSON.stringify(movieMatch)}`);
                 return {
+                    filenameNoExtension,
+                    relativePath,
                     type: FileClassification.MOVIE,
                     movieName: this.config.replaceTitleIfNeeded(cleanText(movieMatch[1])),
                     movieYear: Number(movieMatch[2])
@@ -142,6 +149,8 @@ export class Classifier implements ClassifierInterface {
                 if (movieMatchFromParent?.length >= 2 && movieMatchFromParent[1] && movieMatchFromParent[2]) {
                     this.logger.verbose(`Classification match movie folder: ${JSON.stringify(movieMatchFromParent)}`);
                     return {
+                        filenameNoExtension,
+                        relativePath,
                         type: FileClassification.MOVIE,
                         movieName: this.config.replaceTitleIfNeeded(cleanText(movieMatchFromParent[1])),
                         movieYear: Number(movieMatchFromParent[2])
