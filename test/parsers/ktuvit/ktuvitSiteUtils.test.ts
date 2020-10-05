@@ -1,7 +1,9 @@
 import { parseDownloadIdentifier, parseMovieId, parseMovieSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
-import { readFile } from "fs/promises";
+import * as fs from "fs";
 import * as path from "path";
 import type { Subtitle } from "~src/parsers/commonParser";
+
+const { readFile } = fs.promises;
 
 describe("Test ktuvit site utils", () => {
     it("test parseMovieId", async () => {
