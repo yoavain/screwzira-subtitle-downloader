@@ -1,4 +1,4 @@
-import { parseDownloadIdentifier, parseMovieId, parseMovieSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
+import { parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
 import * as fs from "fs";
 import * as path from "path";
 import type { Subtitle } from "~src/parsers/commonParser";
@@ -6,19 +6,19 @@ import type { Subtitle } from "~src/parsers/commonParser";
 const { readFile } = fs.promises;
 
 describe("Test ktuvit site utils", () => {
-    it("test parseMovieId", async () => {
+    it("test parseId", async () => {
         const queryLocation: string = path.resolve(__dirname, "..", "..", "resources", "parsers", "ktuvit", "findMovieQuery.json");
         const query: string = await readFile(queryLocation, { encoding: "utf8" });
 
-        const movieId: string = parseMovieId(query, "Frozen", 2013);
+        const movieId: string = parseId(query, "Frozen", 2013);
 
         expect(movieId).toEqual("0679D248C930F4659069AC9F9FA2E8D7");
     });
-    it("Test parseMovieSubtitles", async () => {
+    it("Test parseSubtitles", async () => {
         const pageLocation: string = path.resolve(__dirname, "..", "..", "resources", "parsers", "ktuvit", "moviePage.html");
         const page: string = await readFile(pageLocation, { encoding: "utf8" });
 
-        const parsedMovieSubtitles: Subtitle[] = parseMovieSubtitles(page);
+        const parsedMovieSubtitles: Subtitle[] = parseSubtitles(page);
 
         expect(parsedMovieSubtitles).toEqual([
             { id: "E00664CE8F1C1D95D55CC21E85C1A031", name: "Frozen.2013.1080p.BluRay.x264-SPARKS" },

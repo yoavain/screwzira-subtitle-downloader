@@ -1,7 +1,7 @@
 import { toTitleCase } from "~src/stringUtils";
 import type { Subtitle } from "~src/parsers/commonParser";
 import { CommonParser } from "~src/parsers/commonParser";
-import { parseDownloadIdentifier, parseMovieId, parseMovieSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
+import { parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
 import * as fs from "fs";
 import * as path from "path";
 import type { OptionsOfBufferResponseBody, OptionsOfJSONResponseBody, OptionsOfTextResponseBody } from "got";
@@ -11,6 +11,7 @@ import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
 import { NotificationType } from "~src/notifier";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
+import { FileClassification } from "~src/classifier";
 
 export type GetMovieResponse = {
     EngName: string,
@@ -35,6 +36,11 @@ export type GetMovieResponse = {
     Genres?: string,
     Languages?: any[],
     Studios?: any[]
+}
+
+type DownloadBestSubtitlesResponse = {
+    success: boolean,
+    errorMessage?: string
 }
 
 export class KtuvitParser extends CommonParser implements ParserInterface {
@@ -63,12 +69,12 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             return;
         }
 
-        let movieId: string = await this.findMovieId(movieName, movieYear, contextMessage);
+        let movieId: string = await this.findId(movie, contextMessage, movieName, movieYear);
         if (!movieId) {
             const alternativeName: string = this.classifier.findAlternativeName(movieName);
             if (alternativeName && movieName !== alternativeName) {
                 const alternativeContextMessage = `movie "${toTitleCase(alternativeName)}" (${movieYear})`; 
-                movieId = await this.findMovieId(alternativeName, movieYear, alternativeContextMessage);
+                movieId = await this.findId(movie, alternativeContextMessage, alternativeName, movieYear);
             }
         }
         if (!movieId) {
@@ -76,35 +82,58 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             return;
         }
 
-        const subtitles: Subtitle[] = await this.getMovieSubtitles(movieId, contextMessage);
+        const options: OptionsOfTextResponseBody = this.getMovieSubtitlesOptions(movieId);
+        const subtitles: Subtitle[] = await this.getSubtitles(options, contextMessage);
         if (!subtitles) {
             this.notifier.notif(`Unable to find subtitles for ${contextMessage}`, NotificationType.FAILED, true);
             return;
         }
 
         const excludeList: string[] = this.getMovieExcludeList(movieName, movieYear);
-
-        const subtitleId: string = this.findClosestMatch(filenameNoExtension, subtitles, excludeList);
-
-        const downloadIdentifier: string = await this.getDownloadIdentifier(movieId, subtitleId, contextMessage);
-        if (!downloadIdentifier) {
-            this.notifier.notif(`Unable to find subtitle download identifier for ${contextMessage}`, NotificationType.FAILED, true);
-            return;
+        const downloadResponse: DownloadBestSubtitlesResponse = await this.downloadBestSubtitles(movieId, subtitles, excludeList, filenameNoExtension, relativePath, contextMessage);
+        if (downloadResponse.success) {
+            this.notifier.notif(`Successfully downloaded Subtitles for ${contextMessage}`, NotificationType.DOWNLOAD);
         }
-
-        const success: boolean = await this.downloadFile(movieId, downloadIdentifier, filenameNoExtension, relativePath, contextMessage);
-        if (!success) {
-            this.notifier.notif(`Failed downloading subtitle for ${contextMessage}`, NotificationType.FAILED);
-            return;
+        else {
+            this.notifier.notif(downloadResponse.errorMessage, NotificationType.FAILED);
         }
-
-        this.notifier.notif(`Successfully downloaded Subtitles for ${contextMessage}`, NotificationType.DOWNLOAD);
     }
-
 
     // eslint-disable-next-line no-unused-vars
     async handleEpisode(tvEpisode: TvEpisodeFileClassificationInterface): Promise<void> {
-        return undefined;
+        const { filenameNoExtension, relativePath, series, season, episode } = tvEpisode;
+        const contextMessage = `series "${toTitleCase(series)}" season ${season} episode ${episode}`;
+        this.logger.info(`Handling ${contextMessage}`);
+
+        if (!this.cookie) {
+            await this.login(this.email, this.password);
+        }
+        if (!this.cookie) {
+            this.notifier.notif(`Failed to login to ${this.baseUrl}`, NotificationType.FAILED, true);
+            return;
+        }
+
+        const seriesId: string = await this.findId(tvEpisode, contextMessage, series);
+        if (!seriesId) {
+            this.notifier.notif(`Unable to find series ID for ${contextMessage}`, NotificationType.FAILED, true);
+            return;
+        }
+
+        const options: OptionsOfTextResponseBody = this.getEpisodeSubtitlesOptions(seriesId, season, episode);
+        const subtitles: Subtitle[] = await this.getSubtitles(options, contextMessage);
+        if (!subtitles) {
+            this.notifier.notif(`Unable to find subtitles for ${contextMessage}`, NotificationType.FAILED, true);
+            return;
+        }
+
+        const excludeList: string[] = this.getTvSeriesExcludeList(series);
+        const downloadResponse: DownloadBestSubtitlesResponse = await this.downloadBestSubtitles(seriesId, subtitles, excludeList, filenameNoExtension, relativePath, contextMessage);
+        if (downloadResponse.success) {
+            this.notifier.notif(`Successfully downloaded Subtitles for ${contextMessage}`, NotificationType.DOWNLOAD);
+        }
+        else {
+            this.notifier.notif(downloadResponse.errorMessage, NotificationType.FAILED);
+        }
     }
 
     private login = async (email: string, password: string): Promise<void> => {
@@ -138,8 +167,8 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         }
     };
 
-    private findMovieId = async (movieName: string, movieYear: number, contextMessage: string): Promise<string> => {
-        const options: OptionsOfJSONResponseBody = {
+    private buildSearchOptions(name: string, type: FileClassification, movieYear?: number): OptionsOfJSONResponseBody {
+        return {
             url: `${this.baseUrl}/Services/ContentProvider.svc/SearchPage_search`,
             headers: {
                 "User-Agent": this.userAgent,
@@ -147,29 +176,34 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             },
             json: {
                 request: {
-                    FilmName: movieName,
+                    FilmName: name,
                     Actors: [],
                     Studios: null,
                     Directors: [],
                     Genres: [],
                     Countries: [],
                     Languages: [],
-                    Year: movieYear,
                     Rating: [],
                     Page: 1,
-                    SearchType: "0",
-                    WithSubsOnly: false
+                    WithSubsOnly: false,
+                    SearchType: type === FileClassification.MOVIE ? "0" : "1",
+                    Year: type === FileClassification.MOVIE ? movieYear : ""
                 }
             },
             responseType: "json"
         };
+    }
+
+    private findId = async (classification: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface, contextMessage: string, name: string, year?: number): Promise<string> => {
+        const { type } = classification;
+        const options: OptionsOfJSONResponseBody = this.buildSearchOptions(name, type, year);
 
         let response;
         try {
             this.logger.debug(`Searching for ${contextMessage}`);
             response = await got.post(options);
             if (response.statusCode === 200) {
-                return parseMovieId(response.body.d, movieName, movieYear);
+                return parseId(response.body.d, name, year);
             }
             else {
                 this.handleError(response.error, response);
@@ -180,21 +214,30 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         }
     }
 
-    private getMovieSubtitles = async (movieId: string, contextMessage: string): Promise<Subtitle[]> => {
-        const options: OptionsOfTextResponseBody = {
-            url: `${this.baseUrl}/MovieInfo.aspx?ID=${movieId}`,
-            headers: {
-                "User-Agent": this.userAgent,
-                "Cookie": this.cookie.join("; ")
-            }
-        };
+    private getMovieSubtitlesOptions = (movieId: string): OptionsOfTextResponseBody => ({
+        url: `${this.baseUrl}/MovieInfo.aspx?ID=${movieId}`,
+        headers: {
+            "User-Agent": this.userAgent,
+            "Cookie": this.cookie.join("; ")
+        }
+    });
 
+    private getEpisodeSubtitlesOptions = (seriesId: string, season: number, episode: number): OptionsOfTextResponseBody => ({
+        url: `${this.baseUrl}/Services/GetModuleAjax.ashx?moduleName=SubtitlesList&SeriesID=${seriesId}&Season=${season}&Episode=${episode}`,
+        headers: {
+            "User-Agent": this.userAgent,
+            "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${seriesId}`,
+            "Cookie": this.cookie.join("; ")
+        }
+    });
+
+    private getSubtitles = async (options: OptionsOfTextResponseBody, contextMessage: string): Promise<Subtitle[]> => {
         let response;
         try {
             this.logger.debug(`Searching subtitles for ${contextMessage}`);
             response = await got.get(options);
             if (response.statusCode === 200) {
-                return parseMovieSubtitles(response.body);
+                return parseSubtitles(response.body);
             }
             else {
                 this.handleError(response.error, response);
@@ -205,19 +248,19 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         }
     }
 
-    private getDownloadIdentifier = async (movieId: string, subtitleId: string, contextMessage: string): Promise<string> => {
+    private getDownloadIdentifier = async (id: string, subtitleId: string, contextMessage: string): Promise<string> => {
         this.logger.info(`Downloading: ${subtitleId}`);
         const options: OptionsOfJSONResponseBody = {
             url: `${this.baseUrl}/Services/ContentProvider.svc/RequestSubtitleDownload`,
             headers: {
                 "User-Agent": this.userAgent,
                 "Accept": "*/*",
-                "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${movieId}`,
+                "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${id}`,
                 "Cookie": this.cookie.join("; ")
             },
             json: {
                 request: {
-                    FilmID: movieId,
+                    FilmID: id,
                     SubtitleID: subtitleId,
                     FontSize: 0,
                     FontColor: "",
@@ -273,5 +316,23 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         catch (error) {
             this.logger.error(error);
         }
+    };
+
+    private downloadBestSubtitles = async (id: string, subtitles: Subtitle[], excludeList: string[], filenameNoExtension: string, relativePath: string, contextMessage: string)
+        : Promise<DownloadBestSubtitlesResponse> => {
+        const subtitleId: string = this.findClosestMatch(filenameNoExtension, subtitles, excludeList);
+        const downloadIdentifier: string = await this.getDownloadIdentifier(id, subtitleId, contextMessage);
+        if (!downloadIdentifier) {
+            return {
+                success: false,
+                errorMessage: `Unable to find subtitle download identifier for ${contextMessage}`
+            };
+        }
+
+        const success: boolean = await this.downloadFile(id, downloadIdentifier, filenameNoExtension, relativePath, contextMessage);
+        return {
+            success,
+            errorMessage: !success && `Failed downloading subtitle for ${contextMessage}`
+        };
     };
 }
