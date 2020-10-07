@@ -1,39 +1,45 @@
+import type { ArgsParserInterface } from "~src/argsParser";
+import { ArgsParser } from "~src/argsParser";
+import type { LoggerInterface } from "~src/logger";
+import { Logger } from "~src/logger";
+import type { NotifierInterface } from "~src/notifier";
+import { NotificationType, Notifier } from "~src/notifier";
+import { Config } from "~src/config";
+import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
+import { Classifier, FileClassification } from "~src/classifier";
+import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 import * as fs from "fs";
 import * as fsextra from "fs-extra";
 import * as path from "path";
-import { IScrewziraUtils, ScrewziraUtils } from "~src/screwziraUtils";
-import { ISzArgsParser, SzArgsParser } from "~src/szArgsParser";
-import { IMovieFileClassification, ISzClassifier, ITvEpisodeFileClassification, SzClassifier } from "~src/szClassifier";
-import { ISzConfig, SzConfig } from "~src/szConfig";
-import { ISzLogger, SzLogger } from "~src/szLogger";
-import { ISzNotifier, NotificationIcon, SzNotifier } from "~src/szNotifier";
+import type { ParserInterface } from "~src/parsers/parserInterface";
+import { PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PROGRAM_NAME } from "~src/commonConsts";
 
 // Make sure the log directory is there
-fsextra.ensureDirSync(path.resolve(process.env.ProgramData, "Screwzira-Downloader"));
+fsextra.ensureDirSync(path.resolve(process.env.ProgramData, PROGRAM_NAME));
 
 // CLI Args Parser
-const szArgsParser: ISzArgsParser = new SzArgsParser(process.argv);
+const argsParser: ArgsParserInterface = new ArgsParser(process.argv);
 
 // Logger
-const logFile: string = path.resolve(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader.log");
-const szLogger: ISzLogger = new SzLogger(logFile);
+const logFile: string = path.resolve(process.env.ProgramData, PROGRAM_NAME, PROGRAM_LOG_FILENAME);
+const logger: LoggerInterface = new Logger(logFile);
 
 // Notifier
-const szNotifier: ISzNotifier = new SzNotifier(szLogger, szArgsParser.getSnoreToastPath(), szArgsParser.isQuiet());
+const notifier: NotifierInterface = new Notifier(logger, argsParser.getSnoreToastPath(), argsParser.isQuiet());
 
 // Config
-const confFile: string = path.resolve(process.env.ProgramData, "Screwzira-Downloader", "screwzira-downloader-config.json");
-const szConfig: ISzConfig = new SzConfig(confFile, szLogger);
-szLogger.setLogLevel(szConfig.getLogLevel());
+const confFile: string = path.resolve(process.env.ProgramData, PROGRAM_NAME, PROGRAM_CONFIG_FILENAME);
+const config: Config = new Config(confFile, logger);
+logger.setLogLevel(config.getLogLevel());
 
 // File classifier
-const szClassifier: ISzClassifier = new SzClassifier(szLogger, szConfig);
+const classifier: ClassifierInterface = new Classifier(logger, config);
 
-// Screwzira Utils
-const screwziraUtils: IScrewziraUtils = new ScrewziraUtils(szLogger, szNotifier, szClassifier);
+// Ktuvit parser
+const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier);
 
 // handle single file
-const handleSingleFile = (fullpath: string, fileExists: boolean): void => {
+const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<void> => {
     const relativePath: string = fullpath.substr(0, fullpath.lastIndexOf("/"));
     const split: string[] = fullpath.split("/");
     const filename: string = split[split.length - 1];
@@ -41,26 +47,23 @@ const handleSingleFile = (fullpath: string, fileExists: boolean): void => {
     const parentFolder: string = fileExists && split.length > 1 ? split[split.length - 2] : undefined;
 
     // Check if already exists
-    if (szClassifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
-        szLogger.warn("Hebrew subtitles already exist");
-        szNotifier.notif("Hebrew subtitles already exist", NotificationIcon.WARNING);
+    if (classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
+        notifier.notif("Hebrew subtitles already exist", NotificationType.WARNING);
         return;
     }
 
-    const classification: IMovieFileClassification | ITvEpisodeFileClassification = szClassifier.classify(filenameNoExtension, parentFolder);
+    const classification: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = classifier.classify(filenameNoExtension, relativePath, parentFolder);
 
-    szLogger.verbose(`Classification response: ${JSON.stringify(classification)}`);
+    logger.verbose(`Classification response: ${JSON.stringify(classification)}`);
 
-    if (classification?.type === "movie") {
-        const movieFile: IMovieFileClassification = classification as IMovieFileClassification;
-        screwziraUtils.handleMovie(movieFile.movieName, movieFile.movieYear, filenameNoExtension, relativePath);
+    if (classification?.type === FileClassification.MOVIE) {
+        await ktuvitParser.handleMovie(classification);
     }
-    else if (classification?.type === "episode") {
-        const tvEpisode: ITvEpisodeFileClassification = classification as ITvEpisodeFileClassification;
-        screwziraUtils.handleEpisode(tvEpisode.series, tvEpisode.season, tvEpisode.episode, filenameNoExtension, relativePath);
+    else if (classification?.type === FileClassification.EPISODE) {
+        await ktuvitParser.handleEpisode(classification);
     }
     else {
-        szNotifier.notif("Unable to classify input file as movie or episode", NotificationIcon.FAILED);
+        notifier.notif("Unable to classify input file as movie or episode", NotificationType.FAILED);
     }
 };
 
@@ -82,31 +85,30 @@ const handleFolder = (dir: string): void => {
     fs.readdirSync(dir).forEach((file) => {
         const fullPath: string = path.join(dir, file).replace(/\\/g, "/");
         if (fs.lstatSync(fullPath).isDirectory()) {
-            szLogger.verbose(`Handling sub-folder ${fullPath}`);
+            logger.verbose(`Handling sub-folder ${fullPath}`);
             handleFolder(fullPath);
         }
         else {
-            if (szConfig.getExtensions().includes(getFileExtension(fullPath))) {
+            if (config.getExtensions().includes(getFileExtension(fullPath))) {
                 noFileHandled = false;
                 const waitTimeMs: number = getWaitTimeMs();
-                szLogger.verbose(`Waiting ${waitTimeMs}ms to handle file ${fullPath}`);
+                logger.verbose(`Waiting ${waitTimeMs}ms to handle file ${fullPath}`);
                 setTimeout(handleSingleFile, waitTimeMs, fullPath, true);
             }
         }
     });
     if (noFileHandled) {
-        szLogger.warn("No file handled");
-        szNotifier.notif("No file handled", NotificationIcon.WARNING);
+        notifier.notif("No file handled", NotificationType.WARNING);
     }
 };
 
 // Main
-szLogger.verbose(`Argv: ${process.argv.join(" ")}`);
-szLogger.verbose(`Sonar Mode: ${szArgsParser.isSonarrMode()}`);
-szLogger.verbose(`Quiet Mode: ${szArgsParser.isQuiet()}`);
-const input: string = szArgsParser.getInput();
+logger.verbose(`Argv: ${process.argv.join(" ")}`);
+logger.verbose(`Sonar Mode: ${argsParser.isSonarrMode()}`);
+logger.verbose(`Quiet Mode: ${argsParser.isQuiet()}`);
+const input: string = argsParser.getInput();
 if (typeof input === "string") {
-    szLogger.info(`*** Looking for subtitle for "${input}" ***`);
+    logger.info(`*** Looking for subtitle for "${input}" ***`);
     const fullpath: string = input.replace(/\\/g, "/");
     try {
         if (fs.lstatSync(fullpath).isDirectory()) {
@@ -122,13 +124,12 @@ if (typeof input === "string") {
             handleSingleFile(fullpath, false);
         }
         else {
-            szLogger.error(`Cannot handle ${fullpath}`);
+            logger.error(`Cannot handle ${fullpath}`);
         }
     }
 }
 else {
-    szLogger.error("*** Missing input file ***");
-    szNotifier.notif("Missing input file", NotificationIcon.FAILED);
+    notifier.notif("Missing input file", NotificationType.FAILED);
     // tslint:disable-next-line:no-console
-    console.log(`Usage:${szArgsParser.getHelp()}`);
+    console.log(`Usage:${argsParser.getHelp()}`);
 }

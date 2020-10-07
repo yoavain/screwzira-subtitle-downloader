@@ -1,4 +1,5 @@
 module.exports = {
+    clearMocks: true,
     transform: {
         '^.+\\.ts$': 'ts-jest'
     },
@@ -9,5 +10,9 @@ module.exports = {
         "^~test/(.*)": "<rootDir>/test/$1",
         "^~resources/(.*)": "<rootDir>/resources/$1"
     },
+    collectCoverageFrom: [
+        "src/**/*.ts",
+        "!src/parsers/screwzira/**"
+    ],
     verbose: true
 };
