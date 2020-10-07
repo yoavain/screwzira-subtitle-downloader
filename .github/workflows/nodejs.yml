@@ -35,15 +35,14 @@ jobs:
       run: npm run build
       env:
         CI: true
+        KTUVIT_EMAIL: ${{ secrets.KTUVIT_EMAIL }}
+        KTUVIT_PASSWORD: ${{ secrets.KTUVIT_PASSWORD }}
 
     - name: Codecov
       uses: codecov/codecov-action@v1.0.10
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
-      env:
-        KTUVIT_EMAIL: ${{ secrets.KTUVIT_EMAIL }}
-        KTUVIT_PASSWORD: ${{ secrets.KTUVIT_PASSWORD }}
 
     - name: Release
       uses: softprops/action-gh-release@v1
