@@ -19,17 +19,17 @@ module.exports = {
         rules: [
             {
                 test: /\.ts$/,
-                use: 'ts-loader',
-                exclude: /node_modules/,
-            },
-        ],
+                use: "ts-loader",
+                exclude: /node_modules/
+            }
+        ]
     },
     resolve: {
-        extensions: ['.ts', '.js'],
+        extensions: [".ts", ".js"],
         alias: {
-            "~src": path.resolve(__dirname, 'src'),
-            "~test": path.resolve(__dirname, 'test'),
-            "~resources": path.resolve(__dirname, 'resources')
+            "~src": path.resolve(__dirname, "src"),
+            "~test": path.resolve(__dirname, "test"),
+            "~resources": path.resolve(__dirname, "resources")
         }
     },
     plugins: [
