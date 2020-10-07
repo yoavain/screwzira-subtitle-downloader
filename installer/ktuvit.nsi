@@ -66,11 +66,11 @@ File "..\dist\snoretoast-x64.exe"
 SectionEnd
 Section "Icons" SEC01
 SetOutPath "$INSTDIR\notif-icons"
-File "..\dist\notif-icons\logo-300.png"
-File "..\dist\notif-icons\download-300.png"
-File "..\dist\notif-icons\not-found-300.png"
-File "..\dist\notif-icons\failed-300.png"
-File "..\dist\notif-icons\warning-300.png"
+File "..\dist\notif-icons\logo.png"
+File "..\dist\notif-icons\download.png"
+File "..\dist\notif-icons\not-found.png"
+File "..\dist\notif-icons\failed.png"
+File "..\dist\notif-icons\warning.png"
 SectionEnd
 Section "Directory" SEC02
   SetOutPath "$INSTDIR"

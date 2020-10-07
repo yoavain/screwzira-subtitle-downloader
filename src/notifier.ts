@@ -22,15 +22,15 @@ export enum NotificationType {
 export const getNotificationIcon = (notificationType: NotificationType): string => {
     switch (notificationType) {
         case NotificationType.LOGO:
-            return "logo-300.png";
+            return "logo.png";
         case NotificationType.DOWNLOAD:
-            return "download-300.png";
+            return "download.png";
         case NotificationType.WARNING:
-            return "warning-300.png";
+            return "warning.png";
         case NotificationType.NOT_FOUND:
-            return "not-found-300.png";
+            return "not-found.png";
         case NotificationType.FAILED:
-            return "failed-300.png";
+            return "failed.png";
     }
 }; 
 
