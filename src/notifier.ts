@@ -19,7 +19,7 @@ export enum NotificationType {
     FAILED = "FAILED"
 }
 
-const getNotificationIcon = (notificationType: NotificationType): string => {
+export const getNotificationIcon = (notificationType: NotificationType): string => {
     switch (notificationType) {
         case NotificationType.LOGO:
             return "logo-300.png";

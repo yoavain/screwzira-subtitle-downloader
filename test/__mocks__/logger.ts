@@ -7,5 +7,5 @@ export class MockLogger implements LoggerInterface {
     verbose = (message: string): void => console.log(`Logger [verbose]: ${message}`);
     warn = (message: string): void => console.log(`Logger [warn]: ${message}`);
     error = (message: string): void => console.log(`Logger [error]: ${message}`);
-    getLogFileLocation = (): string => "";
+    getLogFileLocation = (): string => "loggerFileLocation";
 }
