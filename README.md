@@ -1,4 +1,4 @@
-# ![](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/icons/sz-64.png) Screwzira Subtitle Downloader  <br>
+# ![](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/icons/ktuvit-64.png) Ktuvit Subtitle Downloader  <br>
 
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/yoavain/screwzira-subtitle-downloader.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/screwzira-subtitle-downloader/alerts/)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/yoavain/screwzira-subtitle-downloader.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/screwzira-subtitle-downloader/context:javascript)
@@ -10,11 +10,9 @@
 ![renovate](https://badges.renovateapi.com/github/yoavain/screwzira-subtitle-downloader)
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=yoavain.screwzira-subtitle-downloader)
 
-# Unfortunately www.screwzira.com is currently down<br/>Working on migrating to a new API from www.ktuvit.me
+## A tool for downloading Hebrew subtitles from ktuvit.me
 
-## A tool for downloading Hebrew subtitles from screwzira.com using their API
-
-Installer adds right-click context to folders and to mkv/avi/mp4 file types.
+Installer adds right-click context to folders and to mkv/avi/mp4 file types (assuming file are associated with media player classic 64)
 
 ### Usage:
 
@@ -25,24 +23,24 @@ Installer adds right-click context to folders and to mkv/avi/mp4 file types.
 Usage example:
 
 ```
-screwzira-downloader.exe input <video-file-full-path>
+ktuvit-downloader.exe input <video-file-full-path>
 ```  
 
 Quiet mode (no notification):  
 ```
-screwzira-downloader.exe input <video-file-full-path> quiet
+ktuvit-downloader.exe input <video-file-full-path> quiet
 ```
   
 Sonarr mode (input file path is taken from environment variable: SONARR_EPISODE_FILE_PATH):
 ```
-screwzira-downloader.exe input sonarr  
+ktuvit-downloader.exe input sonarr  
 ```
 
 <details><summary>Usage (legacy)</summary>
 <p>
 
 ```
-screwzira-downloader.exe <video-file-full-path>
+ktuvit-downloader.exe <video-file-full-path>
 ```
 </p>
 </details>
@@ -54,14 +52,14 @@ screwzira-downloader.exe <video-file-full-path>
 ![sonarr configuration](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/screenshots/sonarr-custom-script.png)
 
 In order to have Silent launch of the downloader:  
-Path should be to the launcher: "C:\Program Files\Screwzira-Downloader\screwzira-downloader-launcher.exe"  
+Path should be to the launcher: "C:\Program Files\Ktuvit-Downloader\ktuvit-downloader-launcher.exe"  
 Arguments should be: sonarr quiet
 
 ---
 
 <details><summary>Advanced configuration</summary>
 <p>
-Configuration json file is located under the %ProgramData%\Screwzira-Downloader folder.<br>  
+Configuration json file is located under the %ProgramData%\Ktuvit-Downloader folder.<br>  
  * You can change the log level<br>
  * You can configure replacement pair (useful for series name mismatch)<br>
  
@@ -80,7 +78,7 @@ Configuration json file is located under the %ProgramData%\Screwzira-Downloader 
 
 <details><summary>Log</summary>
 <p>
-Log file is located under the %ProgramData%\Screwzira-Downloader folder.<br>  
+Log file is located under the %ProgramData%\Ktuvit-Downloader folder.<br>  
  * You can use it to find a reason for why subtitles that are available in the website, are not being downloaded<br> 
 
 </p>
