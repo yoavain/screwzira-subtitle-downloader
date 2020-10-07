@@ -34,7 +34,7 @@ export class ArgsParser implements ArgsParserInterface {
             }
             this.quiet = argv.indexOf(QUIET) >= 0;
         }
-        this.snoreToastPath = argv[0].endsWith("screwzira-downloader.exe") ? path.join(argv[0], "../", "snoretoast-x64.exe") : null;
+        this.snoreToastPath = argv[0].endsWith("-downloader.exe") ? path.join(argv[0], "../", "snoretoast-x64.exe") : null;
     }
 
     public isSonarrMode(): boolean {
