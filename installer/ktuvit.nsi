@@ -19,8 +19,8 @@ Var Mp4ProgID
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "../resources/icons/sz_install.ico"
-!define MUI_UNICON "../resources/icons/sz_uninstall.ico"
+!define MUI_ICON "../resources/icons/ktuvit_install.ico"
+!define MUI_UNICON "../resources/icons/ktuvit_uninstall.ico"
 
 ; MUI Settings / Header
 !define MUI_HEADERIMAGE
