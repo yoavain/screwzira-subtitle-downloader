@@ -24,7 +24,7 @@
         "node": "12.19.0"
     },
     "dependencies": {
-        "flat-cache": "2.0.1",
+        "flat-cache": "3.0.4",
         "fs-extra": "9.0.1",
         "got": "11.8.0",
         "node-notifier": "8.0.0",
