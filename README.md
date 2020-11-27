@@ -7,7 +7,7 @@
 ![commit](https://img.shields.io/github/last-commit/yoavain/screwzira-subtitle-downloader.svg)
 [![Known Vulnerabilities](https://snyk.io//test/github/yoavain/screwzira-subtitle-downloader/badge.svg?targetFile=package.json)](https://snyk.io//test/github/yoavain/screwzira-subtitle-downloader?targetFile=package.json)
 [![codecov](https://codecov.io/gh/yoavain/screwzira-subtitle-downloader/branch/master/graph/badge.svg)](https://codecov.io/gh/yoavain/screwzira-subtitle-downloader)
-![renovate](https://badges.renovateapi.com/github/yoavain/screwzira-subtitle-downloader)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=yoavain.screwzira-subtitle-downloader)
 
 ## A tool for downloading Hebrew subtitles from ktuvit.me
