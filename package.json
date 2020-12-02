@@ -9,7 +9,7 @@
         "eslint": "eslint src/ test/",
         "eslint:fix": "npm run eslint -- --fix",
         "prettier": "prettier --write *.json .eslintrc.json .prettierrc tsconfig.json webpack.config.js",
-        "test": "jest --coverage",
+        "test": "jest",
         "type-check": "tsc --build tsconfig.all.json",
         "webpack": "webpack",
         "nexe": "nexe -t windows-x64-12.18.2 -o dist/ktuvit-downloader.exe",
