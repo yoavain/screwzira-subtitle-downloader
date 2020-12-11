@@ -76,7 +76,6 @@
                 "numbers": true
             }
         ],
-        "no-unused-vars": "error",
         "no-useless-escape": "error",
         "no-empty-pattern": "error",
         "no-eval": "error",
