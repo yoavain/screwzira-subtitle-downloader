@@ -38,6 +38,7 @@
         "@types/jest": "26.0.19",
         "@types/node": "12.19.9",
         "@types/numeral": "0.0.28",
+        "@types/uuid": "8.3.0",
         "@typescript-eslint/eslint-plugin": "4.10.0",
         "@typescript-eslint/parser": "4.10.0",
         "clean-webpack-plugin": "3.0.0",
