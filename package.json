@@ -21,7 +21,7 @@
     "author": "yoavain",
     "license": "ISC",
     "engines": {
-        "node": "12.20.0"
+        "node": "12.20.1"
     },
     "dependencies": {
         "flat-cache": "3.0.4",
