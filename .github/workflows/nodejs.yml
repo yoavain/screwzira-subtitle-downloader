@@ -18,6 +18,14 @@ jobs:
         node-version: [12.x]
 
     steps:
+    - name: Install NSIS
+      run: |
+        Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+        scoop bucket add extras
+        scoop install nsis
+    - name: Print NSIS version
+      run: makensis -VERSION
+
     - name: Checkout
       uses: actions/checkout@v2.3.4
 
