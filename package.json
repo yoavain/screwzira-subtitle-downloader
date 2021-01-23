@@ -1,6 +1,6 @@
 {
     "name": "ktuvit-downloader",
-    "version": "6.0.0",
+    "version": "6.0.1",
     "description": "Download Hebrew subtitles from Ktuvit.me",
     "main": "_build/index.js",
     "scripts": {
@@ -12,7 +12,7 @@
         "test": "jest",
         "type-check": "tsc --build tsconfig.all.json",
         "webpack": "webpack",
-        "nexe": "nexe -t windows-x64-14.5.0 -o dist/ktuvit-downloader.exe",
+        "nexe": "nexe -t windows-x64-14.15.3 -o dist/ktuvit-downloader.exe",
         "check-msbuild": "ts-node -e \"require(\"\"./launcher/launcherCompiler\"\").checkMsbuildInPath(true)\"",
         "rebuild-launcher": "msbuild launcher/launcher.csproj",
         "start": "ts-node src/index.ts",
