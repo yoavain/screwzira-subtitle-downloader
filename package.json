@@ -1,6 +1,6 @@
 {
     "name": "ktuvit-downloader",
-    "version": "6.0.1",
+    "version": "6.0.2",
     "description": "Download Hebrew subtitles from Ktuvit.me",
     "main": "_build/index.js",
     "scripts": {
@@ -16,7 +16,7 @@
         "check-msbuild": "ts-node -e \"require(\"\"./launcher/launcherCompiler\"\").checkMsbuildInPath(true)\"",
         "rebuild-launcher": "msbuild launcher/launcher.csproj",
         "start": "ts-node src/index.ts",
-        "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"../bin/nsis-3.05/makensis.exe\" ktuvit.nsi && cd .."
+        "installer": "cd installer && cross-env BUILD_VERSION=$npm_package_version \"../bin/nsis-3.06.1/makensis.exe\" ktuvit.nsi && cd .."
     },
     "author": "yoavain",
     "license": "ISC",
