@@ -23,7 +23,7 @@
     "license": "ISC",
     "engines": {
         "node": ">=14 <15",
-        "npm": "<7"
+        "npm": "<8"
     },
     "dependencies": {
         "flat-cache": "3.0.4",
