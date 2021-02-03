@@ -22,7 +22,8 @@
     "author": "yoavain",
     "license": "ISC",
     "engines": {
-        "node": "14.15.4"
+        "node": ">=14 <15",
+        "npm": "<7"
     },
     "dependencies": {
         "flat-cache": "3.0.4",
@@ -67,7 +68,7 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "lint-staged && git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-msbuild && npm run rebuild-launcher && git add resources/bin/screwzira-downloader-launcher.exe"
+            "pre-commit": "lint-staged && git diff HEAD --exit-code --stat launcher/launcher.cs || npm run check-msbuild && npm run rebuild-launcher && git add resources/bin/ktuvit-downloader-launcher.exe"
         }
     },
     "lint-staged": {
