@@ -84,7 +84,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
 
         const options: OptionsOfTextResponseBody = this.getMovieSubtitlesOptions(movieId);
         const subtitles: Subtitle[] = await this.getSubtitles(options, contextMessage);
-        if (!subtitles) {
+        if (!subtitles?.length) {
             this.notifier.notif(`Unable to find subtitles for ${contextMessage}`, NotificationType.FAILED, true);
             return;
         }
@@ -121,7 +121,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
 
         const options: OptionsOfTextResponseBody = this.getEpisodeSubtitlesOptions(seriesId, season, episode);
         const subtitles: Subtitle[] = await this.getSubtitles(options, contextMessage);
-        if (!subtitles) {
+        if (!subtitles?.length) {
             this.notifier.notif(`Unable to find subtitles for ${contextMessage}`, NotificationType.FAILED, true);
             return;
         }
