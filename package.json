@@ -1,6 +1,6 @@
 {
     "name": "ktuvit-downloader",
-    "version": "6.2.0",
+    "version": "6.2.1",
     "description": "Download Hebrew subtitles from Ktuvit.me",
     "main": "_build/index.js",
     "scripts": {
