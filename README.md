@@ -1,4 +1,4 @@
-# ![](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/icons/ktuvit-64.png) Ktuvit Subtitle Downloader  <br>
+# ![](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/main/resources/icons/ktuvit-64.png) Ktuvit Subtitle Downloader  <br>
 
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/yoavain/screwzira-subtitle-downloader.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/screwzira-subtitle-downloader/alerts/)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/yoavain/screwzira-subtitle-downloader.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/screwzira-subtitle-downloader/context:javascript)
@@ -6,7 +6,7 @@
 ![types](https://img.shields.io/npm/types/typescript.svg)
 ![commit](https://img.shields.io/github/last-commit/yoavain/screwzira-subtitle-downloader.svg)
 [![Known Vulnerabilities](https://snyk.io//test/github/yoavain/screwzira-subtitle-downloader/badge.svg?targetFile=package.json)](https://snyk.io//test/github/yoavain/screwzira-subtitle-downloader?targetFile=package.json)
-[![codecov](https://codecov.io/gh/yoavain/screwzira-subtitle-downloader/branch/master/graph/badge.svg)](https://codecov.io/gh/yoavain/screwzira-subtitle-downloader)
+[![codecov](https://codecov.io/gh/yoavain/screwzira-subtitle-downloader/branch/main/graph/badge.svg)](https://codecov.io/gh/yoavain/screwzira-subtitle-downloader)
 [![Renovate](https://img.shields.io/badge/renovate-enabled-brightgreen.svg)](https://renovatebot.com)
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=yoavain.screwzira-subtitle-downloader)
 
@@ -16,7 +16,7 @@ Installer adds right-click context to folders and to mkv/avi/mp4 file types (ass
 
 ### Usage:
 
-![sonarr configuration](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/screenshots/right-click-usage.gif)
+![sonarr configuration](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/main/resources/screenshots/right-click-usage.gif)
 
 ### CLI:
 
@@ -49,7 +49,7 @@ ktuvit-downloader.exe <video-file-full-path>
 
 ## Configuring sonarr:
 
-![sonarr configuration](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/master/resources/screenshots/sonarr-custom-script.png)
+![sonarr configuration](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/main/resources/screenshots/sonarr-custom-script.png)
 
 In order to have Silent launch of the downloader:  
 Path should be to the launcher: "C:\Program Files\Ktuvit-Downloader\ktuvit-downloader-launcher.exe"  
