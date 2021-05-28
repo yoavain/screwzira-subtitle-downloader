@@ -7,7 +7,7 @@ const mockFsWriteFileSync = jest.fn((destination, response) => {
 fs.writeFileSync = mockFsWriteFileSync;
 
 import type { ClassifierInterface, MovieFileClassificationInterface } from "~src/classifier";
-import { Classifier, FileClassification, SUBTITLES_SUFFIX } from "~src/classifier";
+import { Classifier, FileClassification } from "~src/classifier";
 import { ScrewziraParser } from "~src/parsers/screwzira/screwziraParser";
 import { MockConfig, MockLogger, MockNotifier } from "~test/__mocks__";
 import * as path from "path";
@@ -38,7 +38,7 @@ describe("Test screwzira parser", () => {
         };
         await screwziraParser.handleMovie(movieFile);
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
-        expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", `${filenameNoExtension}.${SUBTITLES_SUFFIX}`));
+        expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
         expect(fs.writeFileSync.mock.calls[0][1].length).toBeGreaterThan(0);
     });
 });
