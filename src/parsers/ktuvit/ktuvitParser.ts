@@ -304,7 +304,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             this.logger.debug(`Downloading subtitle for ${contextMessage}`);
             response = await got.get(options);
             if (response.statusCode === 200) {
-                const destination: string = path.resolve(relativePath, filenameNoExtension + ".Hebrew.srt");
+                const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${this.classifier.getSubtitlesSuffix()}`);
                 this.logger.verbose(`writing response to ${destination}`);
                 fs.writeFileSync(destination, response.body);
                 return true;

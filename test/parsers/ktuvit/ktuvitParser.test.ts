@@ -8,13 +8,15 @@ fs.writeFileSync = mockFsWriteFileSync;
 
 import * as path from "path";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
-import { Classifier, FileClassification, SUBTITLES_SUFFIX } from "~src/classifier";
+import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 import { MockConfig, MockLogger, MockNotifier } from "~test/__mocks__";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
 import type { ConfigInterface } from "~src/config";
+
+jest.setTimeout(20000);
 
 describe("Test ktuvit parser", () => {
     it("Test fetch file - movie", async () => {
@@ -41,7 +43,7 @@ describe("Test ktuvit parser", () => {
         };
         await ktuvitParser.handleMovie(movieFile);
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
-        expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${SUBTITLES_SUFFIX}`));
+        expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
         expect(fs.writeFileSync.mock.calls[0][1].length).toBeGreaterThan(0);
     });
 
@@ -70,7 +72,7 @@ describe("Test ktuvit parser", () => {
         };
         await ktuvitParser.handleEpisode(tvEpisodeFile);
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
-        expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${SUBTITLES_SUFFIX}`));
+        expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
         expect(fs.writeFileSync.mock.calls[0][1].length).toBeGreaterThan(0);
     });
 });

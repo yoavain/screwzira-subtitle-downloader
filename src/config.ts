@@ -10,15 +10,17 @@ interface ConfigurationInterface {
     logLevel: string;
     extensions: string[];
     replacePairs: ReplacePairsInterface;
+    languageCode: string;
 }
 
 const defaultExtensions: string[] = ["mkv", "mp4", "avi"];
-const defaultConf: ConfigurationInterface = { logLevel: "debug", extensions: defaultExtensions, replacePairs: {} };
+const defaultConf: ConfigurationInterface = { logLevel: "debug", extensions: defaultExtensions, replacePairs: {}, languageCode: "Hebrew" };
 
 export interface ConfigInterface {
     replaceTitleIfNeeded: (text: string) => string;
     getLogLevel: () => string;
     getExtensions: () => string[];
+    getLanguageCode: () => string
 }
 
 export class Config implements ConfigInterface {
@@ -26,6 +28,7 @@ export class Config implements ConfigInterface {
     private readonly logger: LoggerInterface;
     private readonly replacePairs: ReplacePairsInterface;
     private readonly extensions: string[];
+    private readonly languageCode: string;
 
     constructor(confFile: string, logger: LoggerInterface) {
         this.logger = logger;
@@ -44,6 +47,7 @@ export class Config implements ConfigInterface {
         this.logger.debug(`LogLevel ${this.logLevel}`);
         this.extensions = conf?.extensions ?? defaultExtensions;
         this.replacePairs = conf?.replacePairs ? Object.freeze(JSON.parse(JSON.stringify(conf.replacePairs).toLowerCase())) : Object.freeze({});
+        this.languageCode = conf?.languageCode ?? "Hebrew";
         this.logger.debug(
             `Replace pairs (${Object.keys(this.replacePairs).length}): ${Object.keys(this.replacePairs)
                 .map((pairKey) => pairKey + " => " + this.replacePairs[pairKey])
@@ -66,4 +70,8 @@ export class Config implements ConfigInterface {
     public getExtensions = (): string[] => {
         return this.extensions;
     };
+
+    public getLanguageCode = (): string => {
+        return this.languageCode;
+    }
 }

@@ -1,6 +1,6 @@
 {
     "name": "ktuvit-downloader",
-    "version": "6.2.2",
+    "version": "7.0.4",
     "description": "Download Hebrew subtitles from Ktuvit.me",
     "main": "_build/index.js",
     "scripts": {
@@ -29,14 +29,15 @@
     },
     "dependencies": {
         "flat-cache": "3.0.4",
-        "fs-extra": "10.0.0",
+        "fs-extra": "9.1.0",
         "got": "11.8.2",
         "husky": "6.0.0",
-        "node-notifier": "10.0.0",
+        "node-notifier": "9.0.1",
         "numeral": "2.0.6",
         "winston": "3.3.3"
     },
     "devDependencies": {
+        "dotenv": "10.0.0",
         "@types/cross-spawn": "6.0.2",
         "@types/flat-cache": "2.0.0",
         "@types/fs-extra": "9.0.11",

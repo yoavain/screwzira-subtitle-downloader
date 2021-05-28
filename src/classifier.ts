@@ -9,7 +9,7 @@ const episodeRegex = /(.+?)[Ss]?0?(\d+)?[xeE]0?(\d+)/;
 const movieRegex = /([ .\w']+?)[. ](\d{4})[. ]/;
 const movieParentRegex = /((?:[^(]+))\s+(?:\((\d+)\))/;
 
-export const SUBTITLES_SUFFIX = "Hebrew.srt";
+const SUBTITLES_EXTENSION = "srt";
 
 interface IWordWeight {
     [key: string]: number;
@@ -72,6 +72,7 @@ export interface CommonWordsInSentenceResponseInterface {
 }
 
 export interface ClassifierInterface {
+    getSubtitlesSuffix: () => string;
     isSubtitlesAlreadyExist: (relativePath: string, filenameNoExtension: string) => boolean;
     commonWordsInSentences: (s1: string, s2: string, excludeList: string[]) => CommonWordsInSentenceResponseInterface;
     calculateSimilarityMark: (words: string[]) => number;
@@ -88,8 +89,13 @@ export class Classifier implements ClassifierInterface {
         this.config = config;
     }
 
+    public getSubtitlesSuffix = () => {
+        return `${this.config.getLanguageCode()}.${SUBTITLES_EXTENSION}`;
+    };
+
+
     public isSubtitlesAlreadyExist = (relativePath: string, filenameNoExtension: string): boolean => {
-        const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${SUBTITLES_SUFFIX}`);
+        const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${this.getSubtitlesSuffix()}`);
         return fs.existsSync(destination);
     };
 

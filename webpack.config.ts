@@ -2,6 +2,11 @@ import webpack from "webpack";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import path from "path";
 
+require("dotenv").config();
+if (!process.env.KTUVIT_EMAIL || !process.env.KTUVIT_PASSWORD) {
+    throw new Error("Missing Ktuvit credentials");
+}
+
 export const baseConfig: webpack.Configuration = {
     mode: "production",
     entry: "./src/index.ts",
