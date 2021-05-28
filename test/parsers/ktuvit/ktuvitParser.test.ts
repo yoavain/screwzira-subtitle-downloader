@@ -16,6 +16,8 @@ import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
 import type { ConfigInterface } from "~src/config";
 
+jest.setTimeout(20000);
+
 describe("Test ktuvit parser", () => {
     it("Test fetch file - movie", async () => {
         const email: string = process.env.KTUVIT_EMAIL;

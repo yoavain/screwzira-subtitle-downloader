@@ -28,6 +28,7 @@
         "npm": "<7"
     },
     "dependencies": {
+        "dotenv": "10.0.0",
         "flat-cache": "3.0.4",
         "fs-extra": "10.0.0",
         "got": "11.8.2",

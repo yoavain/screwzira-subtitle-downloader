@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("dotenv").config();
+
 import type { ArgsParserInterface } from "~src/argsParser";
 import { ArgsParser } from "~src/argsParser";
 import type { LoggerInterface } from "~src/logger";

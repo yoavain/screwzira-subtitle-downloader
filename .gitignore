@@ -13,3 +13,4 @@ installer/*.bat
 *.iml
 /coverage/
 /lsp/
+/.env
