@@ -57,7 +57,7 @@
         "eslint-plugin-node": "11.1.0",
         "eslint-plugin-security": "1.4.0",
         "jest": "27.0.6",
-        "lint-staged": "11.1.0",
+        "lint-staged": "11.1.1",
         "nexe": "3.3.7",
         "prettier": "2.3.2",
         "rimraf": "3.0.2",
