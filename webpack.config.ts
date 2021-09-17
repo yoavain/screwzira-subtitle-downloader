@@ -41,7 +41,7 @@ export const baseConfig: webpack.Configuration = {
             KTUVIT_EMAIL: JSON.stringify(process.env.KTUVIT_EMAIL),
             KTUVIT_PASSWORD: JSON.stringify(process.env.KTUVIT_PASSWORD)
         }),
-        new webpack.IgnorePlugin({ contextRegExp: /\.(css|less)$/ }),
+        new webpack.IgnorePlugin({ resourceRegExp: /\.(css|less)$/ }),
         new CopyWebpackPlugin({
             patterns: [
                 {
