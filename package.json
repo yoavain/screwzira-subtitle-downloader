@@ -41,7 +41,7 @@
         "@types/flat-cache": "2.0.0",
         "@types/fs-extra": "9.0.13",
         "@types/jest": "27.0.2",
-        "@types/node": "16.10.1",
+        "@types/node": "16.10.2",
         "@types/numeral": "2.0.2",
         "@types/uuid": "8.3.1",
         "@typescript-eslint/eslint-plugin": "4.32.0",
