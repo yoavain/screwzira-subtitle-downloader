@@ -61,7 +61,7 @@ export class Logger implements LoggerInterface {
 
     public getLogFileLocation = (): string => {
         return this.logFile;
-    }
+    };
 
     private log = (level: string, message: string): void => {
         this.logger.log(level, message);

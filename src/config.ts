@@ -73,5 +73,5 @@ export class Config implements ConfigInterface {
 
     public getLanguageCode = (): string => {
         return this.languageCode;
-    }
+    };
 }

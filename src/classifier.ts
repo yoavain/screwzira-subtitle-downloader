@@ -181,7 +181,7 @@ export class Classifier implements ClassifierInterface {
             }
         }
         return undefined;
-    }
+    };
 
     intToRomanUpto9 = (num: number): string => {
         switch (num) {
@@ -207,5 +207,5 @@ export class Classifier implements ClassifierInterface {
                 throw new Error("Unexpected input");
 
         }
-    }
+    };
 }

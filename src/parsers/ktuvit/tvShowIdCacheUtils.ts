@@ -6,7 +6,7 @@ export type FetchFunction = () => Promise<string>
 
 export class TvShowIdCache {
     private readonly cache: Cache;
-    private readonly logger: Logger
+    private readonly logger: Logger;
 
     constructor(id: string, logger?: Logger) {
         this.cache = flatCache.load(id);
