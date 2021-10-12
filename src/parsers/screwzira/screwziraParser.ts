@@ -144,14 +144,14 @@ export class ScrewziraParser extends CommonParser implements ParserInterface {
         catch (error) {
             this.handleError(error, response);
         }
-    }
+    };
 
     private parseResults = (body: string): Subtitle[] => {
         const results: Subtitle[] = body && JSON.parse(body).Results;
         if (Array.isArray(results)) {
             return body && JSON.parse(body).Results;
         }
-    }
+    };
 
     private handleResults = async (results: Subtitle[], excludeList: string[], filenameNoExtension: string, relativePath: string, contextMessage: string): Promise<void> => {
         if (Array.isArray(results) && results.length) {

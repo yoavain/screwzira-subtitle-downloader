@@ -212,7 +212,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         catch (error) {
             this.handleError(error, response);
         }
-    }
+    };
 
     private getMovieSubtitlesOptions = (movieId: string): OptionsOfTextResponseBody => ({
         url: `${this.baseUrl}/MovieInfo.aspx?ID=${movieId}`,
@@ -246,7 +246,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         catch (error) {
             this.handleError(error, response);
         }
-    }
+    };
 
     private getDownloadIdentifier = async (id: string, subtitleId: string, contextMessage: string): Promise<string> => {
         this.logger.info(`Downloading: ${subtitleId}`);

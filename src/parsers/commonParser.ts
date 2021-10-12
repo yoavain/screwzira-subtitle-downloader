@@ -48,20 +48,20 @@ export class CommonParser {
 
     protected getMovieExcludeList = (movieName: string, movieYear: number): string[] => {
         return [...splitText(cleanText(movieName)), movieYear.toString()];
-    }
+    };
 
     protected getTvSeriesExcludeList = (series: string): string[] => {
         return splitText(cleanText(series));
-    }
+    };
 
     protected handleError = (error: any, response) => {
         this.logger.error(error);
         if (response) {
             this.logger.error(JSON.stringify(response));
         }
-    }
+    };
 
     protected handleNoSubtitlesFound = (contextMessage: string) => {
         this.notifier.notif(`No subtitle found for ${contextMessage}`, NotificationType.WARNING, true);
-    }
+    };
 }
