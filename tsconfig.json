@@ -6,6 +6,7 @@
         "allowJs": true,
         "target": "es6",
         "lib": ["es6", "es2017"],
+        "noEmit": true,
         "baseUrl": ".",
         "paths": {
             "~src/*": ["src/*"],
@@ -14,5 +15,5 @@
         },
         "importsNotUsedAsValues": "error"
     },
-    "include": ["./src/**/*"]
+    "include": ["./src/**/*", "./test/**/*", "./*.ts", "./*.js"]
 }
