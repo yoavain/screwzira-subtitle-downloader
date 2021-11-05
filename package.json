@@ -1,17 +1,17 @@
 {
     "name": "ktuvit-downloader",
-    "version": "7.2.0",
+    "version": "7.3.0",
     "description": "Download Hebrew subtitles from Ktuvit.me",
     "main": "_build/index.js",
     "scripts": {
         "postinstall": "git config --get core.hookspath || husky install",
         "build": "npm run eslint && npm run type-check && npm run test && npm run webpack && npm run nexe && npm run installer",
         "quick-build-exe": "npm run webpack && npm run nexe",
-        "eslint": "eslint src/ test/",
+        "eslint": "eslint src/ test/ *.js *.ts",
         "eslint:fix": "npm run eslint -- --fix",
-        "prettier": "prettier --write *.json .eslintrc.json .prettierrc tsconfig.json webpack.config.js",
+        "prettier": "prettier --write *.json .eslintrc.json .prettierrc tsconfig.json tsconfig.build.json",
         "test": "jest",
-        "type-check": "tsc --build tsconfig.all.json",
+        "type-check": "tsc --build tsconfig.json",
         "prewebpack": "rimraf _build",
         "webpack": "webpack",
         "nexe": "nexe -t windows-x64-14.15.3 -o dist/ktuvit-downloader.exe",
@@ -37,6 +37,7 @@
         "winston": "3.3.3"
     },
     "devDependencies": {
+        "@tsconfig/node14": "1.0.1",
         "@types/cross-spawn": "6.0.2",
         "@types/flat-cache": "2.0.0",
         "@types/fs-extra": "9.0.13",
@@ -66,7 +67,7 @@
         "ts-node": "10.4.0",
         "typescript": "4.4.4",
         "uuid": "8.3.2",
-        "webpack": "5.61.0",
+        "webpack": "5.62.1",
         "webpack-cli": "4.9.1"
     },
     "lint-staged": {

@@ -2,6 +2,7 @@ import webpack from "webpack";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import path from "path";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config();
 if (!process.env.KTUVIT_EMAIL || !process.env.KTUVIT_PASSWORD) {
     throw new Error("Missing Ktuvit credentials");
@@ -23,8 +24,14 @@ export const baseConfig: webpack.Configuration = {
         rules: [
             {
                 test: /\.ts$/,
-                use: "ts-loader",
-                exclude: /node_modules/
+                exclude: /node_modules/,
+                use: {
+                    loader: "ts-loader",
+                    options: {
+                        configFile: "tsconfig.build.json",
+                        transpileOnly: true
+                    }
+                }
             }
         ]
     },
