@@ -24,8 +24,14 @@ export const baseConfig: webpack.Configuration = {
         rules: [
             {
                 test: /\.ts$/,
-                use: "ts-loader",
-                exclude: /node_modules/
+                exclude: /node_modules/,
+                use: {
+                    loader: "ts-loader",
+                    options: {
+                        configFile: "tsconfig.build.json",
+                        transpileOnly: true
+                    }
+                }
             }
         ]
     },
