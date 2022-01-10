@@ -25,7 +25,7 @@
     "license": "ISC",
     "engines": {
         "node": ">=14 <17",
-        "npm": "<7"
+        "npm": "<9"
     },
     "dependencies": {
         "flat-cache": "3.0.4",
