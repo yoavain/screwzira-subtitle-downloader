@@ -47,7 +47,7 @@
         "@types/uuid": "8.3.4",
         "@typescript-eslint/eslint-plugin": "5.10.1",
         "@typescript-eslint/parser": "5.10.1",
-        "copy-webpack-plugin": "10.2.1",
+        "copy-webpack-plugin": "10.2.2",
         "cross-env": "7.0.3",
         "cross-spawn": "7.0.3",
         "dotenv": "14.3.2",
