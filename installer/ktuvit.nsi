@@ -10,9 +10,6 @@ Unicode True
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
-!define MkvProgID "mplayerc64.mkv"
-!define AviProgID "mplayerc64.avi"
-!define Mp4ProgID "mplayerc64.mp4"
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -75,26 +72,26 @@ SectionEnd
 Section "Directory" SEC02
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
-  WriteRegStr HKCR "Folder\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
+  WriteRegStr HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
+  WriteRegStr HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
 SectionEnd
 Section "MKV" SEC03
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  WriteRegStr HKLM "SOFTWARE\Classes\${MkvProgID}\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
-  WriteRegStr HKLM "SOFTWARE\Classes\${MkvProgID}\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
+  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
+  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
 SectionEnd
 Section "AVI" SEC04
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-    WriteRegStr HKLM "SOFTWARE\Classes\${AviProgID}\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
-    WriteRegStr HKLM "SOFTWARE\Classes\${AviProgID}\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
+    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
 SectionEnd
 Section "MP4" SEC05
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-    WriteRegStr HKLM "SOFTWARE\Classes\${Mp4ProgID}\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
-    WriteRegStr HKLM "SOFTWARE\Classes\${Mp4ProgID}\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
+    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
 SectionEnd
 
 Section -Post
@@ -142,9 +139,9 @@ Section Uninstall
   RMDir "$INSTDIR"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
-  DeleteRegKey HKCR "Folder\shell\${PRODUCT_NAME}"
-  DeleteRegKey HKLM "SOFTWARE\Classes\${MkvProgID}\shell\${PRODUCT_NAME}"
-  DeleteRegKey HKLM "SOFTWARE\Classes\${AviProgID}\shell\${PRODUCT_NAME}"
-  DeleteRegKey HKLM "SOFTWARE\Classes\${Mp4ProgID}\shell\${PRODUCT_NAME}"
+  DeleteRegKey HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_NAME}"
+  DeleteRegKey HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_NAME}"
+  DeleteRegKey HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_NAME}"
+  DeleteRegKey HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}"
   SetAutoClose true
 SectionEnd
