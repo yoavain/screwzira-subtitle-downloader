@@ -91,7 +91,7 @@ Section "MP4" SEC05
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
     WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
-    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
 SectionEnd
 
 Section -Post
