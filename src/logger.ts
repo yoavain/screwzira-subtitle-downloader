@@ -63,7 +63,7 @@ export class Logger implements LoggerInterface {
         return this.logFile;
     };
 
-    private log = (level: winston.level, message: string): void => {
+    private log = (level: string, message: string): void => {
         this.logger.log(level, message);
     };
 }
