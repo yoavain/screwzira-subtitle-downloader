@@ -12,7 +12,7 @@
 
 ## A tool for downloading Hebrew subtitles from ktuvit.me
 
-Installer adds right-click context to folders and to mkv/avi/mp4 file types (assuming file are associated with media player classic 64)
+Installer adds right-click context to folders and to mkv/avi/mp4 file types
 
 ### Usage:
 
