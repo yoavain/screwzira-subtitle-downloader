@@ -57,8 +57,8 @@ ShowUnInstDetails show
 
 Section "Main" SEC00
 SetOutPath "$INSTDIR"
-File "..\dist\ktuvit-downloader.exe"
-File "..\dist\ktuvit-downloader-launcher.exe"
+File "..\dist\${PRODUCT_NAME}.exe"
+File "..\dist\${PRODUCT_NAME}-launcher.exe"
 File "..\dist\snoretoast-x64.exe"
 SectionEnd
 Section "Icons" SEC01
@@ -72,26 +72,26 @@ SectionEnd
 Section "Directory" SEC02
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  WriteRegStr HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
-  WriteRegStr HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
+  WriteRegStr HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\${PRODUCT_NAME}-launcher.exe,0'
+  WriteRegStr HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\${PRODUCT_NAME}-launcher.exe" input "%1"'
 SectionEnd
 Section "MKV" SEC03
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
-  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
+  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\${PRODUCT_NAME}-launcher.exe,0'
+  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\${PRODUCT_NAME}-launcher.exe" input "%1"'
 SectionEnd
 Section "AVI" SEC04
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
-    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\${PRODUCT_NAME}-launcher.exe,0'
+    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\${PRODUCT_NAME}-launcher.exe" input "%1"'
 SectionEnd
 Section "MP4" SEC05
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\ktuvit-downloader-launcher.exe,0'
-    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\ktuvit-downloader-launcher.exe" input "%1"'
+    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\${PRODUCT_NAME}-launcher.exe,0'
+    WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\${PRODUCT_NAME}-launcher.exe" input "%1"'
 SectionEnd
 
 Section -Post
@@ -99,7 +99,7 @@ Section -Post
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\${PRODUCT_NAME}.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\${PRODUCT_NAME}_Uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\${PRODUCT_NAME}.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\${PRODUCT_NAME}-launcher.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
@@ -132,8 +132,8 @@ FunctionEnd
 
 Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}_Uninst.exe"
-  Delete "$INSTDIR\ktuvit-downloader.exe"
-  Delete "$INSTDIR\ktuvit-downloader-launcher.exe"
+  Delete "$INSTDIR\${PRODUCT_NAME}.exe"
+  Delete "$INSTDIR\${PRODUCT_NAME}-launcher.exe"
   Delete "$INSTDIR\snoretoast-x64.exe"
   RMDir /r "$INSTDIR\notif-icons"
   RMDir "$INSTDIR"
