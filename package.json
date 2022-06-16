@@ -37,7 +37,7 @@
         "winston": "3.7.2"
     },
     "devDependencies": {
-        "@tsconfig/node14": "1.0.1",
+        "@tsconfig/node14": "1.0.3",
         "@types/cross-spawn": "6.0.2",
         "@types/flat-cache": "2.0.0",
         "@types/fs-extra": "9.0.13",
