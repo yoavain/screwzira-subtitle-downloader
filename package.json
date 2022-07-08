@@ -52,7 +52,7 @@
         "cross-spawn": "7.0.3",
         "dotenv": "16.0.1",
         "eslint": "8.19.0",
-        "eslint-import-resolver-typescript": "3.2.4",
+        "eslint-import-resolver-typescript": "3.2.5",
         "eslint-plugin-import": "2.26.0",
         "eslint-plugin-jest": "26.5.3",
         "eslint-plugin-node": "11.1.0",
