@@ -1,7 +1,6 @@
 # ![](https://raw.githubusercontent.com/yoavain/screwzira-subtitle-downloader/main/resources/icons/ktuvit-64.png) Ktuvit Subtitle Downloader  <br>
 
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/yoavain/screwzira-subtitle-downloader.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/screwzira-subtitle-downloader/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/yoavain/screwzira-subtitle-downloader.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/yoavain/screwzira-subtitle-downloader/context:javascript)
+[![CodeQL](https://github.com/yoavain/screwzira-subtitle-downloader/workflows/CodeQL/badge.svg)](https://github.com/yoavain/screwzira-subtitle-downloader/actions?query=workflow%3ACodeQL)
 [![Actions Status](https://github.com/yoavain/screwzira-subtitle-downloader/workflows/Node%20CI/badge.svg)](https://github.com/yoavain/screwzira-subtitle-downloader/actions)
 ![types](https://img.shields.io/npm/types/typescript.svg)
 ![commit](https://img.shields.io/github/last-commit/yoavain/screwzira-subtitle-downloader.svg)
