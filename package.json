@@ -31,7 +31,7 @@
     "dependencies": {
         "flat-cache": "3.0.4",
         "fs-extra": "9.1.0",
-        "got": "11.8.5",
+        "got": "12.5.1",
         "husky": "8.0.1",
         "node-notifier": "10.0.1",
         "numeral": "2.0.6",
