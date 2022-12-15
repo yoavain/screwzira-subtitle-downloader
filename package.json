@@ -1,6 +1,6 @@
 {
     "name": "ktuvit-downloader",
-    "version": "9.0.1",
+    "version": "10.0.0",
     "description": "Download Hebrew subtitles from Ktuvit.me",
     "main": "_build/index.js",
     "scripts": {
@@ -15,7 +15,7 @@
         "type-check": "tsc --build tsconfig.json",
         "prewebpack": "rimraf _build",
         "webpack": "webpack",
-        "nexe": "nexe -t windows-x64-14.15.3 -o dist/ktuvit-downloader.exe",
+        "nexe": "nexe -t windows-x64-16.18.1 --remote \"https://github.com/yoavain/nexe-builds/releases/download/0.3.1/\" -o dist/ktuvit-downloader.exe",
         "check-msbuild": "ts-node -e \"require(\"\"./launcher/launcherCompiler\"\").checkMsbuildInPath(true)\"",
         "rebuild-launcher": "msbuild launcher/launcher.csproj",
         "start": "ts-node src/index.ts",
@@ -25,7 +25,7 @@
     "author": "yoavain",
     "license": "ISC",
     "engines": {
-        "node": ">=14 <19",
+        "node": ">=16 <19",
         "npm": "<9"
     },
     "dependencies": {
@@ -38,7 +38,7 @@
         "winston": "3.8.2"
     },
     "devDependencies": {
-        "@tsconfig/node14": "1.0.3",
+        "@tsconfig/node16": "1.0.3",
         "@types/cross-spawn": "6.0.2",
         "@types/flat-cache": "2.0.0",
         "@types/fs-extra": "9.0.13",
