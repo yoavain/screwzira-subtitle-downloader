@@ -42,7 +42,7 @@
         "@types/cross-spawn": "6.0.2",
         "@types/flat-cache": "2.0.0",
         "@types/fs-extra": "9.0.13",
-        "@types/jest": "29.5.0",
+        "@types/jest": "29.5.1",
         "@types/node": "18.15.12",
         "@types/numeral": "2.0.2",
         "@types/uuid": "9.0.1",
