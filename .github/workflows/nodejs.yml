@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [20.x]
 
     steps:
     - name: Install NSIS
@@ -28,6 +28,9 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v3.5.3
+
+    - name: Setup Windows SDK
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11
 
     - name: Setup NodeJS
       uses: actions/setup-node@v3.6.0
