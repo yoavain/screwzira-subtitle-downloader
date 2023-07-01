@@ -18,6 +18,7 @@
         "prenode-sea:build-blob": "rimraf _blob && mkdir _blob",
         "node-sea:build-blob": "node --experimental-sea-config sea-config.json",
         "node-sea:copy-node": "for /F \"tokens=*\" %n IN ('where.exe node') DO @(copy \"%n\" dist\\ktuvit-downloader.exe)",
+        "postnode-sea:copy-node": "dist\\ktuvit-downloader.exe -v",
         "node-sea:unsign": "signtool remove /s dist\\ktuvit-downloader.exe",
         "node-sea:inject-blob": "postject dist\\ktuvit-downloader.exe NODE_SEA_BLOB _blob\\sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
         "node-sea:sign": "signtool sign /fd SHA256 dist\\ktuvit-downloader.exe",
