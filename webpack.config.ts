@@ -68,6 +68,9 @@ export const baseConfig: webpack.Configuration = {
             ]
         })
     ],
+    stats: {
+        errorDetails: true
+    },
     devtool: "source-map"
 };
 

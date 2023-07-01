@@ -16,3 +16,4 @@ installer/*.bat
 /.env
 /dist/
 /_build/
+/_blob/

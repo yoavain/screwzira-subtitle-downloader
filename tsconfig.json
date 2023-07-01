@@ -1,9 +1,9 @@
 {
-    "extends": "@tsconfig/node16",
+    "extends": "@tsconfig/node20",
     "compilerOptions": {
         "strict": false,
         "moduleResolution": "node",
-        "importsNotUsedAsValues": "error",
+        "verbatimModuleSyntax": false,
         "allowJs": true,
         "noEmit": true,
         "baseUrl": ".",
@@ -13,5 +13,5 @@
             "~resources/*": ["resources/*"]
         }
     },
-    "include": ["./src/**/*", "./test/**/*", "./*.ts", "./*.js"]
+    "include": ["./src/**/*", "./test/**/*", "./*.ts", "./*.js", "./launcher/*.ts"]
 }
