@@ -43,6 +43,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: npm
+    - name: validate NodEJS
+      run: | 
+        node -v
+        where node
 
     - name: Dependencies Install
       run: npm ci
