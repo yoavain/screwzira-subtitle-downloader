@@ -44,7 +44,7 @@
         "winston": "3.10.0"
     },
     "devDependencies": {
-        "@tsconfig/node20": "1.0.2",
+        "@tsconfig/node20": "20.1.0",
         "@types/cross-spawn": "6.0.2",
         "@types/flat-cache": "2.0.0",
         "@types/fs-extra": "11.0.1",
