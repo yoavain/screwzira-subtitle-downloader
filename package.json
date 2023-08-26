@@ -35,7 +35,7 @@
         "npm": "<=9"
     },
     "dependencies": {
-        "flat-cache": "3.0.4",
+        "flat-cache": "3.1.0",
         "fs-extra": "11.1.1",
         "got": "11.8.6",
         "husky": "8.0.3",
