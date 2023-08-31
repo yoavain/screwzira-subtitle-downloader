@@ -32,7 +32,7 @@
     "license": "ISC",
     "engines": {
         "node": ">=20",
-        "npm": "<=9"
+        "npm": "<=10"
     },
     "dependencies": {
         "flat-cache": "3.1.0",
