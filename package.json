@@ -51,7 +51,7 @@
         "@types/jest": "29.5.4",
         "@types/node": "20.5.8",
         "@types/numeral": "2.0.2",
-        "@types/uuid": "9.0.2",
+        "@types/uuid": "9.0.3",
         "@typescript-eslint/eslint-plugin": "5.62.0",
         "@typescript-eslint/parser": "5.62.0",
         "copy-webpack-plugin": "11.0.0",
