@@ -41,7 +41,7 @@
         "husky": "8.0.3",
         "node-notifier": "10.0.1",
         "numeral": "2.0.6",
-        "winston": "3.10.0"
+        "winston": "3.11.0"
     },
     "devDependencies": {
         "@tsconfig/node20": "1.0.2",
