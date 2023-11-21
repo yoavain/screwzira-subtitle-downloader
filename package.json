@@ -46,7 +46,7 @@
     "devDependencies": {
         "@tsconfig/node20": "1.0.2",
         "@types/cross-spawn": "6.0.5",
-        "@types/flat-cache": "2.0.1",
+        "@types/flat-cache": "2.0.2",
         "@types/fs-extra": "11.0.3",
         "@types/jest": "29.5.9",
         "@types/node": "20.8.10",
