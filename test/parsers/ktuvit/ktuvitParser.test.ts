@@ -1,10 +1,10 @@
 // Mock first
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require("fs");
-const mockFsWriteFileSync = jest.fn((destination, response) => {
-    console.log(`Writing file: ${destination} with ${response.size} bytes`);
+const fs = require("fs/promises");
+const mockFsWriteFile = jest.fn(async (destination, response: Buffer) => {
+    console.log(`Writing file: ${destination} with ${response.length} bytes`);
 });
-fs.writeFileSync = mockFsWriteFileSync;
+fs.writeFile = mockFsWriteFile;
 
 import * as path from "path";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
@@ -42,9 +42,9 @@ describe("Test ktuvit parser", () => {
             movieYear : 2013
         };
         await ktuvitParser.handleMovie(movieFile);
-        expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
-        expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
-        expect(fs.writeFileSync.mock.calls[0][1].length).toBeGreaterThan(0);
+        expect(fs.writeFile).toHaveBeenCalledTimes(1);
+        expect(fs.writeFile.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
+        expect(fs.writeFile.mock.calls[0][1].length).toBeGreaterThan(0);
     });
 
     it("Test fetch file - series", async () => {
@@ -71,8 +71,8 @@ describe("Test ktuvit parser", () => {
             season: 1
         };
         await ktuvitParser.handleEpisode(tvEpisodeFile);
-        expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
-        expect(fs.writeFileSync.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
-        expect(fs.writeFileSync.mock.calls[0][1].length).toBeGreaterThan(0);
+        expect(fs.writeFile).toHaveBeenCalledTimes(1);
+        expect(fs.writeFile.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
+        expect(fs.writeFile.mock.calls[0][1].length).toBeGreaterThan(0);
     });
 });

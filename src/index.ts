@@ -8,7 +8,7 @@ import { Config } from "~src/config";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
-import * as fs from "fs";
+import * as fs from "fs/promises";
 import * as fsextra from "fs-extra";
 import * as path from "path";
 import type { ParserInterface } from "~src/parsers/parserInterface";
@@ -47,7 +47,7 @@ const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<
     const parentFolder: string = fileExists && split.length > 1 ? split[split.length - 2] : undefined;
 
     // Check if already exists
-    if (classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
+    if (await classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
         notifier.notif("Hebrew subtitles already exist", NotificationType.WARNING);
         return false;
     }
@@ -83,12 +83,12 @@ const getFileExtension = (fullPath: string): string => {
 const handleFolder = async (dir: string): Promise<void> => {
     let noFileHandled = true;
 
-    const items: string[] = fs.readdirSync(dir);
+    const items: string[] = await fs.readdir(dir);
 
     let needToWait = false;
     for (const fileOrFolder of items) {
         const fullPath: string = path.join(dir, fileOrFolder).replace(/\\/g, "/");
-        if (fs.lstatSync(fullPath).isDirectory()) {
+        if ((await fs.lstat(fullPath)).isDirectory()) {
             logger.verbose(`Handling sub-folder ${fullPath}`);
             await handleFolder(fullPath);
         }
@@ -119,7 +119,7 @@ const main = async () => {
         logger.info(`*** Looking for subtitle for "${input}" ***`);
         const fullpath: string = input.replace(/\\/g, "/");
         try {
-            if (fs.lstatSync(fullpath).isDirectory()) {
+            if ((await fs.lstat(fullpath)).isDirectory()) {
                 await handleFolder(fullpath);
             }
             else {

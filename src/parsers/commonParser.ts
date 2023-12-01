@@ -54,10 +54,15 @@ export class CommonParser {
         return splitText(cleanText(series));
     };
 
-    protected handleError = (error: any, response) => {
+    protected handleError = async (error: string, response: Response) => {
         this.logger.error(error);
         if (response) {
-            this.logger.error(JSON.stringify(response));
+            try {
+                this.logger.error(await response.text());
+            }
+            catch (e) {
+                this.logger.warn("Failed to parse error response");
+            }
         }
     };
 
