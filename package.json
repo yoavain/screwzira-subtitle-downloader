@@ -8,7 +8,7 @@
         "postinstall": "npm run husky-install && npx fix-lockfile-integrity package-lock.json",
         "build": "npm run eslint && npm run type-check && npm run test && npm run webpack && npm run node-sea && npm run installer",
         "quick-build-exe": "npm run webpack && npm run node-sea",
-        "eslint": "eslint src/ test/ *.js *.ts",
+        "eslint": "eslint src/ test/ *.ts",
         "eslint:fix": "npm run eslint -- --fix",
         "prettier": "prettier --write *.json .eslintrc.json .prettierrc tsconfig.json tsconfig.build.json",
         "test": "jest",
@@ -42,6 +42,7 @@
         "winston": "3.11.0"
     },
     "devDependencies": {
+        "@jest/types": "29.6.3",
         "@tsconfig/node20": "20.1.2",
         "@types/cross-spawn": "6.0.6",
         "@types/flat-cache": "2.0.2",

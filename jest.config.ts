@@ -1,10 +1,16 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config();
 
-module.exports = {
+import type { Config } from "@jest/types";
+
+const config: Config.InitialOptions = {
+    testEnvironment: "node",
     clearMocks: true,
     transform: {
-        "^.+\\.ts$": "ts-jest"
+        "^.+\\.ts$": ["ts-jest", {
+            tsconfig: "tsconfig.jest.json",
+            isolatedModules: true
+        }]
     },
     testRegex: "test/.*.test.ts$",
     moduleFileExtensions: ["ts", "js", "json", "node"],
@@ -14,6 +20,7 @@ module.exports = {
         "^~resources/(.*)": "<rootDir>/resources/$1"
     },
     collectCoverage: true,
+    coverageDirectory: "coverage",
     coverageReporters: [
         "text",
         "text-summary",
@@ -28,3 +35,5 @@ module.exports = {
     ],
     verbose: true
 };
+
+export default config;
