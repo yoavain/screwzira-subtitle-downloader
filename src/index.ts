@@ -8,7 +8,7 @@ import { Config } from "~src/config";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
-import * as fs from "fs/promises";
+import { lstat, readdir } from "fs/promises";
 import * as fsextra from "fs-extra";
 import * as path from "path";
 import type { ParserInterface } from "~src/parsers/parserInterface";
@@ -83,12 +83,12 @@ const getFileExtension = (fullPath: string): string => {
 const handleFolder = async (dir: string): Promise<void> => {
     let noFileHandled = true;
 
-    const items: string[] = await fs.readdir(dir);
+    const items: string[] = await readdir(dir);
 
     let needToWait = false;
     for (const fileOrFolder of items) {
         const fullPath: string = path.join(dir, fileOrFolder).replace(/\\/g, "/");
-        if ((await fs.lstat(fullPath)).isDirectory()) {
+        if ((await lstat(fullPath)).isDirectory()) {
             logger.verbose(`Handling sub-folder ${fullPath}`);
             await handleFolder(fullPath);
         }
@@ -119,7 +119,7 @@ const main = async () => {
         logger.info(`*** Looking for subtitle for "${input}" ***`);
         const fullpath: string = input.replace(/\\/g, "/");
         try {
-            if ((await fs.lstat(fullpath)).isDirectory()) {
+            if ((await lstat(fullpath)).isDirectory()) {
                 await handleFolder(fullpath);
             }
             else {

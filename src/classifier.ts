@@ -1,5 +1,4 @@
 import { cleanText, splitText } from "~src/stringUtils";
-import * as fs from "fs/promises";
 import * as path from "path";
 import type { ConfigInterface } from "~src/config";
 import type { LoggerInterface } from "~src/logger";

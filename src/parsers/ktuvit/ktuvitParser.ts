@@ -2,7 +2,7 @@ import { toTitleCase } from "~src/stringUtils";
 import type { Subtitle } from "~src/parsers/commonParser";
 import { CommonParser } from "~src/parsers/commonParser";
 import { parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
-import * as fs from "fs/promises";
+import { writeFile } from "fs/promises";
 import * as path from "path";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import type { LoggerInterface } from "~src/logger";
@@ -323,7 +323,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
                 const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${this.classifier.getSubtitlesSuffix()}`);
                 this.logger.verbose(`writing response to ${destination}`);
 
-                await fs.writeFile(destination, Buffer.from(await response.arrayBuffer()));
+                await writeFile(destination, Buffer.from(await response.arrayBuffer()));
                 return true;
             }
             else {

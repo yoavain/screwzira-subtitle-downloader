@@ -1,12 +1,5 @@
-// Mock first
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require("fs/promises");
-const mockFsWriteFile = jest.fn(async (destination, response: Buffer) => {
-    console.log(`Writing file: ${destination} with ${response.length} bytes`);
-});
-fs.writeFile = mockFsWriteFile;
-
 import * as path from "path";
+import fs from "fs/promises";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
@@ -18,8 +11,15 @@ import type { ConfigInterface } from "~src/config";
 
 jest.setTimeout(20000);
 
+const mockFsWriteFile = jest.fn(async (destination, response: Buffer) => {
+    console.log(`Writing file: ${destination} with ${response.length} bytes`);
+});
+
+
 describe("Test ktuvit parser", () => {
     it("Test fetch file - movie", async () => {
+        jest.spyOn(fs, "writeFile").mockImplementation(mockFsWriteFile);
+
         const email: string = process.env.KTUVIT_EMAIL;
         const password: string = process.env.KTUVIT_PASSWORD;
 
@@ -43,11 +43,13 @@ describe("Test ktuvit parser", () => {
         };
         await ktuvitParser.handleMovie(movieFile);
         expect(fs.writeFile).toHaveBeenCalledTimes(1);
-        expect(fs.writeFile.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
-        expect(fs.writeFile.mock.calls[0][1].length).toBeGreaterThan(0);
+        expect((fs.writeFile as jest.Mock).mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
+        expect((fs.writeFile as jest.Mock).mock.calls[0][1].length).toBeGreaterThan(0);
     });
 
     it("Test fetch file - series", async () => {
+        jest.spyOn(fs, "writeFile").mockImplementation(mockFsWriteFile);
+
         const email: string = process.env.KTUVIT_EMAIL;
         const password: string = process.env.KTUVIT_PASSWORD;
 
@@ -72,7 +74,7 @@ describe("Test ktuvit parser", () => {
         };
         await ktuvitParser.handleEpisode(tvEpisodeFile);
         expect(fs.writeFile).toHaveBeenCalledTimes(1);
-        expect(fs.writeFile.mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
-        expect(fs.writeFile.mock.calls[0][1].length).toBeGreaterThan(0);
+        expect((fs.writeFile as jest.Mock).mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
+        expect((fs.writeFile as jest.Mock).mock.calls[0][1].length).toBeGreaterThan(0);
     });
 });
