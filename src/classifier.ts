@@ -1,8 +1,8 @@
 import { cleanText, splitText } from "~src/stringUtils";
-import * as fs from "fs";
 import * as path from "path";
 import type { ConfigInterface } from "~src/config";
 import type { LoggerInterface } from "~src/logger";
+import { isExist } from "~src/fileUtils";
 
 // RegEx
 const episodeRegex = /(.+?)[Ss]?0?(\d+)?[xeE]0?(\d+)/;
@@ -73,7 +73,7 @@ export interface CommonWordsInSentenceResponseInterface {
 
 export interface ClassifierInterface {
     getSubtitlesSuffix: () => string;
-    isSubtitlesAlreadyExist: (relativePath: string, filenameNoExtension: string) => boolean;
+    isSubtitlesAlreadyExist: (relativePath: string, filenameNoExtension: string) => Promise<boolean>;
     commonWordsInSentences: (s1: string, s2: string, excludeList: string[]) => CommonWordsInSentenceResponseInterface;
     calculateSimilarityMark: (words: string[]) => number;
     classify: (filenameNoExtension: string, relativePath: string, parentFolder: string) => MovieFileClassificationInterface | TvEpisodeFileClassificationInterface;
@@ -94,9 +94,9 @@ export class Classifier implements ClassifierInterface {
     };
 
 
-    public isSubtitlesAlreadyExist = (relativePath: string, filenameNoExtension: string): boolean => {
+    public isSubtitlesAlreadyExist = async (relativePath: string, filenameNoExtension: string): Promise<boolean> => {
         const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${this.getSubtitlesSuffix()}`);
-        return fs.existsSync(destination);
+        return isExist(destination);
     };
 
     public commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): CommonWordsInSentenceResponseInterface => {

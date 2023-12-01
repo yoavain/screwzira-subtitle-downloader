@@ -2,16 +2,16 @@ import { toTitleCase } from "~src/stringUtils";
 import type { Subtitle } from "~src/parsers/commonParser";
 import { CommonParser } from "~src/parsers/commonParser";
 import { parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
-import * as fs from "fs";
+import { writeFile } from "fs/promises";
 import * as path from "path";
-import type { OptionsOfBufferResponseBody, OptionsOfJSONResponseBody, OptionsOfTextResponseBody } from "got";
-import got from "got";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
 import { NotificationType } from "~src/notifier";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { FileClassification } from "~src/classifier";
+import type { FetchOptions } from "~src/types";
+
 
 export type GetMovieResponse = {
     EngName: string,
@@ -82,7 +82,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             return;
         }
 
-        const options: OptionsOfTextResponseBody = this.getMovieSubtitlesOptions(movieId);
+        const options: FetchOptions = this.getMovieSubtitlesOptions(movieId);
         const subtitles: Subtitle[] = await this.getSubtitles(options, contextMessage);
         if (!subtitles?.length) {
             this.notifier.notif(`Unable to find subtitles for ${contextMessage}`, NotificationType.FAILED, true);
@@ -119,7 +119,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             return;
         }
 
-        const options: OptionsOfTextResponseBody = this.getEpisodeSubtitlesOptions(seriesId, season, episode);
+        const options: FetchOptions = this.getEpisodeSubtitlesOptions(seriesId, season, episode);
         const subtitles: Subtitle[] = await this.getSubtitles(options, contextMessage);
         if (!subtitles?.length) {
             this.notifier.notif(`Unable to find subtitles for ${contextMessage}`, NotificationType.FAILED, true);
@@ -137,148 +137,163 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
     }
 
     private login = async (email: string, password: string): Promise<void> => {
-        const options: OptionsOfJSONResponseBody = {
+        const options: FetchOptions = {
             url: `${this.baseUrl}/Services/MembershipService.svc/Login`,
-            headers: {
-                "User-Agent": this.userAgent
-            },
-            json: {
-                request: {
-                    Email: email,
-                    Password: password
-                }
-            },
-            responseType: "json"
+            requestInit: {
+                method: "POST",
+                headers: {
+                    "User-Agent": this.userAgent,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    request: {
+                        Email: email,
+                        Password: password
+                    }
+                })
+            }
         };
 
-        let response;
+        let response: Response;
         try {
             this.logger.debug("Login into Ktuvit.me");
-            response = await got.post(options);
-            if (response.statusCode === 200) {
-                this.cookie = response.headers["set-cookie"];
+            response = await fetch(new Request(options.url, options.requestInit));
+            if (response.status === 200) {
+                this.cookie = response.headers.getSetCookie();
             }
             else {
-                this.handleError(response.error, response);
+                await this.handleError(response.statusText, response);
             }
         }
         catch (error) {
-            this.handleError(error, response);
+            await this.handleError(error?.message ?? error, response);
         }
     };
 
-    private buildSearchOptions(name: string, type: FileClassification, movieYear?: number): OptionsOfJSONResponseBody {
+    private buildSearchOptions(name: string, type: FileClassification, movieYear?: number): FetchOptions {
         return {
             url: `${this.baseUrl}/Services/ContentProvider.svc/SearchPage_search`,
-            headers: {
-                "User-Agent": this.userAgent,
-                "Cookie": this.cookie.join("; ")
-            },
-            json: {
-                request: {
-                    FilmName: name,
-                    Actors: [],
-                    Studios: null,
-                    Directors: [],
-                    Genres: [],
-                    Countries: [],
-                    Languages: [],
-                    Rating: [],
-                    Page: 1,
-                    WithSubsOnly: false,
-                    SearchType: type === FileClassification.MOVIE ? "0" : "1",
-                    Year: type === FileClassification.MOVIE ? movieYear : ""
-                }
-            },
-            responseType: "json"
+            requestInit: {
+                method: "POST",
+                headers: {
+                    "User-Agent": this.userAgent,
+                    "Content-Type": "application/json",
+                    "Cookie": this.cookie.join("; ")
+                },
+                body: JSON.stringify({
+                    request: {
+                        FilmName: name,
+                        Actors: [],
+                        Studios: null,
+                        Directors: [],
+                        Genres: [],
+                        Countries: [],
+                        Languages: [],
+                        Rating: [],
+                        Page: 1,
+                        WithSubsOnly: false,
+                        SearchType: type === FileClassification.MOVIE ? "0" : "1",
+                        Year: type === FileClassification.MOVIE ? movieYear : ""
+                    }
+                })
+            }
         };
     }
 
     private findId = async (classification: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface, contextMessage: string, name: string, year?: number): Promise<string> => {
         const { type } = classification;
-        const options: OptionsOfJSONResponseBody = this.buildSearchOptions(name, type, year);
+        const options: FetchOptions = this.buildSearchOptions(name, type, year);
 
-        let response;
+        let response: Response;
         try {
             this.logger.debug(`Searching for ${contextMessage}`);
-            response = await got.post(options);
-            if (response.statusCode === 200) {
-                return parseId(response.body.d, name, year);
+            response = await fetch(new Request(options.url, options.requestInit));
+            if (response.status === 200) {
+                const body: any = await response.json();
+                return parseId(body.d, name, year);
             }
             else {
-                this.handleError(response.error, response);
+                await this.handleError(response.statusText, response);
             }
         }
         catch (error) {
-            this.handleError(error, response);
+            await this.handleError(error, response);
         }
     };
 
-    private getMovieSubtitlesOptions = (movieId: string): OptionsOfTextResponseBody => ({
+    private getMovieSubtitlesOptions = (movieId: string): FetchOptions => ({
         url: `${this.baseUrl}/MovieInfo.aspx?ID=${movieId}`,
-        headers: {
-            "User-Agent": this.userAgent,
-            "Cookie": this.cookie.join("; ")
+        requestInit: {
+            headers: {
+                "User-Agent": this.userAgent,
+                "Cookie": this.cookie.join("; ")
+            }
         }
     });
 
-    private getEpisodeSubtitlesOptions = (seriesId: string, season: number, episode: number): OptionsOfTextResponseBody => ({
+    private getEpisodeSubtitlesOptions = (seriesId: string, season: number, episode: number): FetchOptions => ({
         url: `${this.baseUrl}/Services/GetModuleAjax.ashx?moduleName=SubtitlesList&SeriesID=${seriesId}&Season=${season}&Episode=${episode}`,
-        headers: {
-            "User-Agent": this.userAgent,
-            "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${seriesId}`,
-            "Cookie": this.cookie.join("; ")
+        requestInit: {
+            headers: {
+                "User-Agent": this.userAgent,
+                "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${seriesId}`,
+                "Cookie": this.cookie.join("; ")
+            }
         }
     });
 
-    private getSubtitles = async (options: OptionsOfTextResponseBody, contextMessage: string): Promise<Subtitle[]> => {
-        let response;
+    private getSubtitles = async (options: FetchOptions, contextMessage: string): Promise<Subtitle[]> => {
+        let response: Response;
         try {
             this.logger.debug(`Searching subtitles for ${contextMessage}`);
-            response = await got.get(options);
-            if (response.statusCode === 200) {
-                return parseSubtitles(response.body);
+            response = await fetch(new Request(options.url, options.requestInit));
+            if (response.status === 200) {
+                return parseSubtitles(await response.text());
             }
             else {
-                this.handleError(response.error, response);
+                await this.handleError(response.statusText, response);
             }
         }
         catch (error) {
-            this.handleError(error, response);
+            await this.handleError(error?.message ?? error, response);
         }
     };
 
     private getDownloadIdentifier = async (id: string, subtitleId: string, contextMessage: string): Promise<string> => {
         this.logger.info(`Downloading: ${subtitleId}`);
-        const options: OptionsOfJSONResponseBody = {
+        const options: FetchOptions = {
             url: `${this.baseUrl}/Services/ContentProvider.svc/RequestSubtitleDownload`,
-            headers: {
-                "User-Agent": this.userAgent,
-                "Accept": "*/*",
-                "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${id}`,
-                "Cookie": this.cookie.join("; ")
-            },
-            json: {
-                request: {
-                    FilmID: id,
-                    SubtitleID: subtitleId,
-                    FontSize: 0,
-                    FontColor: "",
-                    PredefinedLayout: -1
-                }
-            },
-            responseType: "json"
+            requestInit: {
+                method: "POST",
+                headers: {
+                    "User-Agent": this.userAgent,
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${id}`,
+                    "Cookie": this.cookie.join("; ")
+                },
+                body: JSON.stringify({
+                    request: {
+                        FilmID: id,
+                        SubtitleID: subtitleId,
+                        FontSize: 0,
+                        FontColor: "",
+                        PredefinedLayout: -1
+                    }
+                })
+            }
         };
 
-        let response;
+        let response: Response;
         try {
             this.logger.debug(`Looking for download identifier for ${contextMessage}`);
-            response = await got.post(options);
-            if (response.statusCode === 200) {
-                return parseDownloadIdentifier(response.body.d);
+            response = await fetch(new Request(options.url, options.requestInit));
+            if (response.status === 200) {
+                const body: any = await response.json();
+                return parseDownloadIdentifier(body.d);
             }
             else {
-                this.logger.error(response.error);
+                this.logger.error(response.statusText);
             }
         }
         catch (error) {
@@ -288,29 +303,31 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
 
     private downloadFile = async (movieId: string, downloadIdentifier: string, filenameNoExtension: string, relativePath: string, contextMessage: string): Promise<boolean> => {
         this.logger.info(`Downloading: ${downloadIdentifier}`);
-        const options: OptionsOfBufferResponseBody = {
+        const options: FetchOptions = {
             url: `${this.baseUrl}/Services/DownloadFile.ashx?DownloadIdentifier=${downloadIdentifier}`,
-            headers: {
-                "User-Agent": this.userAgent,
-                "Accept": "*/*",
-                "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${movieId}`,
-                "Cookie": this.cookie.join("; ")
-            },
-            responseType: "buffer"
+            requestInit: {
+                headers: {
+                    "User-Agent": this.userAgent,
+                    "Accept": "*/*",
+                    "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${movieId}`,
+                    "Cookie": this.cookie.join("; ")
+                }
+            }
         };
 
-        let response;
+        let response: Response;
         try {
             this.logger.debug(`Downloading subtitle for ${contextMessage}`);
-            response = await got.get(options);
-            if (response.statusCode === 200) {
+            response = await fetch(new Request(options.url, options.requestInit));
+            if (response.status === 200) {
                 const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${this.classifier.getSubtitlesSuffix()}`);
                 this.logger.verbose(`writing response to ${destination}`);
-                fs.writeFileSync(destination, response.body);
+
+                await writeFile(destination, Buffer.from(await response.arrayBuffer()));
                 return true;
             }
             else {
-                this.logger.error(response.error);
+                this.logger.error(response.statusText);
             }
         }
         catch (error) {
