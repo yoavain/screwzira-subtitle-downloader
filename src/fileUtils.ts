@@ -13,6 +13,7 @@ export const isExist = async (filePath: string): Promise<boolean> => {
 export const isExistSync = (filePath: string): boolean => {
     try {
         fs.accessSync(filePath, fs.constants.F_OK);
+        return true;
     }
     catch (err) {
         return false;
