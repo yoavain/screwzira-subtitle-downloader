@@ -1,7 +1,8 @@
 import path from "path";
-import { Config, ConfigInterface } from "~src/config";
-import { MockLogger } from "~test/__mocks__";
+import type { ConfigInterface } from "~src/config";
+import { Config } from "~src/config";
 import type { LoggerInterface } from "~src/logger";
+import { MockLogger } from "~test/__mocks__";
 
 const CONFIG_FILE: string = path.resolve(__dirname, "resources", "config", "test-config.json");
 //C:\Dev\_MISC\screwzira-subtitle-downloader\test\resources\config\test-config.json

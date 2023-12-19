@@ -1,6 +1,5 @@
-import * as fsextra from "fs-extra";
 import type { LoggerInterface } from "~src/logger";
-import { isExistSync } from "~src/fileUtils";
+import { isExistSync, readJsonSync, writeJsonSync } from "~src/fileUtils";
 
 interface ReplacePairsInterface {
     [key: string]: string;
@@ -33,11 +32,11 @@ export class Config implements ConfigInterface {
     constructor(confFile: string, logger: LoggerInterface) {
         this.logger = logger;
         if (!isExistSync(confFile)) {
-            fsextra.outputJsonSync(confFile, defaultConf);
+            writeJsonSync(confFile, defaultConf);
         }
         let conf: ConfigurationInterface;
         try {
-            conf = fsextra.readJsonSync(confFile);
+            conf = readJsonSync(confFile);
         }
         catch (e) {
             this.logger.error("Configuration file corrupted. Using default.");

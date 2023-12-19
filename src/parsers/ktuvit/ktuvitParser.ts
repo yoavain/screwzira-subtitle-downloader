@@ -2,7 +2,6 @@ import { toTitleCase } from "~src/stringUtils";
 import type { Subtitle } from "~src/parsers/commonParser";
 import { CommonParser } from "~src/parsers/commonParser";
 import { parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
-import { writeFile } from "fs/promises";
 import * as path from "path";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import type { LoggerInterface } from "~src/logger";
@@ -11,6 +10,7 @@ import { NotificationType } from "~src/notifier";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { FileClassification } from "~src/classifier";
 import type { FetchOptions } from "~src/types";
+import { writeFile } from "~src/fileUtils";
 
 
 export type GetMovieResponse = {

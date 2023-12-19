@@ -8,14 +8,13 @@ import { Config } from "~src/config";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
-import { lstat, readdir } from "fs/promises";
-import * as fsextra from "fs-extra";
-import * as path from "path";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import { PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PROGRAM_NAME } from "~src/commonConsts";
+import { ensureDirSync, isDirectory, readDir } from "~src/fileUtils";
+import * as path from "path";
 
 // Make sure the log directory is there
-fsextra.ensureDirSync(path.resolve(process.env.ProgramData, PROGRAM_NAME));
+ensureDirSync(path.resolve(process.env.ProgramData, PROGRAM_NAME));
 
 // CLI Args Parser
 const argsParser: ArgsParserInterface = new ArgsParser(process.argv);
@@ -83,12 +82,12 @@ const getFileExtension = (fullPath: string): string => {
 const handleFolder = async (dir: string): Promise<void> => {
     let noFileHandled = true;
 
-    const items: string[] = await readdir(dir);
+    const items: string[] = await readDir(dir);
 
     let needToWait = false;
     for (const fileOrFolder of items) {
         const fullPath: string = path.join(dir, fileOrFolder).replace(/\\/g, "/");
-        if ((await lstat(fullPath)).isDirectory()) {
+        if (await isDirectory(fullPath)) {
             logger.verbose(`Handling sub-folder ${fullPath}`);
             await handleFolder(fullPath);
         }
@@ -119,7 +118,7 @@ const main = async () => {
         logger.info(`*** Looking for subtitle for "${input}" ***`);
         const fullpath: string = input.replace(/\\/g, "/");
         try {
-            if ((await lstat(fullpath)).isDirectory()) {
+            if (await isDirectory(fullpath)) {
                 await handleFolder(fullpath);
             }
             else {

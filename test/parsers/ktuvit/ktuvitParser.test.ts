@@ -1,5 +1,5 @@
 import * as path from "path";
-import fs from "fs/promises";
+import * as fileUtils from "~src//fileUtils";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
@@ -18,7 +18,7 @@ const mockFsWriteFile = jest.fn(async (destination, response: Buffer) => {
 
 describe("Test ktuvit parser", () => {
     it("Test fetch file - movie", async () => {
-        jest.spyOn(fs, "writeFile").mockImplementation(mockFsWriteFile);
+        jest.spyOn(fileUtils, "writeFile").mockImplementation(mockFsWriteFile);
 
         const email: string = process.env.KTUVIT_EMAIL;
         const password: string = process.env.KTUVIT_PASSWORD;
@@ -42,13 +42,13 @@ describe("Test ktuvit parser", () => {
             movieYear : 2013
         };
         await ktuvitParser.handleMovie(movieFile);
-        expect(fs.writeFile).toHaveBeenCalledTimes(1);
-        expect((fs.writeFile as jest.Mock).mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
-        expect((fs.writeFile as jest.Mock).mock.calls[0][1].length).toBeGreaterThan(0);
+        expect(fileUtils.writeFile).toHaveBeenCalledTimes(1);
+        expect((fileUtils.writeFile as jest.Mock).mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
+        expect((fileUtils.writeFile as jest.Mock).mock.calls[0][1].length).toBeGreaterThan(0);
     });
 
     it("Test fetch file - series", async () => {
-        jest.spyOn(fs, "writeFile").mockImplementation(mockFsWriteFile);
+        jest.spyOn(fileUtils, "writeFile").mockImplementation(mockFsWriteFile);
 
         const email: string = process.env.KTUVIT_EMAIL;
         const password: string = process.env.KTUVIT_PASSWORD;
@@ -73,8 +73,8 @@ describe("Test ktuvit parser", () => {
             season: 1
         };
         await ktuvitParser.handleEpisode(tvEpisodeFile);
-        expect(fs.writeFile).toHaveBeenCalledTimes(1);
-        expect((fs.writeFile as jest.Mock).mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
-        expect((fs.writeFile as jest.Mock).mock.calls[0][1].length).toBeGreaterThan(0);
+        expect(fileUtils.writeFile).toHaveBeenCalledTimes(1);
+        expect((fileUtils.writeFile as jest.Mock).mock.calls[0][0]).toEqual(path.join(__dirname, "..", "..", "..", `${filenameNoExtension}.${classifier.getSubtitlesSuffix()}`));
+        expect((fileUtils.writeFile as jest.Mock).mock.calls[0][1].length).toBeGreaterThan(0);
     });
 });
