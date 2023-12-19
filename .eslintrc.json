@@ -27,8 +27,7 @@
         "plugin:import/errors",
         "plugin:import/warnings",
         "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended",
-        "plugin:security/recommended"
+        "plugin:@typescript-eslint/recommended"
     ],
     "settings": {
         "import/parsers": {
