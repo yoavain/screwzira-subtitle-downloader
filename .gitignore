@@ -18,3 +18,4 @@ installer/*.bat
 /_build/
 /_blob/
 /publish.bat
+/test/resources/cache/transient/

@@ -1,14 +1,26 @@
 /* eslint-disable no-process-exit */
-import * as fs from "fs-extra";
-import * as path from "path";
 import { sync } from "cross-spawn";
 import type { SpawnSyncReturns } from "child_process";
+import * as path from "path";
+import type { PathLike } from "fs";
+import fs from "fs";
 
 const COMPILER = "msbuild.exe";
 
+export const isExist = async (filePath: PathLike): Promise<boolean> => {
+    try {
+        await fs.promises.access(filePath, fs.constants.F_OK);
+        return true;
+    }
+    catch (err) {
+        return false;
+    }
+};
+
+
 export const checkMsbuildInPath = async (exit?: boolean): Promise<boolean> => {
     // Check for compiler in %PATH%
-    const promises = process.env.path.split(";").map((p) => fs.pathExists(path.resolve(p, COMPILER)));
+    const promises = process.env.path.split(";").map((p) => isExist(path.resolve(p, COMPILER)));
     const results: boolean[] = await Promise.all(promises);
     const compilerFound: boolean = results.find((result) => !!result);
 

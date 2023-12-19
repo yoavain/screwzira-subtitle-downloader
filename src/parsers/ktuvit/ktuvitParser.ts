@@ -2,7 +2,6 @@ import { toTitleCase } from "~src/stringUtils";
 import type { Subtitle } from "~src/parsers/commonParser";
 import { CommonParser } from "~src/parsers/commonParser";
 import { parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
-import { writeFile } from "fs/promises";
 import * as path from "path";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import type { LoggerInterface } from "~src/logger";
@@ -11,6 +10,8 @@ import { NotificationType } from "~src/notifier";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { FileClassification } from "~src/classifier";
 import type { FetchOptions } from "~src/types";
+import { writeFile } from "~src/fileUtils";
+import type { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 
 
 export type GetMovieResponse = {
@@ -47,13 +48,15 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
     private readonly baseUrl: string = "https://www.ktuvit.me";
     private readonly email: string;
     private readonly password: string;
+    private readonly tShowIdCache: TvShowIdCache;
 
     private cookie: string[];
 
-    constructor(email: string, password: string, logger: LoggerInterface, notifier: NotifierInterface, classifier: ClassifierInterface) {
+    constructor(email: string, password: string, logger: LoggerInterface, notifier: NotifierInterface, classifier: ClassifierInterface, tvShowIdCache: TvShowIdCache) {
         super(logger, notifier, classifier);
         this.email = email;
         this.password = password;
+        this.tShowIdCache = tvShowIdCache;
     }
 
     async handleMovie(movie: MovieFileClassificationInterface): Promise<void> {
@@ -113,7 +116,8 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             return;
         }
 
-        const seriesId: string = await this.findId(tvEpisode, contextMessage, series);
+        // This is wrapped with persistence cache
+        const seriesId: string = await this.tShowIdCache.getTvShowId(series, () => this.findId(tvEpisode, contextMessage, series));
         if (!seriesId) {
             this.notifier.notif(`Unable to find series ID for ${contextMessage}`, NotificationType.FAILED, true);
             return;

@@ -1,0 +1,35 @@
+{
+    "logLevel": "debug",
+    "extensions": [
+        "mkv",
+        "mp4",
+        "avi"
+    ],
+    "replacePairs": {
+        "the handmaids tale": "the handmaid's tale",
+        "greys anatomy": "grey's anatomy",
+        "cosmos a spacetime odyssey": "cosmos a space time odyssey",
+        "tom clancys jack ryan": "tom clancy's jack ryan",
+        "the boys 2019": "the boys",
+        "sunderland til i die": "sunderland 'til i die",
+        "the it crowd (2006)": "the it crowd",
+        "requiem for a dream director's cut": "requiem for a dream",
+        "the mind explained": "the mind, explained",
+        "daybreak 2019": "daybreak",
+        "high score 2020": "high score",
+        "the outsider 2020": "the outsider",
+        "the stand 2020": "the stand",
+        "big sky 2020": "big sky",
+        "mythic quest ravens banquet": "mythic quest: raven's banquet",
+        "liseys story": "lisey’s story",
+        "hit and run 2021": "hit & run",
+        "dexter new blood": "dexter: new blood",
+        "the patient (2022)": "the patient",
+        "poker face 2023": "poker face",
+        "fleabag (2016)": "fleabag",
+        "extraordinary 2023": "extraordinary",
+        "quantum leap 2022": "quantum leap",
+        "Yellowjackets (2021)": "Yellowjackets"
+    },
+    "languageCode": "heb"
+}

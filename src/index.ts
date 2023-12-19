@@ -8,14 +8,14 @@ import { Config } from "~src/config";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
-import { lstat, readdir } from "fs/promises";
-import * as fsextra from "fs-extra";
-import * as path from "path";
 import type { ParserInterface } from "~src/parsers/parserInterface";
-import { PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PROGRAM_NAME } from "~src/commonConsts";
+import { PROGRAM_CACHE_FOLDER, PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PROGRAM_NAME, PROGRAM_TV_SHOW_ID_CACHE_NAME } from "~src/commonConsts";
+import { ensureDirSync, isDirectory, readDir } from "~src/fileUtils";
+import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
+import * as path from "path";
 
 // Make sure the log directory is there
-fsextra.ensureDirSync(path.resolve(process.env.ProgramData, PROGRAM_NAME));
+ensureDirSync(path.resolve(process.env.ProgramData, PROGRAM_NAME));
 
 // CLI Args Parser
 const argsParser: ArgsParserInterface = new ArgsParser(process.argv);
@@ -35,8 +35,12 @@ logger.setLogLevel(config.getLogLevel());
 // File classifier
 const classifier: ClassifierInterface = new Classifier(logger, config);
 
+// TV show ID cache
+const cacheFolder: string = path.resolve(process.env.ProgramData, PROGRAM_NAME, PROGRAM_CACHE_FOLDER);
+const tvShowIdCache: TvShowIdCache = new TvShowIdCache(PROGRAM_TV_SHOW_ID_CACHE_NAME, cacheFolder, logger);
+
 // Ktuvit parser
-const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier);
+const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier, tvShowIdCache);
 
 // handle single file. Returns true if a call to provider was made
 const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<boolean> => {
@@ -83,12 +87,12 @@ const getFileExtension = (fullPath: string): string => {
 const handleFolder = async (dir: string): Promise<void> => {
     let noFileHandled = true;
 
-    const items: string[] = await readdir(dir);
+    const items: string[] = await readDir(dir);
 
     let needToWait = false;
     for (const fileOrFolder of items) {
         const fullPath: string = path.join(dir, fileOrFolder).replace(/\\/g, "/");
-        if ((await lstat(fullPath)).isDirectory()) {
+        if (await isDirectory(fullPath)) {
             logger.verbose(`Handling sub-folder ${fullPath}`);
             await handleFolder(fullPath);
         }
@@ -119,7 +123,7 @@ const main = async () => {
         logger.info(`*** Looking for subtitle for "${input}" ***`);
         const fullpath: string = input.replace(/\\/g, "/");
         try {
-            if ((await lstat(fullpath)).isDirectory()) {
+            if (await isDirectory(fullpath)) {
                 await handleFolder(fullpath);
             }
             else {
