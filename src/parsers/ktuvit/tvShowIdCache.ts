@@ -11,6 +11,7 @@ export class TvShowIdCache {
     constructor(id: string, cacheDir: string, logger?: LoggerInterface) {
         this.cache = flatCache.load(id, cacheDir);
         this.logger = logger;
+        this.logger?.info(`Initialized TvShowIdCache with id ${id} and cache dir ${cacheDir}`);
     }
 
     async getTvShowId(tvShowName: string, fetchFunction: FetchFunction): Promise<string> {

@@ -9,7 +9,7 @@ import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFi
 import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 import type { ParserInterface } from "~src/parsers/parserInterface";
-import { PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PROGRAM_NAME } from "~src/commonConsts";
+import { PROGRAM_CACHE_FOLDER, PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PROGRAM_NAME, PROGRAM_TV_SHOW_ID_CACHE_NAME } from "~src/commonConsts";
 import { ensureDirSync, isDirectory, readDir } from "~src/fileUtils";
 import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 import * as path from "path";
@@ -36,9 +36,8 @@ logger.setLogLevel(config.getLogLevel());
 const classifier: ClassifierInterface = new Classifier(logger, config);
 
 // TV show ID cache
-const TvShowIdCacheId = "TvShowIdCache.json";
-const cacheFolder: string = path.resolve(process.env.ProgramData, PROGRAM_NAME, PROGRAM_LOG_FILENAME, ".cache");
-const tvShowIdCache: TvShowIdCache = new TvShowIdCache(TvShowIdCacheId, cacheFolder, logger);
+const cacheFolder: string = path.resolve(process.env.ProgramData, PROGRAM_NAME, PROGRAM_CACHE_FOLDER);
+const tvShowIdCache: TvShowIdCache = new TvShowIdCache(PROGRAM_TV_SHOW_ID_CACHE_NAME, cacheFolder, logger);
 
 // Ktuvit parser
 const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier, tvShowIdCache);
