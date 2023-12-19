@@ -1,0 +1,3 @@
+describe("Test config class", () => {
+    
+});

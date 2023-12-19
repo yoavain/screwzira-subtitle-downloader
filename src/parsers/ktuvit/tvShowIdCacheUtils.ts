@@ -8,8 +8,8 @@ export class TvShowIdCache {
     private readonly cache: Cache;
     private readonly logger: Logger;
 
-    constructor(id: string, logger?: Logger) {
-        this.cache = flatCache.load(id);
+    constructor(id: string, cacheDir: string, logger?: Logger) {
+        this.cache = flatCache.load(id, cacheDir);
         this.logger = logger;
     }
 
