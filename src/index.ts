@@ -11,6 +11,7 @@ import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import { PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PROGRAM_NAME } from "~src/commonConsts";
 import { ensureDirSync, isDirectory, readDir } from "~src/fileUtils";
+import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 import * as path from "path";
 
 // Make sure the log directory is there
@@ -34,8 +35,13 @@ logger.setLogLevel(config.getLogLevel());
 // File classifier
 const classifier: ClassifierInterface = new Classifier(logger, config);
 
+// TV show ID cache
+const TvShowIdCacheId = "TvShowIdCache.json";
+const cacheFolder: string = path.resolve(process.env.ProgramData, PROGRAM_NAME, PROGRAM_LOG_FILENAME, ".cache");
+const tvShowIdCache: TvShowIdCache = new TvShowIdCache(TvShowIdCacheId, cacheFolder, logger);
+
 // Ktuvit parser
-const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier);
+const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier, tvShowIdCache);
 
 // handle single file. Returns true if a call to provider was made
 const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<boolean> => {

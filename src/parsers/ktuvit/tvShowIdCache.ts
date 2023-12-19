@@ -1,14 +1,14 @@
 import type { Cache } from "flat-cache";
 import * as flatCache from "flat-cache";
-import type { Logger } from "~src/logger";
+import type { LoggerInterface } from "~src/logger";
 
 export type FetchFunction = () => Promise<string>
 
 export class TvShowIdCache {
     private readonly cache: Cache;
-    private readonly logger: Logger;
+    private readonly logger: LoggerInterface;
 
-    constructor(id: string, cacheDir: string, logger?: Logger) {
+    constructor(id: string, cacheDir: string, logger?: LoggerInterface) {
         this.cache = flatCache.load(id, cacheDir);
         this.logger = logger;
     }
