@@ -63,7 +63,7 @@ jobs:
         fail_ci_if_error: true
 
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: installer/Ktuvit-Downloader_*_Setup.exe
