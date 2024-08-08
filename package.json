@@ -38,7 +38,7 @@
         "flat-cache": "5.0.0",
         "node-notifier": "10.0.1",
         "numeral": "2.0.6",
-        "winston": "3.13.1"
+        "winston": "3.14.0"
     },
     "devDependencies": {
         "@jest/types": "29.6.3",
