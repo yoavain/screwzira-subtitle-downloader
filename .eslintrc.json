@@ -95,6 +95,7 @@
         "n/no-missing-import": 0,
         "n/no-unpublished-import": 0,
         "n/no-unsupported-features/es-syntax": 0,
+        "n/no-unsupported-features/node-builtins": 0,
         "import/extensions": [
             "error",
             {
