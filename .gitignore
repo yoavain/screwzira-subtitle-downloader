@@ -19,3 +19,4 @@ installer/*.bat
 /_blob/
 /publish.bat
 /test/resources/cache/transient/
+/tsconfig.tsbuildinfo
