@@ -12,5 +12,5 @@
             "~resources/*": ["resources/*"]
         }
     },
-    "include": ["./src/**/*", "./test/**/*", "./*.ts", "./*.js", "./launcher/*.ts"]
+    "include": ["./src/**/*", "./test/**/*", "./*.ts", "./*.js", "./launcher/*.ts", "./*.mjs"]
 }
