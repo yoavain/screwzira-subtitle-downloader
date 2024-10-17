@@ -102,7 +102,6 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         }
     }
 
-    // eslint-disable-next-line no-unused-vars
     async handleEpisode(tvEpisode: TvEpisodeFileClassificationInterface): Promise<void> {
         const { filenameNoExtension, relativePath, series, season, episode } = tvEpisode;
         const contextMessage = `series "${toTitleCase(series)}" season ${season} episode ${episode}`;

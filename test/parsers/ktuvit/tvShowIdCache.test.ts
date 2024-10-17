@@ -1,5 +1,5 @@
 import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
-import { v4 as uuid } from "uuid";
+import { randomUUID as uuid } from "crypto";
 import path from "path";
 
 export const PERSISTENT_CACHE_DIR: string = path.resolve(__dirname, "..", "..", "resources", "cache", "persistent");
