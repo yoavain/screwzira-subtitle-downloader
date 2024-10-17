@@ -1,5 +1,5 @@
 import * as path from "path";
-import * as fileUtils from "~src//fileUtils";
+import * as fileUtils from "~src/fileUtils";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
@@ -10,7 +10,7 @@ import type { NotifierInterface } from "~src/notifier";
 import type { ConfigInterface } from "~src/config";
 import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 import { PERSISTENT_CACHE_DIR, TRANSIENT_CACHE_DIR } from "~test/parsers/ktuvit/tvShowIdCache.test";
-import { v4 as uuid } from "uuid";
+import { randomUUID as uuid } from "crypto";
 
 jest.setTimeout(20000);
 
