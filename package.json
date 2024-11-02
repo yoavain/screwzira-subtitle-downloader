@@ -38,7 +38,7 @@
         "flat-cache": "6.1.1",
         "node-notifier": "10.0.1",
         "numeral": "2.0.6",
-        "winston": "3.15.0"
+        "winston": "3.16.0"
     },
     "devDependencies": {
         "@eslint/compat": "1.2.2",
