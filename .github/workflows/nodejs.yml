@@ -57,7 +57,7 @@ jobs:
         KTUVIT_PASSWORD: ${{ secrets.KTUVIT_PASSWORD }}
 
     - name: Codecov
-      uses: codecov/codecov-action@v4.6.0
+      uses: codecov/codecov-action@v5.0.7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
