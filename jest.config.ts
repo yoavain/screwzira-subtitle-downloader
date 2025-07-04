@@ -8,7 +8,7 @@ const config: Config.InitialOptions = {
     clearMocks: true,
     transform: {
         "^.+\\.ts$": ["ts-jest", {
-            tsconfig: "tsconfig.jest.json",
+            tsconfig: "tsconfig.json",
             isolatedModules: true
         }]
     },

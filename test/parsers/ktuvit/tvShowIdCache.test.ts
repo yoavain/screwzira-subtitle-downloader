@@ -11,7 +11,7 @@ describe("test tvShowId cache", () => {
         const tvShowIdCache: TvShowIdCache = new TvShowIdCache(uuid(), TRANSIENT_CACHE_DIR);
         const tvShowId = await tvShowIdCache.getTvShowId("TV SHOW 1", mockFetch);
         expect(tvShowId).toBeUndefined();
-        expect(mockFetch).toBeCalledTimes(1);
+        expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
     it("Test - found", async () => {
@@ -21,7 +21,7 @@ describe("test tvShowId cache", () => {
         const tvShowId2nd = await tvShowIdCache.getTvShowId("TV SHOW 1", mockFetch);
         expect(tvShowId1st).toBe("tvShowId1");
         expect(tvShowId2nd).toBe("tvShowId1");
-        expect(mockFetch).toBeCalledTimes(1);
+        expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
     it("Test persistence", async () => {

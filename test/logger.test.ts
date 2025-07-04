@@ -28,7 +28,7 @@ describe("Test logger", () => {
         const logger = new Logger("mockLogFile");
         // eslint-disable-next-line security/detect-object-injection
         logger[level]("mock message");
-        expect(mockLog).toBeCalledTimes(1);
+        expect(mockLog).toHaveBeenCalledTimes(1);
         expect(mockLog.mock.calls[0][0]).toEqual(level);
         expect(mockLog.mock.calls[0][1]).toEqual("mock message");
     });
