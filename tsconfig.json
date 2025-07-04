@@ -3,6 +3,7 @@
     "compilerOptions": {
         "strict": false,
         "verbatimModuleSyntax": false,
+        "isolatedModules": true,
         "allowJs": true,
         "noEmit": true,
         "baseUrl": ".",
