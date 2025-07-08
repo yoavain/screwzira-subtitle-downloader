@@ -1,4 +1,3 @@
-import numeral from "numeral";
 import { cleanText, splitText } from "~src/stringUtils";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
@@ -40,7 +39,7 @@ export class CommonParser {
             this.logger.info(`filename:  "${filenameNoExtension}"`);
             this.logger.info(`best match: "${bestMatch.name}"`);
             this.logger.info(`common words: ["${maxCommonWords.commonWords.join("\", \"")}"]`);
-            this.logger.info(`common words mark: ${numeral(maxCommonWords.mark).format("0.00")}`);
+            this.logger.info(`common words mark: ${maxCommonWords.mark.toFixed(2)}`);
 
             return bestMatch.id;
         }
