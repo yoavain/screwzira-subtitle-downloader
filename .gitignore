@@ -20,3 +20,4 @@ installer/*.bat
 /publish.bat
 /test/resources/cache/transient/
 /tsconfig.tsbuildinfo
+/.junie/
