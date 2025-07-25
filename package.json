@@ -54,7 +54,7 @@
         "copy-webpack-plugin": "13.0.0",
         "cross-env": "7.0.3",
         "cross-spawn": "7.0.6",
-        "dotenv": "17.2.0",
+        "dotenv": "17.2.1",
         "eslint": "9.31.0",
         "eslint-import-resolver-typescript": "4.4.4",
         "eslint-plugin-import": "2.32.0",
