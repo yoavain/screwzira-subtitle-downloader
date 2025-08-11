@@ -27,7 +27,7 @@ jobs:
       run: makensis -VERSION
 
     - name: Checkout
-      uses: actions/checkout@v4.2.2
+      uses: actions/checkout@v5.0.0
 
     - name: Setup Windows SDK
       uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
