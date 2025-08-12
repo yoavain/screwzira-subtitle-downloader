@@ -51,7 +51,7 @@
         "@types/node": "22.17.1",
         "@typescript-eslint/eslint-plugin": "8.39.1",
         "@typescript-eslint/parser": "8.39.1",
-        "copy-webpack-plugin": "13.0.0",
+        "copy-webpack-plugin": "13.0.1",
         "cross-env": "10.0.0",
         "cross-spawn": "7.0.6",
         "dotenv": "17.2.1",
