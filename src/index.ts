@@ -45,7 +45,7 @@ const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASS
 
 // handle single file. Returns true if a call to provider was made
 const handleSingleFileLocal = async (fullpath: string, useParentFolder: boolean): Promise<boolean> => {
-    logger.verbose(`Classification response will follow for: ${fullpath}`);
+    logger.verbose(`Handling file: ${fullpath}`);
     return handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser);
 };
 

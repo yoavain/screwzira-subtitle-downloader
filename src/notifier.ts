@@ -52,6 +52,10 @@ export class Notifier implements NotifierInterface {
             this.logger.debug(`snoreToastPath: ${snoreToastPath}`);
             // @ts-ignore
             this.notifier = new WindowsToaster({ withFallback: false, customPath: snoreToastPath });
+            this.notifier.on("log", () => {
+                const file = this.logger.getLogFileLocation();
+                execFile("powershell", ["-NoProfile", "-Command", "Start-Process", file]);
+            });
         }
         else {
             this.logger.debug("Quiet Mode. Not initializing notifier");
@@ -72,10 +76,6 @@ export class Notifier implements NotifierInterface {
                 notification.actions = ["Log", "Close"];
             }
             this.notifier.notify(notification);
-            this.notifier.on("log", () => {
-                const file = this.logger.getLogFileLocation();
-                execFile(file, { shell: "powershell" });
-            });
         }
         else {
             this.logger.info(`Quiet Mode. Skipping notification message: ${message}`);
