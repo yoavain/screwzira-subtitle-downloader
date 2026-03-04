@@ -18,3 +18,24 @@ describe("Test config class", () => {
         expect(config.replaceTitleIfNeeded("poker face 2023")).toBe("poker face");
     });
 });
+
+describe("Test replaceTitleIfNeeded", () => {
+    let config: ConfigInterface;
+
+    beforeEach(() => {
+        config = new Config(CONFIG_FILE, new MockLogger());
+    });
+
+    it("Should return replacement for exact lowercase match", () => {
+        expect(config.replaceTitleIfNeeded("poker face 2023")).toBe("poker face");
+    });
+
+    it("Should return replacement for case-insensitive match", () => {
+        // Key "Yellowjackets (2021)" is stored lowercase; input with mixed case should still match
+        expect(config.replaceTitleIfNeeded("Yellowjackets (2021)")).toBe("Yellowjackets");
+    });
+
+    it("Should return original text when no match", () => {
+        expect(config.replaceTitleIfNeeded("breaking bad 2008")).toBe("breaking bad 2008");
+    });
+});
