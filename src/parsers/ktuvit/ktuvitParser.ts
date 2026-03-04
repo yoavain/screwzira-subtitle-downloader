@@ -300,7 +300,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             }
         }
         catch (error) {
-            this.logger.error(error);
+            this.logger.error(error instanceof Error ? error.message : String(error));
         }
     };
 
@@ -334,7 +334,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             }
         }
         catch (error) {
-            this.logger.error(error);
+            this.logger.error(error instanceof Error ? error.message : String(error));
         }
     };
 

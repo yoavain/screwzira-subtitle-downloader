@@ -1,7 +1,6 @@
 import { cleanText, splitText } from "~src/stringUtils";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
-import { NotificationType } from "~src/notifier";
 import type { ClassifierInterface, CommonWordsInSentenceResponseInterface } from "~src/classifier";
 
 export interface Subtitle {
@@ -60,12 +59,9 @@ export class CommonParser {
                 this.logger.error(await response.text());
             }
             catch (e) {
-                this.logger.warn("Failed to parse error response");
+                this.logger.warn(`Failed to parse error response: ${e}`);
             }
         }
     };
 
-    protected handleNoSubtitlesFound = (contextMessage: string) => {
-        this.notifier.notif(`No subtitle found for ${contextMessage}`, NotificationType.WARNING, true);
-    };
 }

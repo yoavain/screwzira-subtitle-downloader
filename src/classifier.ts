@@ -183,7 +183,7 @@ export class Classifier implements ClassifierInterface {
         return undefined;
     };
 
-    intToRomanUpto9 = (num: number): string => {
+    private intToRomanUpto9 = (num: number): string => {
         switch (num) {
             case 1:
                 return "I";

@@ -30,7 +30,7 @@ export class TvShowIdCache {
             }
         }
         catch (e) {
-            // do nothing
+            this.logger?.warn(`Failed to fetch TV show id for cache: ${e}`);
         }
         return tvShowId;
     }
