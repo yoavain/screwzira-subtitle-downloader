@@ -21,7 +21,7 @@ export class CommonParser {
         this.classifier = classifier;
     }
 
-    findClosestMatch = (filenameNoExtension: string, subtitles: Subtitle[], excludeList: string[]): string => {
+    findClosestMatch(filenameNoExtension: string, subtitles: Subtitle[], excludeList: string[]): string {
         this.logger.info(`Looking for closest match for "${filenameNoExtension}" from: [${subtitles?.map((item) => item.name).join(", ")}]`);
         if (subtitles?.length > 0) {
             let maxCommonWords: CommonWordsInSentenceResponseInterface = this.classifier.commonWordsInSentences(filenameNoExtension, subtitles[0].name, excludeList);
@@ -42,17 +42,17 @@ export class CommonParser {
 
             return bestMatch.id;
         }
-    };
+    }
 
-    protected getMovieExcludeList = (movieName: string, movieYear: number): string[] => {
+    protected getMovieExcludeList(movieName: string, movieYear: number): string[] {
         return [...splitText(cleanText(movieName)), movieYear.toString()];
-    };
+    }
 
-    protected getTvSeriesExcludeList = (series: string): string[] => {
+    protected getTvSeriesExcludeList(series: string): string[] {
         return splitText(cleanText(series));
-    };
+    }
 
-    protected handleError = async (error: string, response: Response) => {
+    protected async handleError(error: string, response: Response) {
         this.logger.error(error);
         if (response) {
             try {
@@ -62,6 +62,18 @@ export class CommonParser {
                 this.logger.warn(`Failed to parse error response: ${e}`);
             }
         }
-    };
+    }
+
+    protected async fetchWithRetry(url: string, init: RequestInit, retries = 2): Promise<Response> {
+        for (let attempt = 0; attempt <= retries; attempt++) {
+            try {
+                return await fetch(new Request(url, { ...init, signal: AbortSignal.timeout(15_000) }));
+            }
+            catch (e) {
+                if (attempt === retries) throw e;
+                await new Promise((r) => setTimeout(r, 1_000 * (attempt + 1)));
+            }
+        }
+    }
 
 }

@@ -89,17 +89,16 @@ export class Classifier implements ClassifierInterface {
         this.config = config;
     }
 
-    public getSubtitlesSuffix = () => {
+    public getSubtitlesSuffix() {
         return `${this.config.getLanguageCode()}.${SUBTITLES_EXTENSION}`;
-    };
+    }
 
-
-    public isSubtitlesAlreadyExist = async (relativePath: string, filenameNoExtension: string): Promise<boolean> => {
+    public async isSubtitlesAlreadyExist(relativePath: string, filenameNoExtension: string): Promise<boolean> {
         const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${this.getSubtitlesSuffix()}`);
         return isExist(destination);
-    };
+    }
 
-    public commonWordsInSentences = (s1: string, s2: string, excludeList: string[]): CommonWordsInSentenceResponseInterface => {
+    public commonWordsInSentences(s1: string, s2: string, excludeList: string[]): CommonWordsInSentenceResponseInterface {
         const split1: string[] = splitText(cleanText(s1));
         const split2: string[] = splitText(cleanText(s2));
 
@@ -107,14 +106,14 @@ export class Classifier implements ClassifierInterface {
         const mark: number = this.calculateSimilarityMark(commonWords);
         this.logger.debug(`"${s1}" & "${s2}" have ${commonWords.length} words in common [${commonWords.join("#")}] with total mark: ${mark}`);
         return { commonWords, mark };
-    };
+    }
 
-    public calculateSimilarityMark = (words: string[]): number => {
+    public calculateSimilarityMark(words: string[]): number {
         return words.reduce((acc, word) => {
             acc += WORD_WEIGHTS[word] !== undefined ? WORD_WEIGHTS[word] : Math.min(5, word.length) / 5;
             return acc;
         }, 0);
-    };
+    }
 
     /**
      * Classify filename:
@@ -125,7 +124,7 @@ export class Classifier implements ClassifierInterface {
      * @param relativePath
      * @param parentFolder
      */
-    public classify = (filenameNoExtension: string, relativePath: string, parentFolder: string): MovieFileClassificationInterface | TvEpisodeFileClassificationInterface => {
+    public classify(filenameNoExtension: string, relativePath: string, parentFolder: string): MovieFileClassificationInterface | TvEpisodeFileClassificationInterface {
         const episodeMatch: RegExpExecArray = episodeRegex.exec(filenameNoExtension);
         if (episodeMatch?.length >= 3 && episodeMatch[1] && episodeMatch[2] && episodeMatch[3]) {
             this.logger.verbose(`Classification match episode: ${JSON.stringify(episodeMatch)}`);
@@ -165,13 +164,13 @@ export class Classifier implements ClassifierInterface {
             }
         }
         return undefined;
-    };
+    }
 
     /**
      * Id movie name ends with a number < 10, assume an alternative name can be in ROMAN representation
      * @param movieName
      */
-    public findAlternativeName = (movieName: string): string => {
+    public findAlternativeName(movieName: string): string {
         const movieNameParts = movieName.split(" ");
         if (movieNameParts.length > 1) {
             const lastMovieNamePart: string = movieNameParts.pop();
@@ -181,9 +180,9 @@ export class Classifier implements ClassifierInterface {
             }
         }
         return undefined;
-    };
+    }
 
-    private intToRomanUpto9 = (num: number): string => {
+    private intToRomanUpto9(num: number): string {
         switch (num) {
             case 1:
                 return "I";
@@ -207,5 +206,5 @@ export class Classifier implements ClassifierInterface {
                 throw new Error("Unexpected input");
 
         }
-    };
+    }
 }

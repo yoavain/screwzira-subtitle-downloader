@@ -56,24 +56,24 @@ export class Config implements ConfigInterface {
         );
     }
 
-    public replaceTitleIfNeeded = (text: string): string => {
+    public replaceTitleIfNeeded(text: string): string {
         const replacement = this.replacePairs[text.toLowerCase()];
         if (replacement) {
             this.logger.info(`Replaced "${text}" with "${replacement}" for query`);
             return replacement;
         }
         return text;
-    };
+    }
 
-    public getLogLevel = (): string => {
+    public getLogLevel(): string {
         return this.logLevel;
-    };
+    }
 
-    public getExtensions = (): string[] => {
+    public getExtensions(): string[] {
         return this.extensions;
-    };
+    }
 
-    public getLanguageCode = (): string => {
+    public getLanguageCode(): string {
         return this.languageCode;
-    };
+    }
 }
