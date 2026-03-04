@@ -44,9 +44,9 @@ const tvShowIdCache: TvShowIdCache = new TvShowIdCache(PROGRAM_TV_SHOW_ID_CACHE_
 const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier, tvShowIdCache);
 
 // handle single file. Returns true if a call to provider was made
-const handleSingleFileLocal = async (fullpath: string, fileExists: boolean): Promise<boolean> => {
+const handleSingleFileLocal = async (fullpath: string, useParentFolder: boolean): Promise<boolean> => {
     logger.verbose(`Classification response will follow for: ${fullpath}`);
-    return handleSingleFile(fullpath, fileExists, classifier, notifier, ktuvitParser);
+    return handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser);
 };
 
 // Batch

@@ -67,13 +67,14 @@ export class CommonParser {
     protected async fetchWithRetry(url: string, init: RequestInit, retries = 2): Promise<Response> {
         for (let attempt = 0; attempt <= retries; attempt++) {
             try {
-                return await fetch(new Request(url, { ...init, signal: AbortSignal.timeout(15_000) }));
+                return await fetch(url, { ...init, signal: AbortSignal.timeout(8_000) });
             }
             catch (e) {
                 if (attempt === retries) throw e;
                 await new Promise((r) => setTimeout(r, 1_000 * (attempt + 1)));
             }
         }
+        throw new Error("fetchWithRetry: unreachable");
     }
 
 }

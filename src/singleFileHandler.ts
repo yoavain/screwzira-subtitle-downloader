@@ -7,15 +7,14 @@ import * as path from "path";
 
 export const handleSingleFile = async (
     fullpath: string,
-    fileExists: boolean,
+    useParentFolder: boolean,
     classifier: ClassifierInterface,
     notifier: NotifierInterface,
     parser: ParserInterface
 ): Promise<boolean> => {
     const relativePath: string = path.dirname(fullpath);
-    const filename: string = path.basename(fullpath);
-    const filenameNoExtension: string = path.parse(filename).name;
-    const parentFolder: string = fileExists ? path.basename(relativePath) || undefined : undefined;
+    const filenameNoExtension: string = path.parse(fullpath).name;
+    const parentFolder: string = useParentFolder ? path.basename(relativePath) || undefined : undefined;
 
     // Check if already exists
     if (await classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
