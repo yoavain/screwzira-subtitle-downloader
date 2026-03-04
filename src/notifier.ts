@@ -68,8 +68,9 @@ export class Notifier implements NotifierInterface {
                 notification.actions = ["Log", "Close"];
             }
             this.notifier.notify(notification);
-            this.notifier.once("log", () => {
-                execFile("cmd.exe", ["/c", "start", "", this.logger.getLogFileLocation()]);
+            this.notifier.on("log", () => {
+                const file = this.logger.getLogFileLocation();
+                execFile(file, { shell: "powershell" });
             });
         }
         else {
