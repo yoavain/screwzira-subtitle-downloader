@@ -44,11 +44,10 @@ const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASS
 
 // handle single file. Returns true if a call to provider was made
 const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<boolean> => {
-    const relativePath: string = fullpath.substring(0, fullpath.lastIndexOf("/"));
-    const split: string[] = fullpath.split("/");
-    const filename: string = split[split.length - 1];
-    const filenameNoExtension: string = filename.substring(0, filename.lastIndexOf("."));
-    const parentFolder: string = fileExists && split.length > 1 ? split[split.length - 2] : undefined;
+    const relativePath: string = path.dirname(fullpath);
+    const filename: string = path.basename(fullpath);
+    const filenameNoExtension: string = path.parse(filename).name;
+    const parentFolder: string = fileExists ? path.basename(relativePath) || undefined : undefined;
 
     // Check if already exists
     if (await classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
@@ -131,7 +130,7 @@ const main = async () => {
             }
         }
         catch (e) {
-            if (e.code === "ENOENT") {
+            if ((e as NodeJS.ErrnoException).code === "ENOENT") {
                 // no such file or directory - treat as file
                 await handleSingleFile(fullpath, false);
             }

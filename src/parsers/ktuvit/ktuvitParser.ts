@@ -220,7 +220,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             }
         }
         catch (error) {
-            await this.handleError(error, response);
+            await this.handleError(error?.message ?? error, response);
         }
     };
 
