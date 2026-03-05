@@ -5,13 +5,14 @@ import { Logger } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
 import { NotificationType, Notifier } from "~src/notifier";
 import { Config } from "~src/config";
-import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
-import { Classifier, FileClassification } from "~src/classifier";
+import type { ClassifierInterface } from "~src/classifier";
+import { Classifier } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import { PROGRAM_CACHE_FOLDER, PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PROGRAM_NAME, PROGRAM_TV_SHOW_ID_CACHE_NAME } from "~src/commonConsts";
 import { ensureDirSync, isDirectory, readDir } from "~src/fileUtils";
 import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
+import { handleSingleFile } from "~src/singleFileHandler";
 import * as path from "path";
 
 // Make sure the log directory is there
@@ -43,35 +44,9 @@ const tvShowIdCache: TvShowIdCache = new TvShowIdCache(PROGRAM_TV_SHOW_ID_CACHE_
 const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier, tvShowIdCache);
 
 // handle single file. Returns true if a call to provider was made
-const handleSingleFile = async (fullpath: string, fileExists: boolean): Promise<boolean> => {
-    const relativePath: string = fullpath.substring(0, fullpath.lastIndexOf("/"));
-    const split: string[] = fullpath.split("/");
-    const filename: string = split[split.length - 1];
-    const filenameNoExtension: string = filename.substring(0, filename.lastIndexOf("."));
-    const parentFolder: string = fileExists && split.length > 1 ? split[split.length - 2] : undefined;
-
-    // Check if already exists
-    if (await classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
-        notifier.notif("Hebrew subtitles already exist", NotificationType.WARNING);
-        return false;
-    }
-
-    const classification: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface = classifier.classify(filenameNoExtension, relativePath, parentFolder);
-
-    logger.verbose(`Classification response: ${JSON.stringify(classification)}`);
-
-    if (classification?.type === FileClassification.MOVIE) {
-        await ktuvitParser.handleMovie(classification);
-        return true;
-    }
-    else if (classification?.type === FileClassification.EPISODE) {
-        await ktuvitParser.handleEpisode(classification);
-        return true;
-    }
-    else {
-        notifier.notif("Unable to classify input file as movie or episode", NotificationType.FAILED);
-        return false;
-    }
+const handleSingleFileLocal = async (fullpath: string, useParentFolder: boolean): Promise<boolean> => {
+    logger.verbose(`Handling file: ${fullpath}`);
+    return handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser);
 };
 
 // Batch
@@ -103,7 +78,7 @@ const handleFolder = async (dir: string): Promise<void> => {
                     logger.verbose(`Waiting ${BATCH_DELAY}ms to handle file ${fullPath}`);
                     await sleep(BATCH_DELAY);
                 }
-                needToWait = await handleSingleFile(fullPath, true);
+                needToWait = await handleSingleFileLocal(fullPath, true);
             }
         }
     }
@@ -127,13 +102,13 @@ const main = async () => {
                 await handleFolder(fullpath);
             }
             else {
-                await handleSingleFile(fullpath, false);
+                await handleSingleFileLocal(fullpath, false);
             }
         }
         catch (e) {
-            if (e.code === "ENOENT") {
+            if ((e as NodeJS.ErrnoException).code === "ENOENT") {
                 // no such file or directory - treat as file
-                await handleSingleFile(fullpath, false);
+                await handleSingleFileLocal(fullpath, false);
             }
             else {
                 logger.error(`Cannot handle ${fullpath}`);

@@ -29,14 +29,14 @@ export type GetMovieResponse = {
     Rating?: number,
     NumberOfVoters?: number,
     NumOfSubs?: number,
-    FilmImage?: any,
-    UrlParam?: any,
+    FilmImage?: unknown,
+    UrlParam?: unknown,
     Actors?: string,
-    Countries?: any[],
+    Countries?: unknown[],
     Directors?: string,
     Genres?: string,
-    Languages?: any[],
-    Studios?: any[]
+    Languages?: unknown[],
+    Studios?: unknown[]
 }
 
 type DownloadBestSubtitlesResponse = {
@@ -139,7 +139,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         }
     }
 
-    private login = async (email: string, password: string): Promise<void> => {
+    private async login(email: string, password: string): Promise<void> {
         const options: FetchOptions = {
             url: `${this.baseUrl}/Services/MembershipService.svc/Login`,
             requestInit: {
@@ -160,7 +160,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         let response: Response;
         try {
             this.logger.debug("Login into Ktuvit.me");
-            response = await fetch(new Request(options.url, options.requestInit));
+            response = await this.fetchWithRetry(options.url, options.requestInit);
             if (response.status === 200) {
                 this.cookie = response.headers.getSetCookie();
             }
@@ -171,7 +171,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         catch (error) {
             await this.handleError(error?.message ?? error, response);
         }
-    };
+    }
 
     private buildSearchOptions(name: string, type: FileClassification, movieYear?: number): FetchOptions {
         return {
@@ -203,16 +203,16 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         };
     }
 
-    private findId = async (classification: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface, contextMessage: string, name: string, year?: number): Promise<string> => {
+    private async findId(classification: MovieFileClassificationInterface | TvEpisodeFileClassificationInterface, contextMessage: string, name: string, year?: number): Promise<string> {
         const { type } = classification;
         const options: FetchOptions = this.buildSearchOptions(name, type, year);
 
         let response: Response;
         try {
             this.logger.debug(`Searching for ${contextMessage}`);
-            response = await fetch(new Request(options.url, options.requestInit));
+            response = await this.fetchWithRetry(options.url, options.requestInit);
             if (response.status === 200) {
-                const body: any = await response.json();
+                const body = await response.json() as { d: string };
                 return parseId(body.d, name, year);
             }
             else {
@@ -220,36 +220,40 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             }
         }
         catch (error) {
-            await this.handleError(error, response);
+            await this.handleError(error?.message ?? error, response);
         }
-    };
+    }
 
-    private getMovieSubtitlesOptions = (movieId: string): FetchOptions => ({
-        url: `${this.baseUrl}/MovieInfo.aspx?ID=${movieId}`,
-        requestInit: {
-            headers: {
-                "User-Agent": this.userAgent,
-                "Cookie": this.cookie.join("; ")
+    private getMovieSubtitlesOptions(movieId: string): FetchOptions {
+        return {
+            url: `${this.baseUrl}/MovieInfo.aspx?ID=${movieId}`,
+            requestInit: {
+                headers: {
+                    "User-Agent": this.userAgent,
+                    "Cookie": this.cookie.join("; ")
+                }
             }
-        }
-    });
+        };
+    }
 
-    private getEpisodeSubtitlesOptions = (seriesId: string, season: number, episode: number): FetchOptions => ({
-        url: `${this.baseUrl}/Services/GetModuleAjax.ashx?moduleName=SubtitlesList&SeriesID=${seriesId}&Season=${season}&Episode=${episode}`,
-        requestInit: {
-            headers: {
-                "User-Agent": this.userAgent,
-                "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${seriesId}`,
-                "Cookie": this.cookie.join("; ")
+    private getEpisodeSubtitlesOptions(seriesId: string, season: number, episode: number): FetchOptions {
+        return {
+            url: `${this.baseUrl}/Services/GetModuleAjax.ashx?moduleName=SubtitlesList&SeriesID=${seriesId}&Season=${season}&Episode=${episode}`,
+            requestInit: {
+                headers: {
+                    "User-Agent": this.userAgent,
+                    "Referer": `${this.baseUrl}/MovieInfo.aspx?ID=${seriesId}`,
+                    "Cookie": this.cookie.join("; ")
+                }
             }
-        }
-    });
+        };
+    }
 
-    private getSubtitles = async (options: FetchOptions, contextMessage: string): Promise<Subtitle[]> => {
+    private async getSubtitles(options: FetchOptions, contextMessage: string): Promise<Subtitle[]> {
         let response: Response;
         try {
             this.logger.debug(`Searching subtitles for ${contextMessage}`);
-            response = await fetch(new Request(options.url, options.requestInit));
+            response = await this.fetchWithRetry(options.url, options.requestInit);
             if (response.status === 200) {
                 return parseSubtitles(await response.text());
             }
@@ -260,9 +264,9 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         catch (error) {
             await this.handleError(error?.message ?? error, response);
         }
-    };
+    }
 
-    private getDownloadIdentifier = async (id: string, subtitleId: string, contextMessage: string): Promise<string> => {
+    private async getDownloadIdentifier(id: string, subtitleId: string, contextMessage: string): Promise<string> {
         this.logger.info(`Downloading: ${subtitleId}`);
         const options: FetchOptions = {
             url: `${this.baseUrl}/Services/ContentProvider.svc/RequestSubtitleDownload`,
@@ -290,9 +294,9 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         let response: Response;
         try {
             this.logger.debug(`Looking for download identifier for ${contextMessage}`);
-            response = await fetch(new Request(options.url, options.requestInit));
+            response = await this.fetchWithRetry(options.url, options.requestInit);
             if (response.status === 200) {
-                const body: any = await response.json();
+                const body = await response.json() as { d: string };
                 return parseDownloadIdentifier(body.d);
             }
             else {
@@ -300,11 +304,11 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             }
         }
         catch (error) {
-            this.logger.error(error);
+            this.logger.error(error instanceof Error ? error.message : String(error));
         }
-    };
+    }
 
-    private downloadFile = async (movieId: string, downloadIdentifier: string, filenameNoExtension: string, relativePath: string, contextMessage: string): Promise<boolean> => {
+    private async downloadFile(movieId: string, downloadIdentifier: string, filenameNoExtension: string, relativePath: string, contextMessage: string): Promise<boolean> {
         this.logger.info(`Downloading: ${downloadIdentifier}`);
         const options: FetchOptions = {
             url: `${this.baseUrl}/Services/DownloadFile.ashx?DownloadIdentifier=${downloadIdentifier}`,
@@ -321,7 +325,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         let response: Response;
         try {
             this.logger.debug(`Downloading subtitle for ${contextMessage}`);
-            response = await fetch(new Request(options.url, options.requestInit));
+            response = await this.fetchWithRetry(options.url, options.requestInit);
             if (response.status === 200) {
                 const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${this.classifier.getSubtitlesSuffix()}`);
                 this.logger.verbose(`writing response to ${destination}`);
@@ -334,12 +338,14 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             }
         }
         catch (error) {
-            this.logger.error(error);
+            this.logger.error(error instanceof Error ? error.message : String(error));
         }
-    };
+    }
 
-    private downloadBestSubtitles = async (id: string, subtitles: Subtitle[], excludeList: string[], filenameNoExtension: string, relativePath: string, contextMessage: string)
-        : Promise<DownloadBestSubtitlesResponse> => {
+    private async downloadBestSubtitles(
+        id: string, subtitles: Subtitle[], excludeList: string[],
+        filenameNoExtension: string, relativePath: string, contextMessage: string
+    ): Promise<DownloadBestSubtitlesResponse> {
         const subtitleId: string = this.findClosestMatch(filenameNoExtension, subtitles, excludeList);
         const downloadIdentifier: string = await this.getDownloadIdentifier(id, subtitleId, contextMessage);
         if (!downloadIdentifier) {
@@ -354,5 +360,5 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             success,
             errorMessage: !success && `Failed downloading subtitle for ${contextMessage}`
         };
-    };
+    }
 }

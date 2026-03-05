@@ -25,6 +25,12 @@ jest.mock("node-notifier", () => ({
 }));
 
 describe("Test notifier", () => {
+    beforeEach(() => {
+        mockNotify.mockClear();
+        mockOn.mockClear();
+        mockExecFile.mockClear();
+    });
+
     it("Test notifier - quiet", () => {
         const logger: LoggerInterface = new MockLogger();
 
@@ -74,8 +80,8 @@ describe("Test notifier", () => {
         });
         expect(mockOn).toHaveBeenCalledTimes(1);
         expect(mockExecFile).toHaveBeenCalledTimes(1);
-        expect(mockExecFile.mock.calls[0][0]).toEqual("loggerFileLocation");
-        expect(mockExecFile.mock.calls[0][1]).toEqual({ shell: "powershell" });
+        expect(mockExecFile.mock.calls[0][0]).toEqual("powershell");
+        expect(mockExecFile.mock.calls[0][1]).toEqual(["-NoProfile", "-Command", "Start-Process", "loggerFileLocation"]);
     });
 
     it("Test notifier - check all notifications", () => {

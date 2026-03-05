@@ -41,23 +41,23 @@ export class ArgsParser implements ArgsParserInterface {
         return !!this.sonarrMode;
     }
 
-    public getInput = (): string => {
+    public getInput(): string {
         return this.input;
-    };
+    }
 
-    public isQuiet = (): boolean => {
+    public isQuiet(): boolean {
         return !!this.quiet;
-    };
+    }
 
     public getSnoreToastPath(): string {
         return this.snoreToastPath;
     }
 
-    public getHelp = (): string => {
+    public getHelp(): string {
         return `\nOptions:\n\t${INPUT}\tinput file\n\t${SONARR}\tsonnar mode (input is taken from ENV VAR ${SONARR_EPISODE_FILE_PATH})\n\t${QUIET}\tquiet mode (no notifications)\n`;
-    };
+    }
 
-    private getSonarrEpisodePathEnvVar = (): string => {
+    private getSonarrEpisodePathEnvVar(): string {
         return process.env[SONARR_EPISODE_FILE_PATH];
-    };
+    }
 }

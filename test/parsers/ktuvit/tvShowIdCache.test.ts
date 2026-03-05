@@ -24,6 +24,16 @@ describe("test tvShowId cache", () => {
         expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
+    it("Test - fetch throws error", async () => {
+        const mockFetch = jest.fn(async () => {
+            throw new Error("network failure"); 
+        });
+        const tvShowIdCache: TvShowIdCache = new TvShowIdCache(uuid(), TRANSIENT_CACHE_DIR);
+        const tvShowId = await tvShowIdCache.getTvShowId("TV SHOW ERROR", mockFetch);
+        expect(tvShowId).toBeUndefined();
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
     it("Test persistence", async () => {
         const id: string = "1e369381-ec96-47ef-b9cc-48d13f570441";
         const mockFetch = jest.fn(async () => "tvShowId1");

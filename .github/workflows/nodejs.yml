@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ '22' ]
+        node-version: [ '24' ]
 
     steps:
     - name: Install NSIS
@@ -23,20 +23,20 @@ jobs:
         Invoke-Expression "& { $(Invoke-RestMethod https://get.scoop.sh) } -RunAsAdmin"
         scoop bucket add extras
         scoop install nsis
+        "$env:USERPROFILE\scoop\shims" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
     - name: Print NSIS version
       run: makensis -VERSION
 
     - name: Checkout
-      uses: actions/checkout@v5.0.0
+      uses: actions/checkout@v6.0.0
 
     - name: Setup Windows SDK
       uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
 
     - name: Add signtool.exe path to PATH environment variable
-      uses: myci-actions/export-env-var-powershell@1
-      with:
-        name: PATH
-        value: $env:PATH;C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x86\
+      run: |
+        $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin" -Recurse -Filter "signtool.exe" | Where-Object { $_.FullName -match "x64" } | Select-Object -First 1
+        $signtool.DirectoryName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
     - name: Setup NodeJS
       uses: actions/setup-node@v4.4.0

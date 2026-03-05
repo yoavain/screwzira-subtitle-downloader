@@ -45,7 +45,9 @@ export class Config implements ConfigInterface {
         this.logLevel = conf?.logLevel;
         this.logger.debug(`LogLevel ${this.logLevel}`);
         this.extensions = conf?.extensions ?? defaultExtensions;
-        this.replacePairs = conf?.replacePairs ? Object.freeze(JSON.parse(JSON.stringify(conf.replacePairs).toLowerCase())) : Object.freeze({});
+        this.replacePairs = conf?.replacePairs
+            ? Object.freeze(Object.fromEntries(Object.entries(conf.replacePairs).map(([k, v]) => [k.toLowerCase(), v])))
+            : Object.freeze({});
         this.languageCode = conf?.languageCode ?? "Hebrew";
         this.logger.debug(
             `Replace pairs (${Object.keys(this.replacePairs).length}): ${Object.keys(this.replacePairs)
@@ -54,23 +56,24 @@ export class Config implements ConfigInterface {
         );
     }
 
-    public replaceTitleIfNeeded = (text: string): string => {
-        if (this.replacePairs[text]) {
-            this.logger.info(`Replaced "${text}" with "${this.replacePairs[text]}" for query`);
-            return this.replacePairs[text];
+    public replaceTitleIfNeeded(text: string): string {
+        const replacement = this.replacePairs[text.toLowerCase()];
+        if (replacement) {
+            this.logger.info(`Replaced "${text}" with "${replacement}" for query`);
+            return replacement;
         }
         return text;
-    };
+    }
 
-    public getLogLevel = (): string => {
+    public getLogLevel(): string {
         return this.logLevel;
-    };
+    }
 
-    public getExtensions = (): string[] => {
+    public getExtensions(): string[] {
         return this.extensions;
-    };
+    }
 
-    public getLanguageCode = (): string => {
+    public getLanguageCode(): string {
         return this.languageCode;
-    };
+    }
 }

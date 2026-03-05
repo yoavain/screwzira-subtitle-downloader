@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 
 import webpack from "webpack";
 import CopyWebpackPlugin from "copy-webpack-plugin";

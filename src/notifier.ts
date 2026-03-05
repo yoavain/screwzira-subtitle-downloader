@@ -7,8 +7,12 @@ import { PROGRAM_TITLE } from "~src/commonConsts";
 
 const WindowsToaster = notifier.WindowsToaster;
 
-declare type NodeNotifier = any;
-declare type Notification = any;
+interface ToastNotification {
+    title: string;
+    message: string;
+    icon: string;
+    actions?: string[];
+}
 
 const ICONS_PATH = "notif-icons";
 export enum NotificationType {
@@ -48,18 +52,22 @@ export class Notifier implements NotifierInterface {
             this.logger.debug(`snoreToastPath: ${snoreToastPath}`);
             // @ts-ignore
             this.notifier = new WindowsToaster({ withFallback: false, customPath: snoreToastPath });
+            this.notifier.on("log", () => {
+                const file = this.logger.getLogFileLocation();
+                execFile("powershell", ["-NoProfile", "-Command", "Start-Process", file]);
+            });
         }
         else {
             this.logger.debug("Quiet Mode. Not initializing notifier");
         }
     }
 
-    public notif = (message: string, notificationType: NotificationType, openLog?: boolean) => {
+    public notif(message: string, notificationType: NotificationType, openLog?: boolean) {
         const icon: string = getNotificationIcon(notificationType);
         this.logger.verbose(`Looking for icon in: ${path.join(ICONS_PATH, icon)}`);
         this.logNotification(message, notificationType);
         if (this.notifier) {
-            const notification: Notification = {
+            const notification: ToastNotification = {
                 title: PROGRAM_TITLE,
                 message,
                 icon: path.join(ICONS_PATH, icon)
@@ -68,17 +76,13 @@ export class Notifier implements NotifierInterface {
                 notification.actions = ["Log", "Close"];
             }
             this.notifier.notify(notification);
-            this.notifier.on("log", () => {
-                const file = this.logger.getLogFileLocation();
-                execFile(file, { shell: "powershell" });
-            });
         }
         else {
             this.logger.info(`Quiet Mode. Skipping notification message: ${message}`);
         }
-    };
+    }
 
-    private logNotification = (message: string, notificationType: NotificationType) => {
+    private logNotification(message: string, notificationType: NotificationType) {
         switch (notificationType) {
             case NotificationType.LOGO:
             case NotificationType.DOWNLOAD:
@@ -91,5 +95,5 @@ export class Notifier implements NotifierInterface {
             case NotificationType.FAILED:
                 this.logger.error(message);
         }
-    };
+    }
 }

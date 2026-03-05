@@ -21,3 +21,8 @@ installer/*.bat
 /test/resources/cache/transient/
 /tsconfig.tsbuildinfo
 /.junie/
+/.claude/settings.local.json
+/.cache/
+/.qodo/
+/logs/
+/docs/plan/
