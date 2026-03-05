@@ -5,4 +5,12 @@ export class MockConfig implements ConfigInterface {
     getLogLevel = (): string => "";
     getExtensions = (): string[] => [];
     getLanguageCode = (): string => "Hebrew";
+    getSubtitlesSuffix = (): string => "Hebrew.srt";
+    getSyncConfig = () => ({
+        syncEnabled: false,
+        ollamaBaseUrl: "",
+        ollamaModel: "translategemma:12b",
+        syncChunkThresholdSeconds: 0.3,
+        syncBatchSize: 20
+    });
 }

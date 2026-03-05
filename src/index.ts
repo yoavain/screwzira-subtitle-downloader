@@ -13,6 +13,10 @@ import { PROGRAM_CACHE_FOLDER, PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PR
 import { ensureDirSync, isDirectory, readDir } from "~src/fileUtils";
 import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 import { handleSingleFile } from "~src/singleFileHandler";
+import { OllamaClient } from "~src/sync/ollamaClient";
+import { MkvExtractor } from "~src/sync/mkvExtractor";
+import { EnglishSourceFinder } from "~src/sync/englishSourceFinder";
+import { SubtitleSyncer } from "~src/sync/subtitleSyncer";
 import * as path from "path";
 
 // Make sure the log directory is there
@@ -43,10 +47,20 @@ const tvShowIdCache: TvShowIdCache = new TvShowIdCache(PROGRAM_TV_SHOW_ID_CACHE_
 // Ktuvit parser
 const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier, tvShowIdCache);
 
+// Subtitle syncer (used when invoked with "sync" flag)
+const ollamaClient = new OllamaClient(config.getSyncConfig().ollamaBaseUrl, logger);
+const mkvExtractor = new MkvExtractor(argsParser.getMkvMergePath(), argsParser.getMkvExtractPath(), logger);
+const englishSourceFinder = new EnglishSourceFinder(mkvExtractor, argsParser.getMkvMergePath(), logger);
+const subtitleSyncer = new SubtitleSyncer(config.getSyncConfig(), config.getSubtitlesSuffix(), ollamaClient, englishSourceFinder, logger, notifier);
+
 // handle single file. Returns true if a call to provider was made
 const handleSingleFileLocal = async (fullpath: string, useParentFolder: boolean): Promise<boolean> => {
     logger.verbose(`Handling file: ${fullpath}`);
-    return handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser);
+    const downloaded = await handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser);
+    if (downloaded && argsParser.isSync()) {
+        await subtitleSyncer.sync(fullpath);
+    }
+    return downloaded;
 };
 
 // Batch
