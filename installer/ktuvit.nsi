@@ -93,6 +93,24 @@ Section "MP4" SEC05
     WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}" "Icon" '$INSTDIR\${PRODUCT_NAME}-launcher.exe,0'
     WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}\command" "" '"$INSTDIR\${PRODUCT_NAME}-launcher.exe" input "%1"'
 SectionEnd
+Section "mkvtoolnix" SEC06
+  SetOutPath "$INSTDIR\mkvtoolnix"
+  File /r "..\dist\mkvtoolnix\*.*"
+SectionEnd
+Section "Sync context menu" SEC07
+  SetOutPath "$INSTDIR"
+  SetOverwrite ifnewer
+  !define PRODUCT_SYNC_NAME "${PRODUCT_NAME}-Sync"
+  WriteRegStr HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_SYNC_NAME}" "" "Ktuvit Downloader with Sync (Beta)"
+  WriteRegStr HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_SYNC_NAME}" "Icon" '$INSTDIR\${PRODUCT_NAME}-launcher.exe,0'
+  WriteRegStr HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_SYNC_NAME}\command" "" '"$INSTDIR\${PRODUCT_NAME}-launcher.exe" input "%1" sync'
+  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_SYNC_NAME}" "Icon" '$INSTDIR\${PRODUCT_NAME}-launcher.exe,0'
+  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_SYNC_NAME}\command" "" '"$INSTDIR\${PRODUCT_NAME}-launcher.exe" input "%1" sync'
+  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_SYNC_NAME}" "Icon" '$INSTDIR\${PRODUCT_NAME}-launcher.exe,0'
+  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_SYNC_NAME}\command" "" '"$INSTDIR\${PRODUCT_NAME}-launcher.exe" input "%1" sync'
+  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_SYNC_NAME}" "Icon" '$INSTDIR\${PRODUCT_NAME}-launcher.exe,0'
+  WriteRegStr HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_SYNC_NAME}\command" "" '"$INSTDIR\${PRODUCT_NAME}-launcher.exe" input "%1" sync'
+SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\${PRODUCT_NAME}_Uninst.exe"
@@ -113,11 +131,14 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "Associate .mkv files to $(^Name)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Associate .avi files to $(^Name)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC05} "Associate .mp4 files to $(^Name)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC06} "mkvtoolnix binaries (mkvmerge, mkvextract) for MKV subtitle extraction"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC07} "Add 'Ktuvit Downloader with Sync (Beta)' right-click context menu entries"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function .onInit
   SectionSetFlags ${SEC00} 17
   SectionSetFlags ${SEC01} 17
+  SectionSetFlags ${SEC06} 17
 FunctionEnd
 
 Function un.onUninstSuccess
@@ -136,6 +157,7 @@ Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}-launcher.exe"
   Delete "$INSTDIR\snoretoast-x64.exe"
   RMDir /r "$INSTDIR\notif-icons"
+  RMDir /r "$INSTDIR\mkvtoolnix"
   RMDir "$INSTDIR"
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
@@ -143,5 +165,9 @@ Section Uninstall
   DeleteRegKey HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_NAME}"
   DeleteRegKey HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_NAME}"
   DeleteRegKey HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}"
+  DeleteRegKey HKLM "SOFTWARE\Classes\Folder\shell\${PRODUCT_NAME}-Sync"
+  DeleteRegKey HKLM "SOFTWARE\Classes\SystemFileAssociations\.mkv\shell\${PRODUCT_NAME}-Sync"
+  DeleteRegKey HKLM "SOFTWARE\Classes\SystemFileAssociations\.avi\shell\${PRODUCT_NAME}-Sync"
+  DeleteRegKey HKLM "SOFTWARE\Classes\SystemFileAssociations\.mp4\shell\${PRODUCT_NAME}-Sync"
   SetAutoClose true
 SectionEnd

@@ -65,6 +65,10 @@ export const baseConfig: webpack.Configuration = {
                 {
                     from: "resources/notif-icons-ktuvit/",
                     to: "../dist/notif-icons/"
+                },
+                {
+                    from: "resources/mkvtoolnix/",
+                    to: "../dist/mkvtoolnix/"
                 }
             ]
         })
