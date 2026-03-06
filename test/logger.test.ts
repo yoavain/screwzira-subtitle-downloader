@@ -37,4 +37,14 @@ describe("Test logger", () => {
         const logFileLocation = logger.getLogFileLocation();
         expect(logFileLocation).toEqual("mockLogFile");
     });
+
+    it("setLogLevel with a truthy level sets the transport level", () => {
+        const logger = new Logger("mockLogFile");
+        expect(() => logger.setLogLevel("info")).not.toThrow();
+    });
+
+    it("setLogLevel with an empty string is a no-op", () => {
+        const logger = new Logger("mockLogFile");
+        expect(() => logger.setLogLevel("")).not.toThrow();
+    });
 });

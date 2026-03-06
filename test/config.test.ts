@@ -1,3 +1,5 @@
+import * as fs from "fs";
+import * as os from "os";
 import path from "path";
 import type { ConfigInterface } from "~src/config";
 import { Config } from "~src/config";
@@ -19,13 +21,13 @@ describe("Test config class", () => {
     });
 });
 
+// Shared config for all read-only tests against CONFIG_FILE
+let config: ConfigInterface;
+beforeAll(() => {
+    config = new Config(CONFIG_FILE, new MockLogger());
+});
+
 describe("Test replaceTitleIfNeeded", () => {
-    let config: ConfigInterface;
-
-    beforeEach(() => {
-        config = new Config(CONFIG_FILE, new MockLogger());
-    });
-
     it("Should return replacement for exact lowercase match", () => {
         expect(config.replaceTitleIfNeeded("poker face 2023")).toBe("poker face");
     });
@@ -37,5 +39,51 @@ describe("Test replaceTitleIfNeeded", () => {
 
     it("Should return original text when no match", () => {
         expect(config.replaceTitleIfNeeded("breaking bad 2008")).toBe("breaking bad 2008");
+    });
+});
+
+describe("Test sync-related config methods", () => {
+    it("getSubtitlesSuffix() returns languageCode + '.srt'", () => {
+        expect(config.getSubtitlesSuffix()).toBe("heb.srt");
+    });
+
+    it("getSyncConfig() returns object with correct shape and default values", () => {
+        const syncConfig = config.getSyncConfig();
+        expect(syncConfig).toEqual({
+            syncEnabled: false,
+            ollamaBaseUrl: "",
+            ollamaModel: "translategemma:12b",
+            syncChunkThresholdSeconds: 0.3,
+            syncBatchSize: 20
+        });
+    });
+});
+
+describe("Config edge cases", () => {
+    let tmpDir: string;
+
+    beforeEach(() => {
+        tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "ktuvit-config-test-"));
+    });
+
+    afterEach(() => {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it("creates config file with defaults when it does not exist", () => {
+        const newConfig = path.join(tmpDir, "new-config.json");
+        const c = new Config(newConfig, new MockLogger());
+        expect(fs.existsSync(newConfig)).toBe(true);
+        expect(c.getLogLevel()).toBe("debug"); // default value
+    });
+
+    it("uses default config when config file is corrupted JSON", () => {
+        const corruptFile = path.join(tmpDir, "corrupt.json");
+        fs.writeFileSync(corruptFile, "{ invalid json !!!");
+        const logger = new MockLogger();
+        const errorSpy = jest.spyOn(logger, "error");
+        const c = new Config(corruptFile, logger);
+        expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("corrupted"));
+        expect(c.getLanguageCode()).toBe("Hebrew"); // default value
     });
 });

@@ -12,7 +12,7 @@
 import { OllamaClient } from "~src/sync/ollamaClient";
 import { MockLogger } from "~test/__mocks__";
 
-const RUN = process.env["OLLAMA_INTEGRATION"] === "1";
+const RUN = process.env["OLLAMA_INTEGRATION"] === "true";
 const BASE_URL = process.env["OLLAMA_BASE_URL"] ?? "http://localhost:11434";
 const MODEL = process.env["OLLAMA_MODEL"] ?? "translategemma:12b";
 

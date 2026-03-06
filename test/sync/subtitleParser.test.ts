@@ -51,6 +51,13 @@ describe("parseSrt", () => {
     it("returns empty array for empty input", () => {
         expect(parseSrt("")).toHaveLength(0);
     });
+
+    it("skips blocks where time line has no ' --> ' arrow", () => {
+        const srt = "1\nno arrow here\nText\n\n2\n00:00:01,000 --> 00:00:02,000\nOK\n";
+        const entries = parseSrt(srt);
+        expect(entries).toHaveLength(1);
+        expect(entries[0].text).toBe("OK");
+    });
 });
 
 describe("stripFormattingTags", () => {

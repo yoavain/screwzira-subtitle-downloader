@@ -3,7 +3,11 @@ import { Classifier, DIMENSION_MARK, ENCODING_MARK, RIP_MARK, SPECIAL_EDITION_MA
 import type { ConfigInterface } from "~src/config";
 import { Config } from "~src/config";
 import type { LoggerInterface } from "~src/logger";
-import { MockLogger } from "./__mocks__";
+import { MockLogger, MockConfig } from "./__mocks__";
+
+jest.mock("~src/fileUtils");
+import { isExist } from "~src/fileUtils";
+const mockIsExist = isExist as jest.Mock;
 
 const mockLogger: LoggerInterface = new MockLogger();
 
@@ -102,5 +106,60 @@ describe("test classify", () => {
         const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
         const alternativeMovieName: string = szClassifier.findAlternativeName("frozen 2");
         expect(alternativeMovieName).toEqual("frozen ii");
+    });
+
+    it("test findAlternativeName - returns undefined for single-word name", () => {
+        const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
+        expect(szClassifier.findAlternativeName("avatar")).toBeUndefined();
+    });
+
+    it("test findAlternativeName - returns undefined when last part is not a small number", () => {
+        const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
+        // 10 is not < 10, so no roman conversion
+        expect(szClassifier.findAlternativeName("fast furious 10")).toBeUndefined();
+    });
+
+    it("test intToRomanUpto9 - all roman numerals via findAlternativeName", () => {
+        const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
+        expect(szClassifier.findAlternativeName("movie 1")).toBe("movie i");
+        expect(szClassifier.findAlternativeName("movie 2")).toBe("movie ii");
+        expect(szClassifier.findAlternativeName("movie 3")).toBe("movie iii");
+        expect(szClassifier.findAlternativeName("movie 4")).toBe("movie iv");
+        expect(szClassifier.findAlternativeName("movie 5")).toBe("movie v");
+        expect(szClassifier.findAlternativeName("movie 6")).toBe("movie vi");
+        expect(szClassifier.findAlternativeName("movie 7")).toBe("movie vii");
+        expect(szClassifier.findAlternativeName("movie 8")).toBe("movie viii");
+        expect(szClassifier.findAlternativeName("movie 9")).toBe("movie ix");
+    });
+
+    it("test classify - parentFolder regex fallback", () => {
+        const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
+        // Filename doesn't match episode or movie regex, so fall back to parentFolder
+        const actual = szClassifier.classify("VIDEO_TS", ".", "Gravity (2013)");
+        expect(actual).toMatchObject({
+            type: "movie",
+            movieName: "gravity",
+            movieYear: 2013
+        });
+    });
+
+    it("test classify - returns undefined when no regex matches", () => {
+        const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
+        const actual = szClassifier.classify("random-file", ".", "");
+        expect(actual).toBeUndefined();
+    });
+
+    it("test isSubtitlesAlreadyExist - returns true when subtitle file exists", async () => {
+        mockIsExist.mockResolvedValue(true);
+        const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
+        const result = await szClassifier.isSubtitlesAlreadyExist(".", "Frozen.2013");
+        expect(result).toBe(true);
+    });
+
+    it("test isSubtitlesAlreadyExist - returns false when subtitle file does not exist", async () => {
+        mockIsExist.mockResolvedValue(false);
+        const szClassifier: ClassifierInterface = new Classifier(mockLogger, mockConfig);
+        const result = await szClassifier.isSubtitlesAlreadyExist(".", "Frozen.2013");
+        expect(result).toBe(false);
     });
 });

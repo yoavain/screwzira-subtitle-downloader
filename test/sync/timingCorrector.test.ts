@@ -67,6 +67,62 @@ describe("applyTimingCorrections", () => {
         expect(result[0].end).toBe(2000);
     });
 
+    it("handles n:m fallback (3 heb to 1 eng) using chunk offset", () => {
+        const heb: SubtitleEntry[] = [
+            makeEntry(0, 1000, 1500),
+            makeEntry(1, 1600, 2000),
+            makeEntry(2, 2100, 2500)
+        ];
+        const eng: SubtitleEntry[] = [makeEntry(0, 1200, 2700)];
+        // 3:1 match — falls into the n:m fallback at the bottom
+        const matches: MatchEntry[] = [{ hebrewIndices: [0, 1, 2], englishIndices: [0], offset: 200 }];
+        const chunks: SceneChunk[] = [{ hebrewStartIdx: 0, hebrewEndIdx: 2, medianOffset: 150 }];
+
+        const result = applyTimingCorrections(heb, eng, matches, chunks, logger);
+        // All 3 heb entries use chunk medianOffset (150)
+        expect(result[0].start).toBe(1000 + 150);
+        expect(result[1].start).toBe(1600 + 150);
+        expect(result[2].start).toBe(2100 + 150);
+    });
+
+    it("returns original timing for 1:N when all english indices are out of bounds", () => {
+        const heb: SubtitleEntry[] = [makeEntry(0, 1000, 2000)];
+        const eng: SubtitleEntry[] = [];
+        const matches: MatchEntry[] = [{ hebrewIndices: [0], englishIndices: [5, 6], offset: 100 }];
+        const chunks: SceneChunk[] = [];
+
+        const result = applyTimingCorrections(heb, eng, matches, chunks, logger);
+        expect(result[0].start).toBe(1000);
+        expect(result[0].end).toBe(2000);
+    });
+
+    it("returns original timing for 2:1 when english index is out of bounds", () => {
+        const heb: SubtitleEntry[] = [makeEntry(0, 1000, 1500), makeEntry(1, 1600, 2000)];
+        const eng: SubtitleEntry[] = [];
+        const matches: MatchEntry[] = [{ hebrewIndices: [0, 1], englishIndices: [5], offset: 0 }];
+        const chunks: SceneChunk[] = [];
+
+        const result = applyTimingCorrections(heb, eng, matches, chunks, logger);
+        expect(result[0].start).toBe(1000);
+        expect(result[1].start).toBe(1600);
+    });
+
+    it("handles n:m fallback without chunks using match offset", () => {
+        const heb: SubtitleEntry[] = [
+            makeEntry(0, 1000, 1500),
+            makeEntry(1, 1600, 2000),
+            makeEntry(2, 2100, 2500)
+        ];
+        const eng: SubtitleEntry[] = [makeEntry(0, 1200, 2700)];
+        const matches: MatchEntry[] = [{ hebrewIndices: [0, 1, 2], englishIndices: [0], offset: 200 }];
+        const chunks: SceneChunk[] = [];
+
+        const result = applyTimingCorrections(heb, eng, matches, chunks, logger);
+        expect(result[0].start).toBe(1000 + 200);
+        expect(result[1].start).toBe(1600 + 200);
+        expect(result[2].start).toBe(2100 + 200);
+    });
+
     it("preserves original text content", () => {
         const heb: SubtitleEntry[] = [makeEntry(0, 1000, 2000, "שלום עולם")];
         const eng: SubtitleEntry[] = [makeEntry(0, 1500, 2500, "Hello world")];

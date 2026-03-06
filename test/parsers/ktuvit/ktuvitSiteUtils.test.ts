@@ -35,6 +35,14 @@ describe("Test ktuvit site utils", () => {
             { id: "8AAF8BD11EF634A60A574603CD8083B1", name: "Frozen.2013.1080p.BluRay.x264-SPARKS" }
         ]);
     });
+    it("parseId returns undefined when queryBody is empty", () => {
+        expect(parseId("", "Frozen", 2013)).toBeUndefined();
+    });
+
+    it("parseDownloadIdentifier returns falsy when queryBody is empty", () => {
+        expect(parseDownloadIdentifier("")).toBeFalsy();
+    });
+
     it("test parseDownloadIdentifier", () => {
         const output = "{\"ValidIn\":0,\"DownloadIdentifier\":\"b53e6717-98ed-4827-9fae-083b5004b22a\",\"IsSuccess\":true,\"ErrorMessage\":\"\"}";
         const downloadIdentifier = parseDownloadIdentifier(output);

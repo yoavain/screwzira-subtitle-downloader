@@ -7,6 +7,16 @@ import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
 import type { ConfigInterface } from "~src/config";
 
+// Subclass to expose protected methods for testing
+class TestParser extends CommonParser {
+    public callHandleError(error: string, response: Response | null) {
+        return this.handleError(error, response);
+    }
+    public callFetchWithRetry(url: string, init: RequestInit, retries?: number) {
+        return this.fetchWithRetry(url, init, retries);
+    }
+}
+
 describe("Test CommonParser", () => {
     it("Test findClosestMatch", () => {
         const logger: LoggerInterface = new MockLogger();
@@ -37,5 +47,96 @@ describe("Test CommonParser", () => {
         const excludeList: string[] = ["frozen", "2013"];
         const closestMatch = commonParser.findClosestMatch(filenameNoExtension, subtitles, excludeList);
         expect(closestMatch).toBe("E00664CE8F1C1D95D55CC21E85C1A031");
+    });
+
+    it("findClosestMatch returns undefined for empty subtitles array", () => {
+        const logger = new MockLogger();
+        const notifier = new MockNotifier();
+        const config = new MockConfig();
+        const classifier = new Classifier(logger, config);
+        const commonParser = new CommonParser(logger, notifier, classifier);
+        const result = commonParser.findClosestMatch("some-file", [], []);
+        expect(result).toBeUndefined();
+    });
+});
+
+describe("CommonParser protected methods", () => {
+    const logger = new MockLogger();
+    const notifier = new MockNotifier();
+    const config = new MockConfig();
+    const classifier = new Classifier(logger, config);
+    let parser: TestParser;
+    let fetchSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+        parser = new TestParser(logger, notifier, classifier);
+        fetchSpy = jest.spyOn(global, "fetch");
+    });
+
+    afterEach(() => {
+        fetchSpy.mockRestore();
+    });
+
+    describe("handleError", () => {
+        it("logs only error message when response is null", async () => {
+            const errorSpy = jest.spyOn(logger, "error");
+            await parser.callHandleError("test error", null);
+            expect(errorSpy).toHaveBeenCalledWith("test error");
+            expect(errorSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it("logs error message and response body when response is provided", async () => {
+            const errorSpy = jest.spyOn(logger, "error");
+            const mockResponse = {
+                text: jest.fn().mockResolvedValue("error body text")
+            } as unknown as Response;
+            await parser.callHandleError("request failed", mockResponse);
+            expect(errorSpy).toHaveBeenCalledWith("request failed");
+            expect(errorSpy).toHaveBeenCalledWith("error body text");
+        });
+
+        it("logs warn when response.text() throws", async () => {
+            const warnSpy = jest.spyOn(logger, "warn");
+            const mockResponse = {
+                text: jest.fn().mockRejectedValue(new Error("parse fail"))
+            } as unknown as Response;
+            await parser.callHandleError("request failed", mockResponse);
+            expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Failed to parse error response"));
+        });
+    });
+
+    describe("fetchWithRetry", () => {
+        it("returns response on first successful fetch", async () => {
+            const mockResponse = { status: 200 } as Response;
+            fetchSpy.mockResolvedValue(mockResponse);
+            const result = await parser.callFetchWithRetry("http://test.com", {}, 0);
+            expect(result).toBe(mockResponse);
+            expect(fetchSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it("retries and returns response after one failure", async () => {
+            jest.useFakeTimers();
+            const mockResponse = { status: 200 } as Response;
+            fetchSpy
+                .mockRejectedValueOnce(new Error("timeout"))
+                .mockResolvedValueOnce(mockResponse);
+
+            const promise = parser.callFetchWithRetry("http://test.com", {}, 1);
+            await jest.advanceTimersByTimeAsync(2000);
+            const result = await promise;
+
+            expect(result).toBe(mockResponse);
+            expect(fetchSpy).toHaveBeenCalledTimes(2);
+            jest.useRealTimers();
+        });
+
+        it("throws immediately when retries=0 and fetch fails", async () => {
+            const err = new Error("always fails");
+            fetchSpy.mockRejectedValue(err);
+            await expect(
+                parser.callFetchWithRetry("http://test.com", {}, 0)
+            ).rejects.toThrow("always fails");
+            expect(fetchSpy).toHaveBeenCalledTimes(1);
+        });
     });
 });
