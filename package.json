@@ -41,7 +41,7 @@
     },
     "devDependencies": {
         "@eslint/compat": "1.4.1",
-        "@eslint/eslintrc": "3.3.4",
+        "@eslint/eslintrc": "3.3.5",
         "@eslint/js": "9.39.3",
         "@jest/types": "30.2.0",
         "@tsconfig/node22": "22.0.5",
