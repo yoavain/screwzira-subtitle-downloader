@@ -26,8 +26,15 @@ flowchart TD
 flowchart TD
     A([handleSingleFileLocal\nfullpath]) --> B{Hebrew .srt\nalready exists\non disk?}
     B -- Yes --> B1([Notify: subtitles already exist\nReturn false])
-    B -- No --> C[Classify filename]
-    C --> D{Classification?}
+    B -- No --> B2{embeddedSubtitleChecker\nprovided?}
+    B2 -- No --> C
+    B2 -- Yes --> B3{checkEmbeddedSubtitles\nenabled AND .mkv?}
+    B3 -- No --> C
+    B3 -- Yes --> B4[MkvExtractor:\nmkvmerge -J → find Hebrew track]
+    B4 --> B5{Hebrew text\ntrack found?}
+    B5 -- Yes --> B6([Notify: embedded Hebrew subtitles found\nReturn false])
+    B5 -- No --> C
+    C[Classify filename] --> D{Classification?}
     D -- Movie --> E[parser.handleMovie]
     D -- Episode --> F[parser.handleEpisode]
     D -- Unknown --> G([Notify: unable to classify\nReturn false])

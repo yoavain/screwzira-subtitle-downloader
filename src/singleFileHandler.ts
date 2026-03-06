@@ -10,7 +10,8 @@ export const handleSingleFile = async (
     useParentFolder: boolean,
     classifier: ClassifierInterface,
     notifier: NotifierInterface,
-    parser: ParserInterface
+    parser: ParserInterface,
+    embeddedSubtitleChecker?: (fullpath: string) => Promise<boolean>
 ): Promise<boolean> => {
     const relativePath: string = path.dirname(fullpath);
     const filenameNoExtension: string = path.parse(fullpath).name;
@@ -19,6 +20,11 @@ export const handleSingleFile = async (
     // Check if already exists
     if (await classifier.isSubtitlesAlreadyExist(relativePath, filenameNoExtension)) {
         notifier.notif("Hebrew subtitles already exist", NotificationType.WARNING);
+        return false;
+    }
+
+    if (embeddedSubtitleChecker && await embeddedSubtitleChecker(fullpath)) {
+        notifier.notif("Embedded Hebrew subtitles found in MKV", NotificationType.WARNING);
         return false;
     }
 

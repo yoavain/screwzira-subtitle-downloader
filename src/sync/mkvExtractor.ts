@@ -21,6 +21,7 @@ const TEXT_CODECS = ["S_TEXT/UTF8", "S_TEXT/ASS", "S_TEXT/SSA"];
 export interface MkvExtractorInterface {
     findEnglishSubtitleTrack: (mkvPath: string) => Promise<{ trackId: number; codec: string } | null>;
     extractSubtitle: (mkvPath: string, trackId: number, outPath: string) => Promise<void>;
+    hasHebrewSubtitleTrack: (mkvPath: string) => Promise<boolean>;
 }
 
 export class MkvExtractor implements MkvExtractorInterface {
@@ -49,5 +50,22 @@ export class MkvExtractor implements MkvExtractorInterface {
     async extractSubtitle(mkvPath: string, trackId: number, outPath: string): Promise<void> {
         this.logger.debug(`Sync: Extracting track ${trackId} from ${mkvPath} → ${outPath}`);
         await execAsync(`"${this.mkvExtractPath}" "${mkvPath}" tracks ${trackId}:"${outPath}"`);
+    }
+
+    async hasHebrewSubtitleTrack(mkvPath: string): Promise<boolean> {
+        try {
+            this.logger.debug(`Sync: Checking for embedded Hebrew subtitle track in ${mkvPath}`);
+            const { stdout } = await execAsync(`"${this.mkvMergePath}" -J "${mkvPath}"`);
+            const data = JSON.parse(stdout) as { tracks: MkvTrack[] };
+            return data.tracks.some((t) =>
+                t.type === "subtitles" &&
+                TEXT_CODECS.includes(t.codec) &&
+                (t.properties.language === "heb" || t.properties.language_ietf?.startsWith("he"))
+            );
+        }
+        catch (e) {
+            this.logger.warn(`Sync: Could not inspect MKV tracks for ${mkvPath}: ${(e as Error).message}`);
+            return false;
+        }
     }
 }

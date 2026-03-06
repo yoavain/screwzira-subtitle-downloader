@@ -57,6 +57,10 @@ describe("Test sync-related config methods", () => {
             syncBatchSize: 20
         });
     });
+
+    it("getCheckEmbeddedSubtitles() returns false when field is absent from config", () => {
+        expect(config.getCheckEmbeddedSubtitles()).toBe(false);
+    });
 });
 
 describe("Config edge cases", () => {

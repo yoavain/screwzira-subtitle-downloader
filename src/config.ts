@@ -16,6 +16,7 @@ interface ConfigurationInterface {
     ollamaModel: string;
     syncChunkThresholdSeconds: number;
     syncBatchSize: number;
+    checkEmbeddedSubtitles: boolean;
 }
 
 const defaultExtensions: string[] = ["mkv", "mp4", "avi"];
@@ -28,7 +29,8 @@ const defaultConf: ConfigurationInterface = {
     ollamaBaseUrl: "",
     ollamaModel: "translategemma:12b",
     syncChunkThresholdSeconds: 0.3,
-    syncBatchSize: 20
+    syncBatchSize: 20,
+    checkEmbeddedSubtitles: false
 };
 
 export interface ConfigInterface {
@@ -38,6 +40,7 @@ export interface ConfigInterface {
     getLanguageCode: () => string;
     getSubtitlesSuffix: () => string;
     getSyncConfig: () => SyncConfig;
+    getCheckEmbeddedSubtitles: () => boolean;
 }
 
 export class Config implements ConfigInterface {
@@ -51,6 +54,7 @@ export class Config implements ConfigInterface {
     private readonly ollamaModel: string;
     private readonly syncChunkThresholdSeconds: number;
     private readonly syncBatchSize: number;
+    private readonly checkEmbeddedSubtitles: boolean;
 
     constructor(confFile: string, logger: LoggerInterface) {
         this.logger = logger;
@@ -77,6 +81,7 @@ export class Config implements ConfigInterface {
         this.ollamaModel = conf?.ollamaModel ?? "translategemma:12b";
         this.syncChunkThresholdSeconds = conf?.syncChunkThresholdSeconds ?? 0.3;
         this.syncBatchSize = conf?.syncBatchSize ?? 20;
+        this.checkEmbeddedSubtitles = conf?.checkEmbeddedSubtitles ?? false;
         this.logger.debug(
             `Replace pairs (${Object.keys(this.replacePairs).length}): ${Object.keys(this.replacePairs)
                 .map((pairKey) => pairKey + " => " + this.replacePairs[pairKey])
@@ -117,5 +122,9 @@ export class Config implements ConfigInterface {
             syncChunkThresholdSeconds: this.syncChunkThresholdSeconds,
             syncBatchSize: this.syncBatchSize
         };
+    }
+
+    public getCheckEmbeddedSubtitles(): boolean {
+        return this.checkEmbeddedSubtitles;
     }
 }

@@ -53,6 +53,43 @@ describe("handleSingleFile", () => {
         expect(parser.handleEpisode).not.toHaveBeenCalled();
     });
 
+    it("returns false and notifies when embedded checker returns true", async () => {
+        const classifier = makeClassifier();
+        const notifier = new MockNotifier();
+        const parser = makeParser();
+        const embeddedSubtitleChecker = jest.fn(async () => true);
+
+        const result = await handleSingleFile("/some/dir/movie.mkv", true, classifier, notifier, parser, embeddedSubtitleChecker);
+
+        expect(result).toBe(false);
+        expect(notifier.notif).toHaveBeenCalledWith("Embedded Hebrew subtitles found in MKV", NotificationType.WARNING);
+        expect(parser.handleMovie).not.toHaveBeenCalled();
+        expect(parser.handleEpisode).not.toHaveBeenCalled();
+    });
+
+    it("continues normally when embedded checker returns false", async () => {
+        const classifier = makeClassifier({ classify: jest.fn(() => MOVIE) });
+        const notifier = new MockNotifier();
+        const parser = makeParser();
+        const embeddedSubtitleChecker = jest.fn(async () => false);
+
+        const result = await handleSingleFile("/some/dir/some.movie.2023.mkv", true, classifier, notifier, parser, embeddedSubtitleChecker);
+
+        expect(result).toBe(true);
+        expect(parser.handleMovie).toHaveBeenCalledWith(MOVIE);
+    });
+
+    it("skips embedded check when embeddedSubtitleChecker is undefined", async () => {
+        const classifier = makeClassifier({ classify: jest.fn(() => MOVIE) });
+        const notifier = new MockNotifier();
+        const parser = makeParser();
+
+        const result = await handleSingleFile("/some/dir/some.movie.2023.mkv", true, classifier, notifier, parser, undefined);
+
+        expect(result).toBe(true);
+        expect(parser.handleMovie).toHaveBeenCalledWith(MOVIE);
+    });
+
     it("returns false and notifies when classification fails", async () => {
         const classifier = makeClassifier({ classify: jest.fn(() => undefined) });
         const notifier = new MockNotifier();

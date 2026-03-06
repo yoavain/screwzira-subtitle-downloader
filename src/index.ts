@@ -53,10 +53,16 @@ const mkvExtractor = new MkvExtractor(argsParser.getMkvMergePath(), argsParser.g
 const englishSourceFinder = new EnglishSourceFinder(mkvExtractor, argsParser.getMkvMergePath(), logger);
 const subtitleSyncer = new SubtitleSyncer(config.getSyncConfig(), config.getSubtitlesSuffix(), ollamaClient, englishSourceFinder, logger, notifier);
 
+const embeddedSubtitleChecker = async (p: string): Promise<boolean> => {
+    if (!config.getCheckEmbeddedSubtitles()) return false;
+    if (!p.toLowerCase().endsWith(".mkv")) return false;
+    return mkvExtractor.hasHebrewSubtitleTrack(p);
+};
+
 // handle single file. Returns true if a call to provider was made
 const handleSingleFileLocal = async (fullpath: string, useParentFolder: boolean): Promise<boolean> => {
     logger.verbose(`Handling file: ${fullpath}`);
-    const downloaded = await handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser);
+    const downloaded = await handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser, embeddedSubtitleChecker);
     if (downloaded && argsParser.isSync()) {
         await subtitleSyncer.sync(fullpath);
     }

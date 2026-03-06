@@ -104,6 +104,56 @@ describe("MkvExtractor unit tests", () => {
         });
     });
 
+    describe("hasHebrewSubtitleTrack", () => {
+        it("returns true for language=heb text track", async () => {
+            _asyncFn.mockResolvedValue({
+                stdout: makeMkvJson([makeTrack({ id: 1, codec: "S_TEXT/UTF8", language: "heb" })]),
+                stderr: ""
+            });
+            const result = await extractor.hasHebrewSubtitleTrack("/path/to/video.mkv");
+            expect(result).toBe(true);
+        });
+
+        it("returns true for language_ietf=he-IL text track", async () => {
+            _asyncFn.mockResolvedValue({
+                stdout: makeMkvJson([makeTrack({ id: 1, codec: "S_TEXT/UTF8", language_ietf: "he-IL" })]),
+                stderr: ""
+            });
+            const result = await extractor.hasHebrewSubtitleTrack("/path/to/video.mkv");
+            expect(result).toBe(true);
+        });
+
+        it("returns false when no Hebrew subtitle track exists", async () => {
+            _asyncFn.mockResolvedValue({
+                stdout: makeMkvJson([makeTrack({ id: 1, codec: "S_TEXT/UTF8", language: "eng" })]),
+                stderr: ""
+            });
+            const result = await extractor.hasHebrewSubtitleTrack("/path/to/video.mkv");
+            expect(result).toBe(false);
+        });
+
+        it("returns false for Hebrew PGS (image) track", async () => {
+            _asyncFn.mockResolvedValue({
+                stdout: makeMkvJson([makeTrack({ id: 1, codec: "S_HDMV/PGS", language: "heb" })]),
+                stderr: ""
+            });
+            const result = await extractor.hasHebrewSubtitleTrack("/path/to/video.mkv");
+            expect(result).toBe(false);
+        });
+
+        it("returns false when mkvmerge fails", async () => {
+            _asyncFn.mockRejectedValue(new Error("process exited with code 1"));
+            const result = await extractor.hasHebrewSubtitleTrack("/path/to/video.mkv");
+            expect(result).toBe(false);
+        });
+
+        it("returns false when stdout is not valid JSON", async () => {
+            _asyncFn.mockResolvedValue({ stdout: "not json", stderr: "" });
+            const result = await extractor.hasHebrewSubtitleTrack("/path/to/video.mkv");
+            expect(result).toBe(false);
+        });
+    });
+
     describe("extractSubtitle", () => {
         it("calls mkvextract with the track id and output path in the command", async () => {
             _asyncFn.mockResolvedValue({ stdout: "", stderr: "" });

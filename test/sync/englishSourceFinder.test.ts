@@ -17,6 +17,7 @@ function makeMockMkvExtractor(overrides: Partial<MkvExtractorInterface> = {}): M
     return {
         findEnglishSubtitleTrack: jest.fn().mockResolvedValue({ trackId: 1, codec: "S_TEXT/UTF8" }),
         extractSubtitle: jest.fn().mockResolvedValue(undefined),
+        hasHebrewSubtitleTrack: jest.fn().mockResolvedValue(false),
         ...overrides
     };
 }
@@ -118,7 +119,7 @@ describe("EnglishSourceFinder unit tests", () => {
         mockIsExist.mockResolvedValueOnce(false);
         mockIsExist.mockResolvedValueOnce(true);
         const mkvExtractor = makeMockMkvExtractor({
-            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+             
             findEnglishSubtitleTrack: jest.fn().mockRejectedValue("string error (non-Error)")
         });
         const finder = new EnglishSourceFinder(mkvExtractor, FAKE_MKV_MERGE, logger);
@@ -130,7 +131,7 @@ describe("EnglishSourceFinder unit tests", () => {
         mockIsExist.mockResolvedValueOnce(false);
         mockIsExist.mockResolvedValueOnce(true);
         const mkvExtractor = makeMockMkvExtractor({
-            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+             
             extractSubtitle: jest.fn().mockRejectedValue("extraction error string")
         });
         const finder = new EnglishSourceFinder(mkvExtractor, FAKE_MKV_MERGE, logger);

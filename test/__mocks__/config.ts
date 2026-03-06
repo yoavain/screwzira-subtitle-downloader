@@ -13,4 +13,5 @@ export class MockConfig implements ConfigInterface {
         syncChunkThresholdSeconds: 0.3,
         syncBatchSize: 20
     });
+    getCheckEmbeddedSubtitles = (): boolean => false;
 }
