@@ -1,6 +1,8 @@
 import * as path from "path";
 import * as os from "os";
 import * as fs from "fs";
+import type * as ChildProcess from "child_process";
+import type * as Util from "util";
 import { MkvExtractor } from "~src/sync/mkvExtractor";
 import { parseSrt } from "~src/sync/subtitleParser";
 import { MockLogger } from "~test/__mocks__";
@@ -8,7 +10,7 @@ import { MockLogger } from "~test/__mocks__";
 // Mock child_process so that promisify picks up the custom async implementation.
 // _asyncFn is the function that execAsync resolves to (via util.promisify.custom).
 jest.mock("child_process", () => {
-    const util = jest.requireActual<typeof import("util")>("util");
+    const util = jest.requireActual<typeof Util>("util");
     const asyncFn = jest.fn().mockResolvedValue({ stdout: "", stderr: "" });
     const execFn = jest.fn();
     Object.defineProperty(execFn, util.promisify.custom, { value: asyncFn, writable: true });
@@ -130,8 +132,8 @@ describeIntegration("MkvExtractor integration tests (real binaries + sample.mkv)
     let extractor: MkvExtractor;
     const logger = new MockLogger();
 
-    const realChildProcess = jest.requireActual<typeof import("child_process")>("child_process");
-    const { promisify: realPromisify } = jest.requireActual<typeof import("util")>("util");
+    const realChildProcess = jest.requireActual<typeof ChildProcess>("child_process");
+    const { promisify: realPromisify } = jest.requireActual<typeof Util>("util");
     const realExecAsync = realPromisify(realChildProcess.exec);
 
     beforeAll(() => {
