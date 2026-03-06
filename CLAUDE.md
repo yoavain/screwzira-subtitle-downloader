@@ -95,6 +95,10 @@ TypeScript and Jest both resolve these aliases:
 
 The hook (`.husky/pre-commit`) runs `lint-staged` (eslint on `.ts`/`.js`, prettier on `.json`) and rebuilds the C# launcher if it changed.
 
+## Flow Charts
+
+Application flow is documented in [`docs/flow-charts.md`](docs/flow-charts.md) as Mermaid diagrams. **After any change that affects control flow, verify the diagrams are still accurate and update them if needed.**
+
 ## Test Structure
 
 Tests live in `test/` and mirror `src/`. Mocks are in `test/__mocks__/` and provide stub implementations of `logger`, `notifier`, `config`, and the main `index` module. Coverage is collected for all `src/**/*.ts` except `src/index.ts`.
