@@ -2,15 +2,15 @@
  * Unit tests for KtuvitParser error-handling paths.
  * Fetch is mocked — no real network calls are made.
  */
-import * as os from "os";
-import * as path from "path";
-import * as fs from "fs";
-import { randomUUID as uuid } from "crypto";
+import * as os from "node:os";
+import * as path from "node:path";
+import * as fs from "node:fs";
+import { randomUUID as uuid } from "node:crypto";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
 import { Classifier, FileClassification } from "~src/classifier";
 import type { MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { NotificationType } from "~src/notifier";
-import { MockLogger, MockConfig } from "~test/__mocks__";
+import { MockLogger, MockConfig } from "~test/mocks";
 import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 
 // HTML that parseSubtitles can extract one subtitle from
@@ -275,7 +275,7 @@ describe("KtuvitParser error-handling (mocked fetch)", () => {
 
     it("handleMovie: notifies FAILED when movie ID not found (no alternative name)", async () => {
         fetchSpy
-            .mockResolvedValueOnce(makeCookieResponse())    // login
+            .mockResolvedValueOnce(makeCookieResponse()) // login
             .mockResolvedValueOnce(makeSearchResponse([])); // search → no results
 
         await parser.handleMovie(MOVIE);
@@ -289,9 +289,9 @@ describe("KtuvitParser error-handling (mocked fetch)", () => {
 
     it("handleMovie: tries alternative name when movie has sequel number, notifies FAILED if both fail", async () => {
         fetchSpy
-            .mockResolvedValueOnce(makeCookieResponse())       // login
-            .mockResolvedValueOnce(makeSearchResponse([]))     // first search "Frozen 2" → empty
-            .mockResolvedValueOnce(makeSearchResponse([]));    // alternative "Frozen II" → empty
+            .mockResolvedValueOnce(makeCookieResponse()) // login
+            .mockResolvedValueOnce(makeSearchResponse([])) // first search "Frozen 2" → empty
+            .mockResolvedValueOnce(makeSearchResponse([])); // alternative "Frozen II" → empty
 
         await parser.handleMovie(MOVIE_SEQUEL);
 
@@ -307,9 +307,9 @@ describe("KtuvitParser error-handling (mocked fetch)", () => {
 
     it("handleMovie: notifies FAILED when no subtitles found", async () => {
         fetchSpy
-            .mockResolvedValueOnce(makeCookieResponse())                   // login
-            .mockResolvedValueOnce(makeSearchResponse([FROZEN_FILM]))       // search → found
-            .mockResolvedValueOnce(makeResponse(200, {                      // movie subtitle page → empty
+            .mockResolvedValueOnce(makeCookieResponse()) // login
+            .mockResolvedValueOnce(makeSearchResponse([FROZEN_FILM])) // search → found
+            .mockResolvedValueOnce(makeResponse(200, { // movie subtitle page → empty
                 text: jest.fn().mockResolvedValue("<html>no subs</html>")
             } as unknown as Partial<Response>));
 
@@ -329,7 +329,7 @@ describe("KtuvitParser error-handling (mocked fetch)", () => {
             .mockResolvedValueOnce(makeResponse(200, {
                 text: jest.fn().mockResolvedValue(SUBTITLE_HTML)
             } as unknown as Partial<Response>))
-            .mockResolvedValueOnce(makeResponse(200, {    // getDownloadIdentifier → no identifier
+            .mockResolvedValueOnce(makeResponse(200, { // getDownloadIdentifier → no identifier
                 json: jest.fn().mockResolvedValue({ d: "{}" })
             } as unknown as Partial<Response>));
 
@@ -359,7 +359,7 @@ describe("KtuvitParser error-handling (mocked fetch)", () => {
 
     it("handleEpisode: notifies FAILED when series ID not found", async () => {
         fetchSpy
-            .mockResolvedValueOnce(makeCookieResponse())    // login
+            .mockResolvedValueOnce(makeCookieResponse()) // login
             .mockResolvedValueOnce(makeSearchResponse([])); // series search → empty
 
         await parser.handleEpisode(EPISODE);

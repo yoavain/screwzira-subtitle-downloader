@@ -1,8 +1,8 @@
 import type { NotifierInterface } from "../src/notifier";
 import { NotificationType, Notifier } from "../src/notifier";
 import type { LoggerInterface } from "~src/logger";
-import { MockLogger } from "./__mocks__";
-import child_process from "child_process";
+import { MockLogger } from "./mocks";
+import child_process from "node:child_process";
 
 const mockNotify = jest.fn();
 const mockOn = jest.fn((eventName, eventCB) => {

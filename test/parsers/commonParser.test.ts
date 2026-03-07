@@ -2,7 +2,7 @@ import type { ClassifierInterface } from "~src/classifier";
 import { Classifier } from "~src/classifier";
 import type { Subtitle } from "~src/parsers/commonParser";
 import { CommonParser } from "~src/parsers/commonParser";
-import { MockConfig, MockLogger, MockNotifier } from "~test/__mocks__";
+import { MockConfig, MockLogger, MockNotifier } from "~test/mocks";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
 import type { ConfigInterface } from "~src/config";

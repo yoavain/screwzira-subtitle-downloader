@@ -3,7 +3,7 @@ import { FileClassification } from "~src/classifier";
 import { NotificationType } from "~src/notifier";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import type { ParserInterface } from "~src/parsers/parserInterface";
-import { MockNotifier } from "~test/__mocks__";
+import { MockNotifier } from "~test/mocks";
 
 const makeClassifier = (overrides: Partial<ClassifierInterface> = {}): ClassifierInterface => ({
     getSubtitlesSuffix: jest.fn(() => "srt"),

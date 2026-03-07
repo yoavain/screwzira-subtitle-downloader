@@ -1,6 +1,6 @@
 import { applyTimingCorrections } from "~src/sync/timingCorrector";
 import type { SubtitleEntry, MatchEntry, SceneChunk } from "~src/sync/types";
-import { MockLogger } from "~test/__mocks__";
+import { MockLogger } from "~test/mocks";
 
 function makeEntry(i: number, start: number, end: number, text = "text"): SubtitleEntry {
     return { index: i + 1, start, end, text };

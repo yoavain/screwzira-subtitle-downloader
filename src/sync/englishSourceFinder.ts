@@ -1,7 +1,8 @@
-import * as path from "path";
+import * as path from "node:path";
 import type { LoggerInterface } from "~src/logger";
 import type { MkvExtractorInterface } from "~src/sync/mkvExtractor";
 import { isExist } from "~src/fileUtils";
+
 
 export interface EnglishSourceFinderInterface {
     findEnglishSrt: (videoPath: string) => Promise<string | null>;
@@ -10,7 +11,6 @@ export interface EnglishSourceFinderInterface {
 export class EnglishSourceFinder implements EnglishSourceFinderInterface {
     constructor(
         private readonly mkvExtractor: MkvExtractorInterface,
-        private readonly mkvMergePath: string,
         private readonly logger: LoggerInterface
     ) {}
 
@@ -27,11 +27,6 @@ export class EnglishSourceFinder implements EnglishSourceFinderInterface {
         const ext = path.extname(videoPath).toLowerCase();
         if (ext !== ".mkv") {
             this.logger.warn(`Sync: No English source found for non-MKV file ${videoPath}. Skipping sync.`);
-            return null;
-        }
-
-        if (!await isExist(this.mkvMergePath)) {
-            this.logger.warn(`Sync: mkvmerge.exe not found at ${this.mkvMergePath} (broken install?). Skipping sync.`);
             return null;
         }
 

@@ -1,7 +1,9 @@
 import type { MatchEntry, SceneChunk } from "~src/sync/types";
 
 function median(values: number[]): number {
-    if (values.length === 0) return 0;
+    if (values.length === 0) {
+        return 0;
+    }
     const sorted = [...values].sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
     return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
@@ -17,7 +19,9 @@ function buildChunk(matches: MatchEntry[], start: number, end: number): SceneChu
 }
 
 export function detectChunks(matches: MatchEntry[], thresholdMs: number): SceneChunk[] {
-    if (matches.length === 0) return [];
+    if (matches.length === 0) {
+        return [];
+    }
 
     const chunks: SceneChunk[] = [];
     let chunkStart = 0;

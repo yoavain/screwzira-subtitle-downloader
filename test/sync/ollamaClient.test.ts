@@ -1,5 +1,5 @@
 import { OllamaClient } from "~src/sync/ollamaClient";
-import { MockLogger } from "~test/__mocks__";
+import { MockLogger } from "~test/mocks";
 
 const BASE_URL = "http://localhost:11434";
 

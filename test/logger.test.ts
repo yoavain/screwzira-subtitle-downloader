@@ -26,7 +26,6 @@ jest.mock("winston", () => ({
 describe("Test logger", () => {
     it.each(["info", "debug", "verbose", "warn", "error"])("Test logger %s", (level) => {
         const logger = new Logger("mockLogFile");
-        // eslint-disable-next-line security/detect-object-injection
         logger[level]("mock message");
         expect(mockLog).toHaveBeenCalledTimes(1);
         expect(mockLog.mock.calls[0][0]).toEqual(level);

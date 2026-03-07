@@ -1,5 +1,5 @@
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import type { SyncConfig } from "~src/sync/types";
 import type { OllamaClientInterface } from "~src/sync/ollamaClient";
 import type { EnglishSourceFinderInterface } from "~src/sync/englishSourceFinder";
@@ -25,10 +25,14 @@ export class SubtitleSyncer {
 
     async sync(videoPath: string): Promise<void> {
         const ok = await syncPreflightCheck(this.config, this.ollamaClient, this.logger);
-        if (!ok) return;
+        if (!ok) {
+            return;
+        }
 
         const engSrtPath = await this.englishSourceFinder.findEnglishSrt(videoPath);
-        if (!engSrtPath) return;
+        if (!engSrtPath) {
+            return;
+        }
 
         const dir = path.dirname(videoPath);
         const nameNoExt = path.parse(videoPath).name;

@@ -1,10 +1,10 @@
-import * as fs from "fs";
-import * as os from "os";
-import path from "path";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import path from "node:path";
 import type { ConfigInterface } from "~src/config";
 import { Config } from "~src/config";
 import type { LoggerInterface } from "~src/logger";
-import { MockLogger } from "~test/__mocks__";
+import { MockLogger } from "~test/mocks";
 
 const CONFIG_FILE: string = path.resolve(__dirname, "resources", "config", "test-config.json");
 //C:\Dev\_MISC\screwzira-subtitle-downloader\test\resources\config\test-config.json

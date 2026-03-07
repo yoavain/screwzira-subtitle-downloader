@@ -304,6 +304,12 @@ export const TEST_CONFIG = {
 
 
 export const OVERRIDES = [
+    {
+        files: ["**/scripts/**/*"],
+        rules: {
+            "no-console": "off"
+        }
+    }
 ];
 
 // endregion config

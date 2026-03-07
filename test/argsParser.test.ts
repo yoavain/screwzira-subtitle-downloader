@@ -1,4 +1,4 @@
-import * as path from "path";
+import * as path from "node:path";
 import type { ArgsParserInterface } from "~src/argsParser";
 import { ArgsParser } from "~src/argsParser";
 

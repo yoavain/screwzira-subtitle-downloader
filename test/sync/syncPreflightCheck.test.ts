@@ -1,7 +1,7 @@
 import { syncPreflightCheck } from "~src/sync/syncPreflightCheck";
 import type { SyncConfig } from "~src/sync/types";
 import type { OllamaClientInterface } from "~src/sync/ollamaClient";
-import { MockLogger } from "~test/__mocks__";
+import { MockLogger } from "~test/mocks";
 
 function makeMockOllama(reachable: boolean, modelAvailable: boolean): OllamaClientInterface {
     return {

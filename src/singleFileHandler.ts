@@ -3,7 +3,7 @@ import { FileClassification } from "~src/classifier";
 import type { NotifierInterface } from "~src/notifier";
 import { NotificationType } from "~src/notifier";
 import type { ParserInterface } from "~src/parsers/parserInterface";
-import * as path from "path";
+import * as path from "node:path";
 
 export const handleSingleFile = async (
     fullpath: string,

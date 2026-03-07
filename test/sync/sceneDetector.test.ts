@@ -27,7 +27,7 @@ describe("detectChunks", () => {
         const matches: MatchEntry[] = [
             makeMatch(0, 1000),
             makeMatch(1, 1010),
-            makeMatch(2, 2000),  // scene boundary
+            makeMatch(2, 2000), // scene boundary
             makeMatch(3, 2010)
         ];
         const chunks = detectChunks(matches, 300);
@@ -62,7 +62,7 @@ describe("detectChunks", () => {
             makeMatch(0, 1000),
             makeMatch(1, 1000),
             makeMatch(2, 1000),
-            makeMatch(3, 9000)  // outlier within threshold to stay in chunk
+            makeMatch(3, 9000) // outlier within threshold to stay in chunk
         ];
         const chunks = detectChunks(matches, 10000);
         expect(chunks).toHaveLength(1);

@@ -17,7 +17,7 @@ import { OllamaClient } from "~src/sync/ollamaClient";
 import { MkvExtractor } from "~src/sync/mkvExtractor";
 import { EnglishSourceFinder } from "~src/sync/englishSourceFinder";
 import { SubtitleSyncer } from "~src/sync/subtitleSyncer";
-import * as path from "path";
+import * as path from "node:path";
 
 // Make sure the log directory is there
 ensureDirSync(path.resolve(process.env.ProgramData, PROGRAM_NAME));
@@ -49,13 +49,17 @@ const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASS
 
 // Subtitle syncer (used when invoked with "sync" flag)
 const ollamaClient = new OllamaClient(config.getSyncConfig().ollamaBaseUrl, logger);
-const mkvExtractor = new MkvExtractor(argsParser.getMkvMergePath(), argsParser.getMkvExtractPath(), logger);
-const englishSourceFinder = new EnglishSourceFinder(mkvExtractor, argsParser.getMkvMergePath(), logger);
+const mkvExtractor = new MkvExtractor(argsParser.getMkvtoolnixDir(), logger);
+const englishSourceFinder = new EnglishSourceFinder(mkvExtractor, logger);
 const subtitleSyncer = new SubtitleSyncer(config.getSyncConfig(), config.getSubtitlesSuffix(), ollamaClient, englishSourceFinder, logger, notifier);
 
 const embeddedSubtitleChecker = async (p: string): Promise<boolean> => {
-    if (!config.getCheckEmbeddedSubtitles()) return false;
-    if (!p.toLowerCase().endsWith(".mkv")) return false;
+    if (!config.getCheckEmbeddedSubtitles()) {
+        return false;
+    }
+    if (!p.toLowerCase().endsWith(".mkv")) {
+        return false;
+    }
     return mkvExtractor.hasHebrewSubtitleTrack(p);
 };
 
@@ -138,6 +142,7 @@ const main = async () => {
     else {
         notifier.notif("Missing input file", NotificationType.FAILED);
         // tslint:disable-next-line:no-console
+        // eslint-disable-next-line no-console
         console.log(`Usage:${argsParser.getHelp()}`);
     }
 };

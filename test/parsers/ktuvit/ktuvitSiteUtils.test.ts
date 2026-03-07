@@ -1,6 +1,6 @@
 import { parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
-import { readFile } from "fs/promises";
-import * as path from "path";
+import { readFile } from "node:fs/promises";
+import * as path from "node:path";
 import type { Subtitle } from "~src/parsers/commonParser";
 
 

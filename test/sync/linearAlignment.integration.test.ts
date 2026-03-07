@@ -15,13 +15,13 @@
  * parseSrt → detectChunks → applyTimingCorrections with real data.
  */
 
-import * as fs from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { parseSrt } from "~src/sync/subtitleParser";
 import { detectChunks } from "~src/sync/sceneDetector";
 import { applyTimingCorrections } from "~src/sync/timingCorrector";
 import type { MatchEntry, SubtitleEntry } from "~src/sync/types";
-import { MockLogger } from "~test/__mocks__";
+import { MockLogger } from "~test/mocks";
 
 const LINEAR_DIR = path.resolve(__dirname, "../resources/sync/linear");
 const HEB_PATH = path.join(LINEAR_DIR, "The.Office.S01E01.Pilot.720p.h264-CtrlHD.heb.srt");
@@ -29,10 +29,10 @@ const ENG_PATH = path.join(LINEAR_DIR, "The.Office.S01E01.Pilot.720p.h264-CtrlHD
 
 const EXPECTED_HEB_COUNT = 375;
 const EXPECTED_ENG_COUNT = 374;
-const EXPECTED_SHIFT_MS = 2000;    // Hebrew start timestamps are ~2000 ms later than English
-const MATCH_TOLERANCE_MS = 50;     // timestamp must be within 50 ms of expected position
+const EXPECTED_SHIFT_MS = 2000; // Hebrew start timestamps are ~2000 ms later than English
+const MATCH_TOLERANCE_MS = 50; // timestamp must be within 50 ms of expected position
 const CHUNK_THRESHOLD_MS = 300;
-const MAX_EXPECTED_CHUNKS = 5;     // a uniform-offset file should produce very few chunks
+const MAX_EXPECTED_CHUNKS = 5; // a uniform-offset file should produce very few chunks
 // Midpoint-based offsets deviate from EXPECTED_SHIFT_MS when Hebrew and English entry
 // durations differ. ±500 ms covers realistic duration variation in a human translation.
 const OFFSET_TOLERANCE_MS = 500;

@@ -1,5 +1,6 @@
-import { exec } from "child_process";
-import { promisify } from "util";
+import * as path from "node:path";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
 import type { LoggerInterface } from "~src/logger";
 
 const execAsync = promisify(exec);
@@ -25,11 +26,16 @@ export interface MkvExtractorInterface {
 }
 
 export class MkvExtractor implements MkvExtractorInterface {
+    private readonly mkvMergePath: string;
+    private readonly mkvExtractPath: string;
+
     constructor(
-        private readonly mkvMergePath: string,
-        private readonly mkvExtractPath: string,
+        mkvtoolnixDir: string,
         private readonly logger: LoggerInterface
-    ) {}
+    ) {
+        this.mkvMergePath = path.join(mkvtoolnixDir, "mkvmerge.exe");
+        this.mkvExtractPath = path.join(mkvtoolnixDir, "mkvextract.exe");
+    }
 
     async findEnglishSubtitleTrack(mkvPath: string): Promise<{ trackId: number; codec: string } | null> {
         this.logger.debug(`Sync: Identifying tracks in ${mkvPath}`);
@@ -42,7 +48,9 @@ export class MkvExtractor implements MkvExtractorInterface {
             (t.properties.language === "eng" || t.properties.language_ietf?.startsWith("en"))
         );
 
-        if (!track) return null;
+        if (!track) {
+            return null;
+        }
         this.logger.debug(`Sync: Found English subtitle track id=${track.id} codec=${track.codec}`);
         return { trackId: track.id, codec: track.codec };
     }

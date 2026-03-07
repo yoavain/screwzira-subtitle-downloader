@@ -1,11 +1,11 @@
-import * as path from "path";
-import * as os from "os";
-import * as fs from "fs";
-import type * as ChildProcess from "child_process";
-import type * as Util from "util";
+import * as path from "node:path";
+import * as os from "node:os";
+import * as fs from "node:fs";
+import type * as ChildProcess from "node:child_process";
+import type * as Util from "node:util";
 import { MkvExtractor } from "~src/sync/mkvExtractor";
 import { parseSrt } from "~src/sync/subtitleParser";
-import { MockLogger } from "~test/__mocks__";
+import { MockLogger } from "~test/mocks";
 
 // Mock child_process so that promisify picks up the custom async implementation.
 // _asyncFn is the function that execAsync resolves to (via util.promisify.custom).
@@ -50,7 +50,7 @@ describe("MkvExtractor unit tests", () => {
     const logger = new MockLogger();
 
     beforeEach(() => {
-        extractor = new MkvExtractor("/fake/mkvmerge.exe", "/fake/mkvextract.exe", logger);
+        extractor = new MkvExtractor("/fake/mkvtoolnix", logger);
         _asyncFn.mockResolvedValue({ stdout: "", stderr: "" });
     });
 
@@ -170,8 +170,9 @@ describe("MkvExtractor unit tests", () => {
 // --- Integration tests (require dist/mkvtoolnix/ binaries and sample.mkv) ---
 
 const SAMPLE_MKV = path.resolve(__dirname, "../resources/sync/mkvtoolnix/sample.mkv");
-const MKV_MERGE_PATH = path.resolve(__dirname, "../../dist/mkvtoolnix/mkvmerge.exe");
-const MKV_EXTRACT_PATH = path.resolve(__dirname, "../../dist/mkvtoolnix/mkvextract.exe");
+const MKV_TOOLNIX_DIR = path.resolve(__dirname, "../../dist/mkvtoolnix");
+const MKV_MERGE_PATH = path.join(MKV_TOOLNIX_DIR, "mkvmerge.exe");
+const MKV_EXTRACT_PATH = path.join(MKV_TOOLNIX_DIR, "mkvextract.exe");
 
 const binariesExist =
     fs.existsSync(MKV_MERGE_PATH) && fs.existsSync(MKV_EXTRACT_PATH) && fs.existsSync(SAMPLE_MKV);
@@ -187,7 +188,7 @@ describeIntegration("MkvExtractor integration tests (real binaries + sample.mkv)
     const realExecAsync = realPromisify(realChildProcess.exec);
 
     beforeAll(() => {
-        extractor = new MkvExtractor(MKV_MERGE_PATH, MKV_EXTRACT_PATH, logger);
+        extractor = new MkvExtractor(MKV_TOOLNIX_DIR, logger);
         _asyncFn.mockImplementation((cmd: string) => realExecAsync(cmd));
     });
 

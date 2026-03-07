@@ -1,6 +1,6 @@
 import { SubtitleMatcher } from "~src/sync/subtitleMatcher";
 import type { SubtitleEntry } from "~src/sync/types";
-import { MockLogger } from "~test/__mocks__";
+import { MockLogger } from "~test/mocks";
 import { makeOllamaClient } from "~test/sync/helpers";
 
 function makeEntry(index: number, start: number, end: number, text = "line"): SubtitleEntry {
@@ -26,12 +26,12 @@ describe("SubtitleMatcher", () => {
             expect(matches[0]).toEqual({
                 hebrewIndices: [0],
                 englishIndices: [0],
-                offset: (1200 + 2200) / 2 - (1000 + 2000) / 2  // 1700 - 1500 = 200
+                offset: (1200 + 2200) / 2 - (1000 + 2000) / 2 // 1700 - 1500 = 200
             });
             expect(matches[1]).toEqual({
                 hebrewIndices: [1],
                 englishIndices: [1],
-                offset: (3200 + 4200) / 2 - (3000 + 4000) / 2  // 3700 - 3500 = 200
+                offset: (3200 + 4200) / 2 - (3000 + 4000) / 2 // 3700 - 3500 = 200
             });
         });
     });

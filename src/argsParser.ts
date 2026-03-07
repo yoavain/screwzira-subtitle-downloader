@@ -1,4 +1,4 @@
-import * as path from "path";
+import * as path from "node:path";
 
 const SONARR = "sonarr";
 const INPUT = "input";
@@ -12,8 +12,7 @@ export interface ArgsParserInterface {
     isQuiet: () => boolean;
     isSync: () => boolean;
     getSnoreToastPath: () => string;
-    getMkvMergePath: () => string;
-    getMkvExtractPath: () => string;
+    getMkvtoolnixDir: () => string;
     getHelp: () => string;
 }
 
@@ -23,8 +22,7 @@ export class ArgsParser implements ArgsParserInterface {
     private readonly quiet: boolean;
     private readonly sync: boolean;
     private readonly snoreToastPath: string;
-    private readonly mkvMergePath: string;
-    private readonly mkvExtractPath: string;
+    private readonly mkvtoolnixDir: string;
 
     constructor(argv: string[]) {
         if (argv.length >= 2 && (argv[argv.length - 2].endsWith(".exe") || argv[argv.length - 2].endsWith(".js")) && ![SONARR, INPUT, QUIET, SYNC].includes(argv[argv.length - 1])) {
@@ -44,12 +42,9 @@ export class ArgsParser implements ArgsParserInterface {
         }
         const isInstalledExe = argv[0].endsWith("-downloader.exe");
         this.snoreToastPath = isInstalledExe ? path.join(argv[0], "../", "snoretoast-x64.exe") : null;
-        this.mkvMergePath = isInstalledExe
-            ? path.join(path.dirname(argv[0]), "mkvtoolnix", "mkvmerge.exe")
-            : path.join(__dirname, "..", "dist", "mkvtoolnix", "mkvmerge.exe");
-        this.mkvExtractPath = isInstalledExe
-            ? path.join(path.dirname(argv[0]), "mkvtoolnix", "mkvextract.exe")
-            : path.join(__dirname, "..", "dist", "mkvtoolnix", "mkvextract.exe");
+        this.mkvtoolnixDir = isInstalledExe
+            ? path.join(path.dirname(argv[0]), "mkvtoolnix")
+            : path.join(__dirname, "..", "dist", "mkvtoolnix");
     }
 
     public isSonarrMode(): boolean {
@@ -72,12 +67,8 @@ export class ArgsParser implements ArgsParserInterface {
         return this.snoreToastPath;
     }
 
-    public getMkvMergePath(): string {
-        return this.mkvMergePath;
-    }
-
-    public getMkvExtractPath(): string {
-        return this.mkvExtractPath;
+    public getMkvtoolnixDir(): string {
+        return this.mkvtoolnixDir;
     }
 
     public getHelp(): string {

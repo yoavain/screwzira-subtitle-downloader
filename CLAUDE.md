@@ -40,10 +40,12 @@ npx jest -t "pattern"
 
 Instantiates all components and defines the main flow:
 1. Parse CLI args → determine input path (single file or directory, or Sonarr env var)
-2. Check if subtitle already exists for the file
-3. Classify the file (movie vs. TV episode) via `Classifier`
-4. Delegate to `KtuvitParser.handleMovie()` or `handleEpisode()`
-5. Save the downloaded `.srt` file alongside the video
+2. For each video file, delegate to `handleSingleFile` (`src/singleFileHandler.ts`):
+   - Check if Hebrew subtitle already exists on disk
+   - Check for embedded Hebrew subtitles in MKV (if `checkEmbeddedSubtitles` enabled)
+   - Classify the file (movie vs. TV episode) via `Classifier`
+   - Delegate to `KtuvitParser.handleMovie()` or `handleEpisode()`
+3. If `--sync` flag set and download succeeded, run `SubtitleSyncer.sync()` to re-time subtitles
 
 Runtime data lives in `%ProgramData%\Ktuvit-Downloader\` (config JSON, log file, TV show ID cache).
 
@@ -66,12 +68,29 @@ Similarity matching uses weighted word scoring (`WORD_WEIGHTS`) to pick the best
 
 | File | Purpose |
 |------|---------|
-| `src/argsParser.ts` | CLI arg parsing; supports `input <path>`, `sonarr`, `quiet` modes |
-| `src/config.ts` | Reads/writes JSON config; supports `logLevel`, `extensions`, `replacePairs`, `languageCode` |
+| `src/argsParser.ts` | CLI arg parsing; supports `input <path>`, `sonarr`, `quiet`, `sync` modes; resolves `mkvmerge`/`mkvextract` paths |
+| `src/config.ts` | Reads/writes JSON config; supports `logLevel`, `extensions`, `replacePairs`, `languageCode`, `checkEmbeddedSubtitles`, and all sync fields (`syncEnabled`, `ollamaBaseUrl`, `ollamaModel`, `syncChunkThresholdSeconds`, `syncBatchSize`) |
+| `src/singleFileHandler.ts` | Core single-file logic: subtitle-exists check → embedded-subtitle check → classify → parser dispatch |
 | `src/notifier.ts` | Windows toast notifications via SnoreToast (bundled in `dist/`) |
 | `src/logger.ts` | Winston-based logger writing to ProgramData log file |
 | `src/parsers/ktuvit/tvShowIdCache.ts` | Flat-cache persistence for TV series IDs (avoids repeated lookups) |
 | `src/parsers/ktuvit/ktuvitSiteUtils.ts` | HTML/JSON response parsing for Ktuvit.me API |
+
+#### Sync pipeline (`src/sync/`)
+
+| File | Purpose |
+|------|---------|
+| `src/sync/types.ts` | `SubtitleEntry`, `MatchEntry`, `SceneChunk`, `SyncConfig` interfaces |
+| `src/sync/subtitleParser.ts` | `parseSrt()`, `stripFormattingTags()` |
+| `src/sync/subtitleWriter.ts` | `writeSrt()`, `formatTimestamp()` |
+| `src/sync/ollamaClient.ts` | `OllamaClient` — fetch wrapper for Ollama `/api/tags`, `/api/show`, `/api/chat` |
+| `src/sync/syncPreflightCheck.ts` | Validates `syncEnabled`, URL, Ollama reachability, and model availability |
+| `src/sync/mkvExtractor.ts` | `MkvExtractor` — runs `mkvmerge -J` and `mkvextract`; used for both embedded Hebrew detection and English source extraction |
+| `src/sync/englishSourceFinder.ts` | Finds `.eng.srt` on disk or extracts English subtitle stream from MKV |
+| `src/sync/subtitleMatcher.ts` | LLM batch matching (Hebrew ↔ English) via Ollama |
+| `src/sync/sceneDetector.ts` | Groups match pairs into scene chunks by offset-delta threshold |
+| `src/sync/timingCorrector.ts` | Applies per-chunk offsets; handles 1:1, 1:2 span, 2:1 merge, and unmatched cases |
+| `src/sync/subtitleSyncer.ts` | `SubtitleSyncer` — orchestrates the full sync pipeline |
 
 ### Path Aliases
 
@@ -95,6 +114,28 @@ TypeScript and Jest both resolve these aliases:
 
 The hook (`.husky/pre-commit`) runs `lint-staged` (eslint on `.ts`/`.js`, prettier on `.json`) and rebuilds the C# launcher if it changed.
 
+## Scripts
+
+One-off and utility scripts live in `scripts/`. Conventions:
+
+- Written in **TypeScript**
+- Begin with a comment block describing what the script does and how to run it
+- Run from the **project root** using:
+  ```bash
+  node -r ts-node/register/transpile-only ./scripts/<script-name>.ts
+  ```
+
+### Conventions for scripts using mkvtoolnix binaries
+
+- Scripts must use **relative imports** (e.g. `../src/...`) — never `~src/` path aliases. `ts-node` does not resolve tsconfig path aliases.
+- Scripts must **not** reinvent binary-calling logic inline. Any logic that shells out to `mkvmerge` or `mkvextract` must live in `src/` (e.g. `src/sync/mkvExtractor.ts`) and be imported.
+- Use a general `MKVTOOLNIX_DIR` constant for the directory, then derive specific binary path constants from it:
+  ```ts
+  const MKVTOOLNIX_DIR  = path.join(__dirname, "..", "resources", "mkvtoolnix");
+  const MKVMERGE_PATH   = path.join(MKVTOOLNIX_DIR, "mkvmerge.exe");
+  const MKVEXTRACT_PATH = path.join(MKVTOOLNIX_DIR, "mkvextract.exe");
+  ```
+
 ## Flow Charts
 
 Application flow is documented in [`docs/flow-charts.md`](docs/flow-charts.md) as Mermaid diagrams. **After any change that affects control flow, verify the diagrams are still accurate and update them if needed.**
@@ -102,3 +143,5 @@ Application flow is documented in [`docs/flow-charts.md`](docs/flow-charts.md) a
 ## Test Structure
 
 Tests live in `test/` and mirror `src/`. Mocks are in `test/__mocks__/` and provide stub implementations of `logger`, `notifier`, `config`, and the main `index` module. Coverage is collected for all `src/**/*.ts` except `src/index.ts`.
+
+Sync tests live in `test/sync/` and cover all modules in `src/sync/`. Integration tests (`*.integration.test.ts`) require a live Ollama instance and are excluded from the default CI run.

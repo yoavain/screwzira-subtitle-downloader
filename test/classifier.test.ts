@@ -3,7 +3,7 @@ import { Classifier, DIMENSION_MARK, ENCODING_MARK, RIP_MARK, SPECIAL_EDITION_MA
 import type { ConfigInterface } from "~src/config";
 import { Config } from "~src/config";
 import type { LoggerInterface } from "~src/logger";
-import { MockLogger, MockConfig } from "./__mocks__";
+import { MockLogger, MockConfig } from "./mocks";
 
 jest.mock("~src/fileUtils");
 import { isExist } from "~src/fileUtils";

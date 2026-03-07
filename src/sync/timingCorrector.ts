@@ -37,7 +37,9 @@ export function applyTimingCorrections(
 
         if (hebrewIndices.length === 1 && englishIndices.length > 1) {
             const engSpan = englishIndices.map((idx) => engEntries[idx]).filter(Boolean);
-            if (!engSpan.length) return { ...heb };
+            if (!engSpan.length) {
+                return { ...heb };
+            }
             const newStart = Math.min(...engSpan.map((e) => e.start));
             const newEnd = Math.max(...engSpan.map((e) => e.end));
             return { ...heb, start: newStart, end: newEnd };
@@ -45,7 +47,9 @@ export function applyTimingCorrections(
 
         if (hebrewIndices.length === 2 && englishIndices.length === 1) {
             const eng = engEntries[englishIndices[0]];
-            if (!eng) return { ...heb };
+            if (!eng) {
+                return { ...heb };
+            }
             const engMidpoint = Math.floor((eng.start + eng.end) / 2);
             const positionInMerge = hebrewIndices.indexOf(i);
             if (positionInMerge === 0) {

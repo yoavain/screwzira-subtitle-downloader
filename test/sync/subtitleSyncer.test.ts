@@ -1,11 +1,11 @@
-import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
 import { SubtitleSyncer } from "~src/sync/subtitleSyncer";
 import type { SyncConfig } from "~src/sync/types";
 import type { EnglishSourceFinderInterface } from "~src/sync/englishSourceFinder";
 import { NotificationType } from "~src/notifier";
-import { MockLogger, MockNotifier } from "~test/__mocks__";
+import { MockLogger, MockNotifier } from "~test/mocks";
 import { makeOllamaClient } from "~test/sync/helpers";
 
 jest.mock("~src/sync/syncPreflightCheck");

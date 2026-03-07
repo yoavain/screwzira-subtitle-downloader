@@ -70,7 +70,9 @@ export class CommonParser {
                 return await fetch(url, { ...init, signal: AbortSignal.timeout(8_000) });
             }
             catch (e) {
-                if (attempt === retries) throw e;
+                if (attempt === retries) {
+                    throw e;
+                }
                 await new Promise((r) => setTimeout(r, 1_000 * (attempt + 1)));
             }
         }

@@ -24,7 +24,9 @@ export class SubtitleMatcher {
             const hebBatch = hebEntries.slice(hebStart, hebStart + this.batchSize);
             const engBatch = engEntries.slice(engStart, engStart + this.batchSize);
 
-            if (hebBatch.length === 0 || engBatch.length === 0) break;
+            if (hebBatch.length === 0 || engBatch.length === 0) {
+                break;
+            }
 
             const batchMatches = await this.matchBatch(hebBatch, engBatch, hebStart, engStart);
             allMatches.push(...batchMatches);
@@ -83,7 +85,9 @@ export class SubtitleMatcher {
     ): number {
         const hebSpan = hebRelIndices.map((i) => hebBatch[i]).filter(Boolean);
         const engSpan = engRelIndices.map((i) => engBatch[i]).filter(Boolean);
-        if (!hebSpan.length || !engSpan.length) return 0;
+        if (!hebSpan.length || !engSpan.length) {
+            return 0;
+        }
         const hebMidpoint = (Math.min(...hebSpan.map((e) => e.start)) + Math.max(...hebSpan.map((e) => e.end))) / 2;
         const engMidpoint = (Math.min(...engSpan.map((e) => e.start)) + Math.max(...engSpan.map((e) => e.end))) / 2;
         return engMidpoint - hebMidpoint;
@@ -110,7 +114,9 @@ Respond ONLY with valid JSON. Format: [{"heb": [number], "eng": [number]}]`;
 
     private parseResponse(response: string): { heb: number[]; eng: number[] }[] {
         const match = response.match(/\[[\s\S]*\]/);
-        if (!match) throw new Error("No JSON array found in LLM response");
+        if (!match) {
+            throw new Error("No JSON array found in LLM response");
+        }
         return JSON.parse(match[0]) as { heb: number[]; eng: number[] }[];
     }
 }

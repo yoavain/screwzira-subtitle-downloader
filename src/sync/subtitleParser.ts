@@ -13,14 +13,20 @@ export function parseSrt(content: string): SubtitleEntry[] {
 
     for (const block of blocks) {
         const lines = block.trim().split("\n");
-        if (lines.length < 2) continue;
+        if (lines.length < 2) {
+            continue;
+        }
 
         const index = parseInt(lines[0], 10);
-        if (isNaN(index)) continue;
+        if (isNaN(index)) {
+            continue;
+        }
 
         const timeLine = lines[1];
         const arrowIdx = timeLine.indexOf(" --> ");
-        if (arrowIdx < 0) continue;
+        if (arrowIdx < 0) {
+            continue;
+        }
 
         const startStr = timeLine.slice(0, arrowIdx).trim();
         const endStr = timeLine.slice(arrowIdx + 5).trim();
