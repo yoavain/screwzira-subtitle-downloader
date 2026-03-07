@@ -23,6 +23,7 @@ export interface MkvExtractorInterface {
     findEnglishSubtitleTrack: (mkvPath: string) => Promise<{ trackId: number; codec: string } | null>;
     extractSubtitle: (mkvPath: string, trackId: number, outPath: string) => Promise<void>;
     hasHebrewSubtitleTrack: (mkvPath: string) => Promise<boolean>;
+    hasEnglishSubtitleTrack: (mkvPath: string) => Promise<boolean>;
 }
 
 export class MkvExtractor implements MkvExtractorInterface {
@@ -70,6 +71,16 @@ export class MkvExtractor implements MkvExtractorInterface {
                 TEXT_CODECS.includes(t.codec) &&
                 (t.properties.language === "heb" || t.properties.language_ietf?.startsWith("he"))
             );
+        }
+        catch (e) {
+            this.logger.warn(`Sync: Could not inspect MKV tracks for ${mkvPath}: ${(e as Error).message}`);
+            return false;
+        }
+    }
+
+    async hasEnglishSubtitleTrack(mkvPath: string): Promise<boolean> {
+        try {
+            return (await this.findEnglishSubtitleTrack(mkvPath)) !== null;
         }
         catch (e) {
             this.logger.warn(`Sync: Could not inspect MKV tracks for ${mkvPath}: ${(e as Error).message}`);

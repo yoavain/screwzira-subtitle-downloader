@@ -17,6 +17,7 @@ function makeMockMkvExtractor(overrides: Partial<MkvExtractorInterface> = {}): M
         findEnglishSubtitleTrack: jest.fn().mockResolvedValue({ trackId: 1, codec: "S_TEXT/UTF8" }),
         extractSubtitle: jest.fn().mockResolvedValue(undefined),
         hasHebrewSubtitleTrack: jest.fn().mockResolvedValue(false),
+        hasEnglishSubtitleTrack: jest.fn().mockResolvedValue(true),
         ...overrides
     };
 }
