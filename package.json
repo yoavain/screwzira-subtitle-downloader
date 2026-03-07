@@ -40,8 +40,8 @@
         "winston": "3.19.0"
     },
     "devDependencies": {
-        "@eslint/compat": "2.0.2",
-        "@eslint/eslintrc": "3.3.4",
+        "@eslint/compat": "2.0.3",
+        "@eslint/eslintrc": "3.3.5",
         "@eslint/js": "9.39.3",
         "@jest/types": "30.2.0",
         "@tsconfig/node22": "22.0.2",
@@ -58,9 +58,11 @@
         "eslint": "9.39.3",
         "eslint-import-resolver-typescript": "4.4.4",
         "eslint-plugin-import": "2.32.0",
+        "eslint-plugin-jasmine": "4.2.2",
         "eslint-plugin-jest": "29.15.0",
         "eslint-plugin-n": "17.24.0",
         "eslint-plugin-security": "4.0.0",
+        "eslint-plugin-unicorn": "63.0.0",
         "globals": "17.4.0",
         "husky": "9.1.7",
         "jest": "30.2.0",
@@ -73,6 +75,7 @@
         "ts-loader": "9.5.4",
         "ts-node": "10.9.2",
         "typescript": "5.9.3",
+        "typescript-eslint": "8.56.1",
         "webpack": "5.105.4",
         "webpack-cli": "6.0.1"
     },

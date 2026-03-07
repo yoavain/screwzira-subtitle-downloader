@@ -32,7 +32,12 @@ ktuvit-downloader.exe input <video-file-full-path> quiet
   
 Sonarr mode (input file path is taken from environment variable: SONARR_EPISODE_FILE_PATH):
 ```
-ktuvit-downloader.exe input sonarr  
+ktuvit-downloader.exe input sonarr
+```
+
+Sync mode (re-time downloaded Hebrew subtitles against English source using Ollama LLM):
+```
+ktuvit-downloader.exe input <video-file-full-path> sync
 ```
 
 <details><summary>Usage (legacy)</summary>
@@ -58,17 +63,24 @@ Arguments should be: sonarr quiet
 
 <details><summary>Advanced configuration</summary>
 <p>
-Configuration json file is located under the %ProgramData%\Ktuvit-Downloader folder.<br>  
+Configuration json file is located under the %ProgramData%\Ktuvit-Downloader folder.<br>
  * You can change the log level<br>
- * You can configure replacement pair (useful for series name mismatch)<br>
- 
+ * You can configure replacement pairs (useful for series name mismatch)<br>
+ * You can enable subtitle sync (re-timing via Ollama LLM)<br>
+
  example:
  ```json
 {
 	"logLevel": "verbose",
 	"replacePairs": {
 		"The Handmaids Tale": "The Handmaid's Tale"
-	}
+	},
+	"checkEmbeddedSubtitles": false,
+	"syncEnabled": false,
+	"ollamaBaseUrl": "http://localhost:11434",
+	"ollamaModel": "translategemma:12b",
+	"syncBatchSize": 20,
+	"syncChunkThresholdSeconds": 0.3
 }
 
 ```
