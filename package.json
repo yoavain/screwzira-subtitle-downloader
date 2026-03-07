@@ -37,7 +37,7 @@
     "dependencies": {
         "flat-cache": "6.1.20",
         "node-notifier": "10.0.1",
-        "winston": "3.17.0"
+        "winston": "3.19.0"
     },
     "devDependencies": {
         "@eslint/compat": "1.4.1",
