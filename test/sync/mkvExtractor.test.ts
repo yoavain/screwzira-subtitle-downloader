@@ -37,6 +37,7 @@ function makeTrack(overrides: {
         type,
         codec,
         properties: {
+            codec_id: codec,
             ...(language !== undefined ? { language } : {}),
             ...(language_ietf !== undefined ? { language_ietf } : {})
         }
@@ -164,6 +165,49 @@ describe("MkvExtractor unit tests", () => {
             expect(cmd).toContain("2:");
             expect(cmd).toContain("out.srt");
         });
+    });
+});
+
+// --- Fixture-based tests (real mkvmerge JSON, no binaries needed) ---
+
+const FIXTURE_PATH = path.resolve(__dirname, "../resources/sync/mkvtoolnix/mkvmerge-output.json");
+const fixtureArray = JSON.parse(fs.readFileSync(FIXTURE_PATH, "utf-8")) as object[];
+
+describe("MkvExtractor with real mkvmerge-output.json fixture", () => {
+    let extractor: MkvExtractor;
+    const logger = new MockLogger();
+
+    beforeEach(() => {
+        extractor = new MkvExtractor("/fake/mkvtoolnix", logger);
+        _asyncFn.mockResolvedValue({
+            stdout: JSON.stringify({ tracks: fixtureArray }),
+            stderr: ""
+        });
+    });
+
+    it("findEnglishSubtitleTrack returns non-null", async () => {
+        const result = await extractor.findEnglishSubtitleTrack("fake.mkv");
+        expect(result).not.toBeNull();
+    });
+
+    it("findEnglishSubtitleTrack returns trackId=2 (first English subtitle)", async () => {
+        const result = await extractor.findEnglishSubtitleTrack("fake.mkv");
+        expect(result!.trackId).toBe(2);
+    });
+
+    it("findEnglishSubtitleTrack returns codec=SubRip/SRT", async () => {
+        const result = await extractor.findEnglishSubtitleTrack("fake.mkv");
+        expect(result!.codec).toBe("SubRip/SRT");
+    });
+
+    it("hasEnglishSubtitleTrack returns true", async () => {
+        const result = await extractor.hasEnglishSubtitleTrack("fake.mkv");
+        expect(result).toBe(true);
+    });
+
+    it("hasHebrewSubtitleTrack returns true", async () => {
+        const result = await extractor.hasHebrewSubtitleTrack("fake.mkv");
+        expect(result).toBe(true);
     });
 });
 

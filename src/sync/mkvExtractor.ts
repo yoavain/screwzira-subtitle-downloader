@@ -10,6 +10,7 @@ interface MkvTrack {
     type: string;
     codec: string;
     properties: {
+        codec_id?: string;
         language?: string;
         language_ietf?: string;
         default_track?: boolean;
@@ -45,7 +46,7 @@ export class MkvExtractor implements MkvExtractorInterface {
 
         const track = data.tracks.find((t) =>
             t.type === "subtitles" &&
-            TEXT_CODECS.includes(t.codec) &&
+            TEXT_CODECS.includes(t.properties.codec_id ?? "") &&
             (t.properties.language === "eng" || t.properties.language_ietf?.startsWith("en"))
         );
 
@@ -68,7 +69,7 @@ export class MkvExtractor implements MkvExtractorInterface {
             const data = JSON.parse(stdout) as { tracks: MkvTrack[] };
             return data.tracks.some((t) =>
                 t.type === "subtitles" &&
-                TEXT_CODECS.includes(t.codec) &&
+                TEXT_CODECS.includes(t.properties.codec_id ?? "") &&
                 (t.properties.language === "heb" || t.properties.language_ietf?.startsWith("he"))
             );
         }
