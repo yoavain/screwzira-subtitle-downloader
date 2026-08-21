@@ -1,9 +1,22 @@
 import type { LoggerInterface } from "~src/logger";
 import { isExistSync, readJsonSync, writeJsonSync } from "~src/fileUtils";
-import type { SyncConfig } from "~src/sync/types";
 
 interface ReplacePairsInterface {
     [key: string]: string;
+}
+
+/**
+ * Sync knobs. `syncEnabled` is deliberately absent: Flow B is entered by choosing
+ * "Sync subtitle" on a .srt, which is both the request and the consent.
+ */
+export interface SyncConfig {
+    referenceLanguages: string[];
+    splitPenaltyMs: number;
+    maxOffsetMs: number;
+    minSegmentEntries: number;
+    minConfidence: number;
+    ollamaBaseUrl: string;
+    syncEmbeddingModel: string;
 }
 
 interface ConfigurationInterface {
@@ -11,11 +24,13 @@ interface ConfigurationInterface {
     extensions: string[];
     replacePairs: ReplacePairsInterface;
     languageCode: string;
-    syncEnabled: boolean;
+    referenceLanguages: string[];
+    splitPenaltyMs: number;
+    maxOffsetMs: number;
+    minSegmentEntries: number;
+    minConfidence: number;
     ollamaBaseUrl: string;
-    ollamaModel: string;
-    syncChunkThresholdSeconds: number;
-    syncBatchSize: number;
+    syncEmbeddingModel: string;
     checkEmbeddedSubtitles: boolean;
 }
 
@@ -25,11 +40,13 @@ const defaultConf: ConfigurationInterface = {
     extensions: defaultExtensions,
     replacePairs: {},
     languageCode: "Hebrew",
-    syncEnabled: false,
+    referenceLanguages: ["fr", "en"],
+    splitPenaltyMs: 7000,
+    maxOffsetMs: 180_000,
+    minSegmentEntries: 3,
+    minConfidence: 0.25,
     ollamaBaseUrl: "",
-    ollamaModel: "translategemma:12b",
-    syncChunkThresholdSeconds: 0.3,
-    syncBatchSize: 20,
+    syncEmbeddingModel: "qwen3-embedding:0.6b",
     checkEmbeddedSubtitles: false
 };
 
@@ -49,11 +66,7 @@ export class Config implements ConfigInterface {
     private readonly replacePairs: ReplacePairsInterface;
     private readonly extensions: string[];
     private readonly languageCode: string;
-    private readonly syncEnabled: boolean;
-    private readonly ollamaBaseUrl: string;
-    private readonly ollamaModel: string;
-    private readonly syncChunkThresholdSeconds: number;
-    private readonly syncBatchSize: number;
+    private readonly syncConfig: SyncConfig;
     private readonly checkEmbeddedSubtitles: boolean;
 
     constructor(confFile: string, logger: LoggerInterface) {
@@ -76,11 +89,15 @@ export class Config implements ConfigInterface {
             ? Object.freeze(Object.fromEntries(Object.entries(conf.replacePairs).map(([k, v]) => [k.toLowerCase(), v])))
             : Object.freeze({});
         this.languageCode = conf?.languageCode ?? "Hebrew";
-        this.syncEnabled = conf?.syncEnabled ?? false;
-        this.ollamaBaseUrl = conf?.ollamaBaseUrl ?? "";
-        this.ollamaModel = conf?.ollamaModel ?? "translategemma:12b";
-        this.syncChunkThresholdSeconds = conf?.syncChunkThresholdSeconds ?? 0.3;
-        this.syncBatchSize = conf?.syncBatchSize ?? 20;
+        this.syncConfig = {
+            referenceLanguages: conf?.referenceLanguages ?? defaultConf.referenceLanguages,
+            splitPenaltyMs: conf?.splitPenaltyMs ?? defaultConf.splitPenaltyMs,
+            maxOffsetMs: conf?.maxOffsetMs ?? defaultConf.maxOffsetMs,
+            minSegmentEntries: conf?.minSegmentEntries ?? defaultConf.minSegmentEntries,
+            minConfidence: conf?.minConfidence ?? defaultConf.minConfidence,
+            ollamaBaseUrl: conf?.ollamaBaseUrl ?? defaultConf.ollamaBaseUrl,
+            syncEmbeddingModel: conf?.syncEmbeddingModel ?? defaultConf.syncEmbeddingModel
+        };
         this.checkEmbeddedSubtitles = conf?.checkEmbeddedSubtitles ?? false;
         this.logger.debug(
             `Replace pairs (${Object.keys(this.replacePairs).length}): ${Object.keys(this.replacePairs)
@@ -115,13 +132,7 @@ export class Config implements ConfigInterface {
     }
 
     public getSyncConfig(): SyncConfig {
-        return {
-            syncEnabled: this.syncEnabled,
-            ollamaBaseUrl: this.ollamaBaseUrl,
-            ollamaModel: this.ollamaModel,
-            syncChunkThresholdSeconds: this.syncChunkThresholdSeconds,
-            syncBatchSize: this.syncBatchSize
-        };
+        return this.syncConfig;
     }
 
     public getCheckEmbeddedSubtitles(): boolean {

@@ -77,7 +77,7 @@ export class ArgsParser implements ArgsParserInterface {
             `\t${INPUT}\tinput file`,
             `\t${SONARR}\tsonnar mode (input is taken from ENV VAR ${SONARR_EPISODE_FILE_PATH})`,
             `\t${QUIET}\tquiet mode (no notifications)`,
-            `\t${SYNC}\tsync mode (re-time Hebrew subtitles against English source)\n`
+            `\t${SYNC}\tsync mode — input is a .srt to re-time against a French or English reference\n`
         ].join("\n");
     }
 

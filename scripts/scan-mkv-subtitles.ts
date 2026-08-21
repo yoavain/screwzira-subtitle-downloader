@@ -85,8 +85,8 @@ async function main() {
             const nameNoExt = filename.slice(0, -4);
 
             const [embeddedHebrew, embeddedEnglish, externalHebrew, externalEnglish] = await Promise.all([
-                mkvExtractor.hasHebrewSubtitleTrack(fullPath),
-                mkvExtractor.hasEnglishSubtitleTrack(fullPath),
+                mkvExtractor.hasSubtitleTrack(fullPath, ["he"]),
+                mkvExtractor.hasSubtitleTrack(fullPath, ["en"]),
                 isExist(path.join(folder, nameNoExt + ".heb.srt")),
                 isExist(path.join(folder, nameNoExt + ".eng.srt"))
             ]);

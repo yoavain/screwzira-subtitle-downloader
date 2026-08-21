@@ -2,223 +2,175 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { SubtitleSyncer } from "~src/sync/subtitleSyncer";
-import type { SyncConfig } from "~src/sync/types";
-import type { EnglishSourceFinderInterface } from "~src/sync/englishSourceFinder";
+import { GateFailure } from "~src/sync/syncGates";
+import type { ReferenceSourceFinderInterface, ReferenceSource } from "~src/sync/referenceSourceFinder";
+import { parseSrt } from "~src/sync/subtitleParser";
+import { writeSrt } from "~src/sync/subtitleWriter";
+import type { SubtitleEntry } from "~src/sync/types";
+import { MockLogger } from "~test/mocks";
 import { NotificationType } from "~src/notifier";
-import { MockLogger, MockNotifier } from "~test/mocks";
-import { makeOllamaClient } from "~test/sync/helpers";
 
-jest.mock("~src/sync/syncPreflightCheck");
+const logger = new MockLogger();
 
-import { syncPreflightCheck } from "~src/sync/syncPreflightCheck";
-const mockPreflight = syncPreflightCheck as jest.Mock;
-
-// SRT fixtures
-const ENG_SRT = `\
-1
-00:00:01,000 --> 00:00:02,000
-Hello
-
-2
-00:00:03,000 --> 00:00:04,000
-World
-
-3
-00:00:05,000 --> 00:00:06,000
-Test
-`;
-
-const HEB_SRT = `\
-1
-00:00:01,200 --> 00:00:02,200
-שלום
-
-2
-00:00:03,200 --> 00:00:04,200
-עולם
-
-3
-00:00:05,200 --> 00:00:06,200
-בדיקה
-`;
-
-const SYNC_CONFIG: SyncConfig = {
-    syncEnabled: true,
-    ollamaBaseUrl: "http://localhost:11434",
-    ollamaModel: "test-model",
-    syncChunkThresholdSeconds: 0.3,
-    syncBatchSize: 5
-};
-
-function makeEnglishFinder(result: string | null): EnglishSourceFinderInterface {
-    return { findEnglishSrt: jest.fn().mockResolvedValue(result) };
+function makeNotifier() {
+    return { notif: jest.fn() };
 }
 
-describe("SubtitleSyncer", () => {
-    const logger = new MockLogger();
+function finderReturning(source: ReferenceSource | null): ReferenceSourceFinderInterface {
+    return { find: jest.fn().mockResolvedValue(source) };
+}
 
-    describe("returns early", () => {
-        it("when preflight check fails", async () => {
-            mockPreflight.mockResolvedValue(false);
-            const finder = makeEnglishFinder("/some/path.eng.srt");
-            const ollama = makeOllamaClient();
-            const notifier = new MockNotifier();
-            jest.spyOn(notifier, "notif");
+/** Evenly spaced dialogue, so the timing fingerprint is unambiguous. */
+function makeEntries(count: number, offsetMs = 0): SubtitleEntry[] {
+    return Array.from({ length: count }, (_, i) => ({
+        index: i + 1,
+        start: 1000 + i * 4000 + offsetMs,
+        end: 3000 + i * 4000 + offsetMs,
+        text: `line ${i + 1}`
+    }));
+}
 
-            const syncer = new SubtitleSyncer(SYNC_CONFIG, "heb.srt", ollama, finder, logger, notifier);
-            await syncer.sync("/fake/video.mkv");
+let tmpDir: string;
 
-            expect(finder.findEnglishSrt).not.toHaveBeenCalled();
-            expect(ollama.chat).not.toHaveBeenCalled();
-            expect(notifier.notif).not.toHaveBeenCalled();
-        });
+beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "syncer-"));
+});
 
-        it("when findEnglishSrt returns null", async () => {
-            mockPreflight.mockResolvedValue(true);
-            const finder = makeEnglishFinder(null);
-            const ollama = makeOllamaClient();
-            const notifier = new MockNotifier();
-            jest.spyOn(notifier, "notif");
+afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+});
 
-            const syncer = new SubtitleSyncer(SYNC_CONFIG, "heb.srt", ollama, finder, logger, notifier);
-            await syncer.sync("/fake/video.mkv");
+function write(name: string, entries: SubtitleEntry[]): string {
+    const full = path.join(tmpDir, name);
+    fs.writeFileSync(full, writeSrt(entries), "utf-8");
+    return full;
+}
 
-            expect(ollama.chat).not.toHaveBeenCalled();
-            expect(notifier.notif).not.toHaveBeenCalled();
-        });
+describe("SubtitleSyncer — hard gates notify and stop", () => {
+    it("G2: unreadable target", async () => {
+        const notifier = makeNotifier();
+        const syncer = new SubtitleSyncer(finderReturning(null), logger, notifier);
 
-        it("when Hebrew SRT file is not found on disk", async () => {
-            mockPreflight.mockResolvedValue(true);
-            const finder = makeEnglishFinder("/nonexistent/path.eng.srt");
-            const ollama = makeOllamaClient();
-            const notifier = new MockNotifier();
-            jest.spyOn(notifier, "notif");
+        const outcome = await syncer.sync(path.join(tmpDir, "missing.srt"));
 
-            const syncer = new SubtitleSyncer(SYNC_CONFIG, "heb.srt", ollama, finder, logger, notifier);
-            await syncer.sync("/nonexistent/video.mkv");
-
-            expect(ollama.chat).not.toHaveBeenCalled();
-            expect(notifier.notif).not.toHaveBeenCalled();
-        });
-
-        it("when both SRT files are empty", async () => {
-            const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "ktuvit-syncer-test-"));
-            try {
-                const engPath = path.join(tmpDir, "video.eng.srt");
-                const hebPath = path.join(tmpDir, "video.heb.srt");
-                fs.writeFileSync(engPath, "");
-                fs.writeFileSync(hebPath, "");
-
-                mockPreflight.mockResolvedValue(true);
-                const finder = makeEnglishFinder(engPath);
-                const ollama = makeOllamaClient();
-                const notifier = new MockNotifier();
-                const syncer = new SubtitleSyncer(SYNC_CONFIG, "heb.srt", ollama, finder, logger, notifier);
-                await syncer.sync(path.join(tmpDir, "video.mkv"));
-
-                expect(ollama.chat).not.toHaveBeenCalled();
-                expect(notifier.notif).not.toHaveBeenCalled();
-            }
-            finally {
-                fs.rmSync(tmpDir, { recursive: true, force: true });
-            }
-        });
-
-        it("when LLM returns no matches", async () => {
-            const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "ktuvit-syncer-test-"));
-            try {
-                const engPath = path.join(tmpDir, "video.eng.srt");
-                const hebPath = path.join(tmpDir, "video.heb.srt");
-                fs.writeFileSync(engPath, ENG_SRT);
-                fs.writeFileSync(hebPath, HEB_SRT);
-
-                mockPreflight.mockResolvedValue(true);
-                const finder = makeEnglishFinder(engPath);
-                const ollama = makeOllamaClient(() => Promise.resolve("[]"));
-                const notifier = new MockNotifier();
-                const syncer = new SubtitleSyncer(SYNC_CONFIG, "heb.srt", ollama, finder, logger, notifier);
-                await syncer.sync(path.join(tmpDir, "video.mkv"));
-
-                expect(notifier.notif).not.toHaveBeenCalled();
-                expect(fs.existsSync(`${hebPath}.bak`)).toBe(false);
-            }
-            finally {
-                fs.rmSync(tmpDir, { recursive: true, force: true });
-            }
-        });
+        expect(outcome.ok).toBe(false);
+        expect(outcome.failure).toBe(GateFailure.TARGET_UNREADABLE);
+        expect(notifier.notif).toHaveBeenCalledWith(expect.any(String), NotificationType.FAILED);
     });
 
-    describe("happy path", () => {
-        it("writes corrected .srt, creates .bak, and calls notifier", async () => {
-            const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "ktuvit-syncer-test-"));
-            try {
-                const engPath = path.join(tmpDir, "video.eng.srt");
-                const hebPath = path.join(tmpDir, "video.heb.srt");
-                fs.writeFileSync(engPath, ENG_SRT);
-                fs.writeFileSync(hebPath, HEB_SRT);
+    it("G2: empty target", async () => {
+        const notifier = makeNotifier();
+        const target = path.join(tmpDir, "empty.srt");
+        fs.writeFileSync(target, "");
 
-                // LLM returns 1:1 matches for all 3 entries
-                const llmResponse = JSON.stringify([
-                    { heb: [0], eng: [0] },
-                    { heb: [1], eng: [1] },
-                    { heb: [2], eng: [2] }
-                ]);
-                mockPreflight.mockResolvedValue(true);
-                const finder = makeEnglishFinder(engPath);
-                const ollama = makeOllamaClient(() => Promise.resolve(llmResponse));
-                const notifier = new MockNotifier();
-                const syncer = new SubtitleSyncer(SYNC_CONFIG, "heb.srt", ollama, finder, logger, notifier);
-                await syncer.sync(path.join(tmpDir, "video.mkv"));
+        const outcome = await new SubtitleSyncer(finderReturning(null), logger, notifier).sync(target);
 
-                expect(fs.existsSync(hebPath)).toBe(true);
-                expect(fs.existsSync(`${hebPath}.bak`)).toBe(true);
-                expect(notifier.notif).toHaveBeenCalledWith(
-                    expect.any(String),
-                    NotificationType.DOWNLOAD
-                );
+        expect(outcome.failure).toBe(GateFailure.TARGET_EMPTY);
+    });
 
-                // Corrected SRT should have 3 entries
-                const correctedContent = fs.readFileSync(hebPath, "utf-8");
-                expect(correctedContent).toContain("-->");
-                const lineCount = correctedContent.split("-->").length - 1;
-                expect(lineCount).toBe(3);
-            }
-            finally {
-                fs.rmSync(tmpDir, { recursive: true, force: true });
-            }
-        });
+    it("G3: no reference found", async () => {
+        const notifier = makeNotifier();
+        const target = write("Movie.Hebrew.srt", makeEntries(10));
 
-        it("still writes corrected SRT and calls notifier when backup copy fails", async () => {
-            const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "ktuvit-syncer-test-"));
-            try {
-                const engPath = path.join(tmpDir, "video.eng.srt");
-                const hebPath = path.join(tmpDir, "video.heb.srt");
-                fs.writeFileSync(engPath, ENG_SRT);
-                fs.writeFileSync(hebPath, HEB_SRT);
+        const outcome = await new SubtitleSyncer(finderReturning(null), logger, notifier).sync(target);
 
-                // Create a directory at the .bak path so copyFileSync fails naturally
-                const bakPath = `${hebPath}.bak`;
-                fs.mkdirSync(bakPath);
+        expect(outcome.failure).toBe(GateFailure.NO_REFERENCE);
+        expect(notifier.notif).toHaveBeenCalledWith(expect.stringContaining("reference"), NotificationType.FAILED);
+    });
 
-                const llmResponse = JSON.stringify([
-                    { heb: [0], eng: [0] },
-                    { heb: [1], eng: [1] },
-                    { heb: [2], eng: [2] }
-                ]);
-                mockPreflight.mockResolvedValue(true);
-                const finder = makeEnglishFinder(engPath);
-                const ollama = makeOllamaClient(() => Promise.resolve(llmResponse));
-                const notifier = new MockNotifier();
-                const syncer = new SubtitleSyncer(SYNC_CONFIG, "heb.srt", ollama, finder, logger, notifier);
-                await syncer.sync(path.join(tmpDir, "video.mkv"));
+    it("G3: reference exists but is empty", async () => {
+        const notifier = makeNotifier();
+        const target = write("Movie.Hebrew.srt", makeEntries(10));
+        const refPath = path.join(tmpDir, "Movie.fr.srt");
+        fs.writeFileSync(refPath, "");
 
-                // Backup failed but corrected SRT is still written
-                expect(fs.existsSync(hebPath)).toBe(true);
-                expect(notifier.notif).toHaveBeenCalled();
-            }
-            finally {
-                fs.rmSync(tmpDir, { recursive: true, force: true });
-            }
-        });
+        const outcome = await new SubtitleSyncer(
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            logger,
+            notifier
+        ).sync(target);
+
+        expect(outcome.failure).toBe(GateFailure.REFERENCE_EMPTY);
+    });
+
+    it("leaves the target untouched when a gate fails", async () => {
+        const entries = makeEntries(10);
+        const target = write("Movie.Hebrew.srt", entries);
+        const before = fs.readFileSync(target, "utf-8");
+
+        await new SubtitleSyncer(finderReturning(null), logger, makeNotifier()).sync(target);
+
+        expect(fs.readFileSync(target, "utf-8")).toBe(before);
+        expect(fs.existsSync(`${target}.bak`)).toBe(false);
+    });
+});
+
+describe("SubtitleSyncer — successful sync", () => {
+    const setup = () => {
+        const reference = makeEntries(40);
+        const target = write("Movie.Hebrew.srt", makeEntries(40, 2500));
+        const refPath = write("Movie.fr.srt", reference);
+        return { reference, target, refPath };
+    };
+
+    it("re-times the target onto the reference and reports success", async () => {
+        const { target, refPath, reference } = setup();
+        const notifier = makeNotifier();
+
+        const outcome = await new SubtitleSyncer(
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            logger,
+            notifier
+        ).sync(target);
+
+        expect(outcome.ok).toBe(true);
+        const corrected = parseSrt(fs.readFileSync(target, "utf-8"));
+        expect(Math.abs(corrected[0].start - reference[0].start)).toBeLessThan(150);
+        expect(notifier.notif).toHaveBeenCalledWith(expect.stringContaining("synced"), NotificationType.DOWNLOAD);
+    });
+
+    it("writes a .bak of the original before overwriting", async () => {
+        const { target, refPath } = setup();
+        const before = fs.readFileSync(target, "utf-8");
+
+        await new SubtitleSyncer(
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            logger,
+            makeNotifier()
+        ).sync(target);
+
+        expect(fs.readFileSync(`${target}.bak`, "utf-8")).toBe(before);
+    });
+
+    it("preserves text, order and entry count", async () => {
+        const { target, refPath } = setup();
+        const original = parseSrt(fs.readFileSync(target, "utf-8"));
+
+        await new SubtitleSyncer(
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            logger,
+            makeNotifier()
+        ).sync(target);
+
+        const corrected = parseSrt(fs.readFileSync(target, "utf-8"));
+        expect(corrected).toHaveLength(original.length);
+        expect(corrected.map((e) => e.text)).toEqual(original.map((e) => e.text));
+    });
+
+    it("warns instead of claiming success when the match is weak", async () => {
+        const target = write("Movie.Hebrew.srt", makeEntries(20));
+        const refPath = write("Movie.fr.srt", makeEntries(20));
+        const notifier = makeNotifier();
+
+        // A confidence floor above any achievable value forces the low-quality path.
+        const outcome = await new SubtitleSyncer(
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            logger,
+            notifier,
+            { minConfidence: 1.1 }
+        ).sync(target);
+
+        expect(outcome.ok).toBe(true);
+        expect(notifier.notif).toHaveBeenCalledWith(expect.stringContaining("weak"), NotificationType.WARNING);
     });
 });

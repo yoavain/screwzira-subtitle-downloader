@@ -18,13 +18,20 @@ interface MkvTrack {
     };
 }
 
+/** Codecs that mkvextract can produce as readable text. Bitmap tracks need OCR and are out of scope. */
 const TEXT_CODECS = ["S_TEXT/UTF8", "S_TEXT/ASS", "S_TEXT/SSA"];
 
+export interface SubtitleTrack {
+    trackId: number;
+    codec: string;
+    language: string;
+}
+
 export interface MkvExtractorInterface {
-    findEnglishSubtitleTrack: (mkvPath: string) => Promise<{ trackId: number; codec: string } | null>;
+    /** First text subtitle track matching any of `languages`, in the order given. Null if none. */
+    findSubtitleTrack: (mkvPath: string, languages: string[]) => Promise<SubtitleTrack | null>;
+    hasSubtitleTrack: (mkvPath: string, languages: string[]) => Promise<boolean>;
     extractSubtitle: (mkvPath: string, trackId: number, outPath: string) => Promise<void>;
-    hasHebrewSubtitleTrack: (mkvPath: string) => Promise<boolean>;
-    hasEnglishSubtitleTrack: (mkvPath: string) => Promise<boolean>;
 }
 
 export class MkvExtractor implements MkvExtractorInterface {
@@ -39,53 +46,60 @@ export class MkvExtractor implements MkvExtractorInterface {
         this.mkvExtractPath = path.join(mkvtoolnixDir, "mkvextract.exe");
     }
 
-    async findEnglishSubtitleTrack(mkvPath: string): Promise<{ trackId: number; codec: string } | null> {
+    async findSubtitleTrack(mkvPath: string, languages: string[]): Promise<SubtitleTrack | null> {
         this.logger.debug(`Sync: Identifying tracks in ${mkvPath}`);
         const { stdout } = await execAsync(`"${this.mkvMergePath}" -J "${mkvPath}"`);
-        const data = JSON.parse(stdout) as { tracks: MkvTrack[] };
+        const tracks = (JSON.parse(stdout) as { tracks: MkvTrack[] }).tracks ?? [];
 
-        const track = data.tracks.find((t) =>
-            t.type === "subtitles" &&
-            TEXT_CODECS.includes(t.properties.codec_id ?? "") &&
-            (t.properties.language === "eng" || t.properties.language_ietf?.startsWith("en"))
-        );
-
-        if (!track) {
-            return null;
+        // Language priority wins over track order: a French track later in the file still
+        // beats an English track earlier in it.
+        for (const language of languages) {
+            const track = tracks.find((t) => isTextSubtitle(t) && matchesLanguage(t, language));
+            if (track) {
+                this.logger.debug(`Sync: Found ${language} subtitle track id=${track.id} codec=${track.codec}`);
+                return { trackId: track.id, codec: track.codec, language };
+            }
         }
-        this.logger.debug(`Sync: Found English subtitle track id=${track.id} codec=${track.codec}`);
-        return { trackId: track.id, codec: track.codec };
+        return null;
+    }
+
+    async hasSubtitleTrack(mkvPath: string, languages: string[]): Promise<boolean> {
+        try {
+            return (await this.findSubtitleTrack(mkvPath, languages)) !== null;
+        }
+        catch (e) {
+            this.logger.warn(`Sync: Could not inspect MKV tracks for ${mkvPath}: ${(e as Error).message}`);
+            return false;
+        }
     }
 
     async extractSubtitle(mkvPath: string, trackId: number, outPath: string): Promise<void> {
-        this.logger.debug(`Sync: Extracting track ${trackId} from ${mkvPath} → ${outPath}`);
+        this.logger.debug(`Sync: Extracting track ${trackId} from ${mkvPath} to ${outPath}`);
         await execAsync(`"${this.mkvExtractPath}" "${mkvPath}" tracks ${trackId}:"${outPath}"`);
     }
-
-    async hasHebrewSubtitleTrack(mkvPath: string): Promise<boolean> {
-        try {
-            this.logger.debug(`Sync: Checking for embedded Hebrew subtitle track in ${mkvPath}`);
-            const { stdout } = await execAsync(`"${this.mkvMergePath}" -J "${mkvPath}"`);
-            const data = JSON.parse(stdout) as { tracks: MkvTrack[] };
-            return data.tracks.some((t) =>
-                t.type === "subtitles" &&
-                TEXT_CODECS.includes(t.properties.codec_id ?? "") &&
-                (t.properties.language === "heb" || t.properties.language_ietf?.startsWith("he"))
-            );
-        }
-        catch (e) {
-            this.logger.warn(`Sync: Could not inspect MKV tracks for ${mkvPath}: ${(e as Error).message}`);
-            return false;
-        }
-    }
-
-    async hasEnglishSubtitleTrack(mkvPath: string): Promise<boolean> {
-        try {
-            return (await this.findEnglishSubtitleTrack(mkvPath)) !== null;
-        }
-        catch (e) {
-            this.logger.warn(`Sync: Could not inspect MKV tracks for ${mkvPath}: ${(e as Error).message}`);
-            return false;
-        }
-    }
 }
+
+function isTextSubtitle(track: MkvTrack): boolean {
+    return track.type === "subtitles" && TEXT_CODECS.includes(track.properties?.codec_id ?? "");
+}
+
+/**
+ * Matches ISO 639-2/B, 639-2/T and BCP 47 spellings of the same language, so "fr" also
+ * matches a track tagged "fre" or "fra", and "he" also matches "heb" or "iw".
+ */
+function matchesLanguage(track: MkvTrack, language: string): boolean {
+    const aliases = LANGUAGE_ALIASES[language.toLowerCase()] ?? [language.toLowerCase()];
+    const declared = (track.properties?.language ?? "").toLowerCase();
+    const ietf = (track.properties?.language_ietf ?? "").toLowerCase().split("-")[0];
+    return aliases.includes(declared) || aliases.includes(ietf);
+}
+
+const LANGUAGE_ALIASES: Record<string, string[]> = {
+    fr: ["fr", "fre", "fra", "french"],
+    fre: ["fr", "fre", "fra", "french"],
+    fra: ["fr", "fre", "fra", "french"],
+    en: ["en", "eng", "english"],
+    eng: ["en", "eng", "english"],
+    he: ["he", "heb", "iw", "hebrew"],
+    heb: ["he", "heb", "iw", "hebrew"]
+};

@@ -2,6 +2,15 @@
 
 > After any code change that affects the application flow, verify these diagrams are still accurate.
 
+The application has two **disjoint** flows, selected by what the user right-clicks. They share no
+invocation and no code path.
+
+| | Flow A — Download | Flow B — Sync |
+|---|---|---|
+| Right-click target | video (`.mkv` `.avi` `.mp4`) or folder | subtitle (`.srt`) |
+| Menu entry | `Ktuvit-Downloader` | `Sync subtitle (Beta)` |
+| CLI | `input "<path>"` | `sync input "<path.srt>"` |
+
 ---
 
 ## 1. Main Entry Flow
@@ -9,41 +18,44 @@
 ```mermaid
 flowchart TD
     A([CLI invoked]) --> B[Parse args]
-    B --> C{Input provided?}
-    C -- No --> C1([Notify: Missing input\nPrint usage\nEnd])
-    C -- Yes --> D{Path is\ndirectory?}
-    D -- Yes --> E[handleFolder\nrecurse into sub-folders]
+    B --> S{sync mode?}
+    S -- Yes --> S1{Input provided?}
+    S1 -- No --> S2([Notify: missing subtitle file<br/>End])
+    S1 -- Yes --> S3[subtitleSyncer.sync<br/>see chart 5]
+    S -- No --> C{Input provided?}
+    C -- No --> C1([Notify: Missing input<br/>Print usage<br/>End])
+    C -- Yes --> D{Path is<br/>directory?}
+    D -- Yes --> E[handleFolder<br/>recurse into sub-folders]
     D -- No --> F[handleSingleFileLocal]
     D -- ENOENT --> F
     E --> F
 ```
 
+Sync is dispatched at the top of `main()` and returns. Nothing in the sync pipeline can affect the
+download path below it.
+
 ---
 
-## 2. Single File Handler
+## 2. Single File Handler (Flow A)
 
 ```mermaid
 flowchart TD
-    A([handleSingleFileLocal\nfullpath]) --> B{Hebrew .srt\nalready exists\non disk?}
-    B -- Yes --> B1([Notify: subtitles already exist\nReturn false])
-    B -- No --> B2{embeddedSubtitleChecker\nprovided?}
+    A([handleSingleFileLocal<br/>fullpath]) --> B{Hebrew .srt<br/>already exists<br/>on disk?}
+    B -- Yes --> B1([Notify: subtitles already exist<br/>Return false])
+    B -- No --> B2{embeddedSubtitleChecker<br/>provided?}
     B2 -- No --> C
-    B2 -- Yes --> B3{checkEmbeddedSubtitles\nenabled AND .mkv?}
+    B2 -- Yes --> B3{checkEmbeddedSubtitles<br/>enabled AND .mkv?}
     B3 -- No --> C
-    B3 -- Yes --> B4[MkvExtractor:\nmkvmerge -J → find Hebrew track]
-    B4 --> B5{Hebrew text\ntrack found?}
-    B5 -- Yes --> B6([Notify: embedded Hebrew subtitles found\nReturn false])
+    B3 -- Yes --> B4["MkvExtractor.hasSubtitleTrack(path, ['he'])"]
+    B4 --> B5{Hebrew text<br/>track found?}
+    B5 -- Yes --> B6([Notify: embedded Hebrew subtitles found<br/>Return false])
     B5 -- No --> C
     C[Classify filename] --> D{Classification?}
     D -- Movie --> E[parser.handleMovie]
     D -- Episode --> F[parser.handleEpisode]
-    D -- Unknown --> G([Notify: unable to classify\nReturn false])
-    E --> H([Return true\ndownloaded])
+    D -- Unknown --> G([Notify: unable to classify<br/>Return false])
+    E --> H([Return true — downloaded])
     F --> H
-    H --> I{isSync flag\nset?}
-    I -- No --> Z([Done])
-    I -- Yes --> J[subtitleSyncer.sync]
-    J --> Z
 ```
 
 ---
@@ -54,29 +66,29 @@ flowchart TD
 flowchart TD
     A([handleMovie / handleEpisode]) --> B[Login to ktuvit.me]
     B --> C[Search for title]
-    C --> D{Results\nfound?}
-    D -- No --> D1([Notify: not found\nEnd])
-    D -- Yes --> E[Get subtitles list\nfor best match]
-    E --> F[findClosestMatch\nweighted word scoring]
-    F --> G{Match\nfound?}
-    G -- No --> G1([Notify: no subtitle match\nEnd])
+    C --> D{Results<br/>found?}
+    D -- No --> D1([Notify: not found<br/>End])
+    D -- Yes --> E[Get subtitles list<br/>for best match]
+    E --> F[findClosestMatch<br/>weighted word scoring]
+    F --> G{Match<br/>found?}
+    G -- No --> G1([Notify: no subtitle match<br/>End])
     G -- Yes --> H[Request download token]
     H --> I[Download .srt file]
-    I --> J[Save as\nfilename.languageCode.srt]
+    I --> J[Save as<br/>filename.languageCode.srt]
     J --> K([Notify: success])
 ```
 
 ---
 
-## 4. Folder Batch Handling
+## 4. Folder Batch Handling (Flow A only)
 
 ```mermaid
 flowchart TD
-    A([handleFolder\ndir]) --> B[readDir]
+    A([handleFolder<br/>dir]) --> B[readDir]
     B --> C{For each item}
     C -- Is directory --> D[Recurse: handleFolder]
     D --> C
-    C -- Is video file\next in config --> E{needToWait?}
+    C -- Is video file<br/>ext in config --> E{needToWait?}
     E -- Yes --> F[Sleep 3000ms]
     F --> G[handleSingleFileLocal]
     E -- No --> G
@@ -84,83 +96,114 @@ flowchart TD
     H -- Yes --> I[needToWait = true]
     H -- No --> C
     I --> C
-    C -- Done --> J{Any file\nhandled?}
+    C -- Done --> J{Any file<br/>handled?}
     J -- No --> K([Notify: no file handled])
     J -- Yes --> L([Done])
 ```
 
----
-
-## 5. Sync Pipeline (when `--sync` flag is set)
-
-```mermaid
-flowchart TD
-    A([subtitleSyncer.sync\nfullpath]) --> B[syncPreflightCheck]
-    B --> C{syncEnabled\nin config?}
-    C -- No --> C1([Skip sync — disabled])
-    C -- Yes --> D{ollamaBaseUrl\nconfigured?}
-    D -- No --> D1([WARN: ollamaBaseUrl not set\nSkip sync])
-    D -- Yes --> E{GET /api/tags\nOllama reachable?}
-    E -- No --> E1([WARN: Ollama not running\nSkip sync])
-    E -- Yes --> F{POST /api/show\nModel available?}
-    F -- No --> F1([WARN: Model not found\nhint: ollama pull\nSkip sync])
-    F -- Yes --> G[Find English source]
-    G --> H{.eng.srt\nexists?}
-    H -- Yes --> K[Parse English SRT]
-    H -- No --> I{File is .mkv?}
-    I -- No --> I1([WARN: no English source\nSkip sync])
-    I -- Yes --> J[MkvExtractor:\nmkvmerge -J → find English track\nmkvextract → .eng.srt]
-    J --> J1{English stream\nfound?}
-    J1 -- No --> J2([WARN: no English subtitle\nstream in MKV\nSkip sync])
-    J1 -- Yes --> K
-    K --> L[Parse Hebrew SRT]
-    L --> M[SubtitleMatcher:\nmatch Hebrew ↔ English\nvia Ollama LLM in batches]
-    M --> N[SceneDetector:\ngroup match pairs\nby offset delta threshold]
-    N --> O[TimingCorrector:\napply per-chunk offsets]
-    O --> P[Backup .heb.srt → .heb.srt.bak]
-    P --> Q[Save corrected .heb.srt]
-    Q --> R([Notify: sync complete])
-```
+Folders never trigger sync. Batch sync is deliberately not offered — a batch is mostly already in sync,
+so syncing it eagerly is wasted work.
 
 ---
 
-## 6. LLM Subtitle Matching (batch loop)
+## 5. Sync Pipeline (Flow B)
 
 ```mermaid
 flowchart TD
-    A(["Hebrew lines [H1..Hn]\nEnglish lines [E1..Em]"]) --> B["Split into parallel batches of syncBatchSize:\nbatch b → hebEntries[b*N .. b*N+N]\n          engEntries[b*N .. b*N+N]"]
-    B --> C{Either batch\nempty?}
-    C -- Yes --> J([Full MatchTable])
-    C -- No --> D[POST /api/chat to Ollama\nmap Hebrew → English indices]
-    D --> E{HTTP/network\nerror?}
-    E -- No --> G[Parse JSON from response]
-    E -- Yes --> F[Retry once]
-    F --> F2{Retry\nerror?}
-    F2 -- Yes --> K[Return empty —\nno matches for batch\nWARN logged]
-    F2 -- No --> G
-    G --> H{JSON parse\nfailed?}
-    H -- Yes --> K
-    H -- No --> I[Map to MatchEntry array\nwith absolute indices\n+ compute offset]
-    I --> L[Accumulate matches]
-    K --> L
-    L --> M{More batches?}
-    M -- Yes --> C
-    M -- No --> J
+    A(["subtitleSyncer.sync(targetSrtPath)"]) --> G2{G2: target parses<br/>to >= 1 entry?}
+    G2 -- No --> W([NOTIFY failure + stop<br/>file untouched, no .bak])
+    G2 -- Yes --> G3[referenceSourceFinder.find<br/>see chart 6]
+    G3 --> G3a{Reference found<br/>and non-empty?}
+    G3a -- No --> W
+    G3a -- Yes --> S1["Stage 1 — timeWarp<br/>split-penalty DP on timings<br/>NO AI, NO text"]
+    S1 --> S4["Stage 4 — retime<br/>apply warp + repair pass"]
+    S4 --> B[Copy target to .srt.bak]
+    B --> C[Overwrite target .srt]
+    C --> D{confidence >=<br/>minConfidence?}
+    D -- Yes --> E([Notify: synced<br/>shift + cut count])
+    D -- No --> F([Notify WARNING: match looks weak<br/>original is in the .bak])
 ```
+
+Gates G4/G5 (Ollama reachable, embedding model pulled) arrive with Phase 3. They are **soft**: they
+downgrade the bead scorer, they never stop the sync. Stages 2 and 3 — the bead DP and the segment
+refit — slot between Stage 1 and Stage 4 without changing this shape.
 
 ---
 
-## 7. Timing Correction
+## 6. Reference Source Resolution
 
 ```mermaid
 flowchart TD
-    A([For each Hebrew line Hi]) --> B{Match type?}
-    B -- "1:1  Hi → Ej" --> C["new_start = hi.start + chunk_offset\nnew_end   = hi.end   + chunk_offset"]
-    B -- "1:2 split  Hi → Ej, Ej+1" --> D["new_start = Ej.start\nnew_end   = Ej+1.end"]
-    B -- "2:1 merge  Hi,Hi+1 → Ej" --> E["Hi:   start=Ej.start, end=Ej.midpoint\nHi+1: start=Ej.midpoint, end=Ej.end"]
-    B -- Unmatched --> F[Keep original timing\nWARN: unmatched line]
-    C --> G([Write corrected entry])
-    D --> G
-    E --> G
-    F --> G
+    A(["clicked Movie.Hebrew.srt"]) --> B[derive stem:<br/>strip one language/variant tag]
+    B --> C[find sibling video:<br/>stem + mkv / mp4 / avi]
+    C -- none --> C2{exactly one video<br/>in the folder?}
+    C2 -- Yes --> D
+    C2 -- No --> H
+    C -- found --> D{video is .mkv?}
+    D -- Yes --> E[mkvmerge -J]
+    E --> F{text track in<br/>language priority order?}
+    F -- Yes --> G{already extracted?}
+    G -- Yes --> Z([reference ready — embedded])
+    G -- No --> G1[mkvextract to stem.LANG.srt]
+    G1 --> Z
+    F -- No --> H[sidecar lookup]
+    D -- No --> H
+    H --> I{"stem.fr / .fra / .fre / .french .srt"}
+    I -- found --> Z2([reference ready — sidecar])
+    I -- none --> J{"stem.en / .eng / .english .srt"}
+    J -- found --> Z2
+    J -- none --> K([G3 fails: no reference])
 ```
+
+Notes:
+- **French before English.** French marks grammatical gender like Hebrew, so a French line
+  disambiguates its Hebrew counterpart more often. Priority is configurable.
+- **Embedded before sidecar.** An embedded track is guaranteed to be timed against *this* video file;
+  a sidecar may have been downloaded for a different release.
+- The reference is never allowed to resolve to the clicked file itself.
+- If the `.srt` sits in a `Subs/` or `Subtitles/` folder, the parent folder is searched too.
+- Sync works with no video present — only the embedded path needs one.
+
+---
+
+## 7. Stage 1 — timeWarp (no AI, no text)
+
+```mermaid
+flowchart TD
+    A([target spans, reference spans]) --> B[For each framerate ratio:<br/>scale target times]
+    B --> C[Vote for candidate offsets:<br/>reference.start - target.start,<br/>weighted by entry duration]
+    C --> D[Keep the top-voted offsets]
+    D --> E[Rank ratios by best single offset]
+    E --> F[For the top 2 ratios:<br/>split-penalty DP over<br/>item x offset]
+    F --> G[mergeShortRuns:<br/>fold runs under<br/>minSegmentEntries]
+    G --> H[Refine each segment offset<br/>to the median boundary difference]
+    H --> I([segments + confidence])
+```
+
+The split penalty is what stops the fit degenerating: without a cost per split, the optimum gives every
+entry its own offset, scores perfectly, and describes nothing. `mergeShortRuns` handles the related
+case where one unusually long entry with no counterpart — a translator credit, a title card — can pay
+for its own segment. A genuine cut shifts everything *after* it, so an island is an outlier.
+
+---
+
+## 8. Stage 4 — retime and repair
+
+```mermaid
+flowchart TD
+    A([For each entry i]) --> B["Apply its segment:<br/>t -> t * scale + offset"]
+    B --> C[Repair pass, in order]
+    C --> D["start[i] >= start[i-1]"]
+    D --> E["end[i] >= start[i] + minDurationMs"]
+    E --> F{"end[i-1] > start[i] - minGapMs?"}
+    F -- No --> H
+    F -- Yes --> G{did the ORIGINAL<br/>overlap here?}
+    G -- Yes --> H([keep — legitimate<br/>simultaneous speakers])
+    G -- No --> I[truncate entry i-1,<br/>never move entry i]
+    I --> H
+```
+
+The repair pass is a correctness requirement, not a polish step. Real subtitles legitimately overlap
+when two speakers are on screen at once — the test fixture has eight such pairs, one with two identical
+spans — so the pass distinguishes an inherited overlap from one that retiming introduced, and only
+repairs the latter. Text, order, and entry count are never changed.

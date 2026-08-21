@@ -5,22 +5,28 @@ export interface SubtitleEntry {
     text: string; // may be multi-line, joined with \n
 }
 
-export interface MatchEntry {
-    hebrewIndices: number[]; // zero-based array indices into the hebrew entries array
-    englishIndices: number[]; // zero-based array indices into the english entries array
-    offset: number; // english_midpoint - hebrew_midpoint (ms)
+/** Minimal shape the timing stages need. SubtitleEntry is structurally compatible. */
+export interface TimeSpan {
+    start: number; // milliseconds
+    end: number; // milliseconds
 }
 
-export interface SceneChunk {
-    hebrewStartIdx: number;
-    hebrewEndIdx: number;
-    medianOffset: number; // ms
+/**
+ * A contiguous run of target entries sharing one linear time transform:
+ *   t -> t * scale + offset
+ * scale is 1 for a pure shift; it deviates only for framerate mismatch.
+ */
+export interface Segment {
+    startIdx: number; // first target index, inclusive
+    endIdx: number; // last target index, inclusive
+    scale: number;
+    offset: number; // milliseconds
 }
 
-export interface SyncConfig {
-    syncEnabled: boolean;
-    ollamaBaseUrl: string;
-    ollamaModel: string;
-    syncChunkThresholdSeconds: number;
-    syncBatchSize: number;
+export interface TimeWarp {
+    segments: Segment[];
+    /** Achieved overlap divided by total target duration. 0..1 — higher is better. */
+    confidence: number;
+    /** Total overlap in milliseconds, before the split penalty was charged. */
+    overlapMs: number;
 }

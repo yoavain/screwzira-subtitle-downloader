@@ -13,9 +13,8 @@ import { PROGRAM_CACHE_FOLDER, PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PR
 import { ensureDirSync, isDirectory, readDir } from "~src/fileUtils";
 import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 import { handleSingleFile } from "~src/singleFileHandler";
-import { OllamaClient } from "~src/sync/ollamaClient";
 import { MkvExtractor } from "~src/sync/mkvExtractor";
-import { EnglishSourceFinder } from "~src/sync/englishSourceFinder";
+import { ReferenceSourceFinder } from "~src/sync/referenceSourceFinder";
 import { SubtitleSyncer } from "~src/sync/subtitleSyncer";
 import * as path from "node:path";
 
@@ -47,11 +46,7 @@ const tvShowIdCache: TvShowIdCache = new TvShowIdCache(PROGRAM_TV_SHOW_ID_CACHE_
 // Ktuvit parser
 const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier, tvShowIdCache);
 
-// Subtitle syncer (used when invoked with "sync" flag)
-const ollamaClient = new OllamaClient(config.getSyncConfig().ollamaBaseUrl, logger);
 const mkvExtractor = new MkvExtractor(argsParser.getMkvtoolnixDir(), logger);
-const englishSourceFinder = new EnglishSourceFinder(mkvExtractor, logger);
-const subtitleSyncer = new SubtitleSyncer(config.getSyncConfig(), config.getSubtitlesSuffix(), ollamaClient, englishSourceFinder, logger, notifier);
 
 const embeddedSubtitleChecker = async (p: string): Promise<boolean> => {
     if (!config.getCheckEmbeddedSubtitles()) {
@@ -60,17 +55,13 @@ const embeddedSubtitleChecker = async (p: string): Promise<boolean> => {
     if (!p.toLowerCase().endsWith(".mkv")) {
         return false;
     }
-    return mkvExtractor.hasHebrewSubtitleTrack(p);
+    return mkvExtractor.hasSubtitleTrack(p, ["he"]);
 };
 
 // handle single file. Returns true if a call to provider was made
 const handleSingleFileLocal = async (fullpath: string, useParentFolder: boolean): Promise<boolean> => {
     logger.verbose(`Handling file: ${fullpath}`);
-    const downloaded = await handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser, embeddedSubtitleChecker);
-    if (downloaded && argsParser.isSync()) {
-        await subtitleSyncer.sync(fullpath);
-    }
-    return downloaded;
+    return handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser, embeddedSubtitleChecker);
 };
 
 // Batch
@@ -112,12 +103,37 @@ const handleFolder = async (dir: string): Promise<void> => {
     }
 };
 
+// Flow B — sync. Entered by right-clicking a .srt, never chained onto a download, so the
+// download path below is untouched by anything in the sync pipeline.
+const runSync = async (input: string): Promise<void> => {
+    const syncConfig = config.getSyncConfig();
+    const referenceSourceFinder = new ReferenceSourceFinder(
+        syncConfig.referenceLanguages,
+        [config.getLanguageCode().toLowerCase()],
+        mkvExtractor,
+        logger
+    );
+    const subtitleSyncer = new SubtitleSyncer(referenceSourceFinder, logger, notifier, syncConfig);
+    logger.info(`*** Syncing "${input}" ***`);
+    await subtitleSyncer.sync(input.replace(/\\/g, "/"));
+};
+
 const main = async () => {
     // Main
     logger.verbose(`Argv: ${process.argv.join(" ")}`);
     logger.verbose(`Sonar Mode: ${argsParser.isSonarrMode()}`);
     logger.verbose(`Quiet Mode: ${argsParser.isQuiet()}`);
     const input: string = argsParser.getInput();
+
+    if (argsParser.isSync()) {
+        if (typeof input !== "string") {
+            notifier.notif("Missing subtitle file to sync", NotificationType.FAILED);
+            return;
+        }
+        await runSync(input);
+        return;
+    }
+
     if (typeof input === "string") {
         logger.info(`*** Looking for subtitle for "${input}" ***`);
         const fullpath: string = input.replace(/\\/g, "/");

@@ -101,14 +101,9 @@ describe("test parse", () => {
         expect(argsParser.isSync()).toBe(true);
     });
 
-    it("getMkvMergePath() returns path containing mkvtoolnix/mkvmerge.exe", () => {
+    it("getMkvtoolnixDir() returns a path ending in mkvtoolnix", () => {
         const argsParser = new ArgsParser([NODE, SCRIPT, INPUT, MKV]);
-        expect(argsParser.getMkvMergePath()).toContain(["mkvtoolnix", "mkvmerge.exe"].join(path.sep));
-    });
-
-    it("getMkvExtractPath() returns path containing mkvtoolnix/mkvextract.exe", () => {
-        const argsParser = new ArgsParser([NODE, SCRIPT, INPUT, MKV]);
-        expect(argsParser.getMkvExtractPath()).toContain(["mkvtoolnix", "mkvextract.exe"].join(path.sep));
+        expect(argsParser.getMkvtoolnixDir()).toContain("mkvtoolnix");
     });
 
     it("getSnoreToastPath() returns null for non-installed exe", () => {

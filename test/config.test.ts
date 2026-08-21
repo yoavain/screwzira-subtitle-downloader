@@ -50,11 +50,13 @@ describe("Test sync-related config methods", () => {
     it("getSyncConfig() returns object with correct shape and default values", () => {
         const syncConfig = config.getSyncConfig();
         expect(syncConfig).toEqual({
-            syncEnabled: false,
+            referenceLanguages: ["fr", "en"],
+            splitPenaltyMs: 7000,
+            maxOffsetMs: 180_000,
+            minSegmentEntries: 3,
+            minConfidence: 0.25,
             ollamaBaseUrl: "",
-            ollamaModel: "translategemma:12b",
-            syncChunkThresholdSeconds: 0.3,
-            syncBatchSize: 20
+            syncEmbeddingModel: "qwen3-embedding:0.6b"
         });
     });
 

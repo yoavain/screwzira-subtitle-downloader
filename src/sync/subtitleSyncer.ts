@@ -1,93 +1,123 @@
+/**
+ * Flow B orchestrator. Right-click a .srt, and this re-times it against a reference.
+ *
+ * Phase 1 wires Stage 1 (timeWarp) and Stage 4 (retime). Stages 2 and 3 — the bead DP and
+ * the refit — slot in between them without changing this file's shape.
+ */
+
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { SyncConfig } from "~src/sync/types";
-import type { OllamaClientInterface } from "~src/sync/ollamaClient";
-import type { EnglishSourceFinderInterface } from "~src/sync/englishSourceFinder";
-import { syncPreflightCheck } from "~src/sync/syncPreflightCheck";
-import { parseSrt } from "~src/sync/subtitleParser";
-import { writeSrt } from "~src/sync/subtitleWriter";
-import { SubtitleMatcher } from "~src/sync/subtitleMatcher";
-import { detectChunks } from "~src/sync/sceneDetector";
-import { applyTimingCorrections } from "~src/sync/timingCorrector";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
 import { NotificationType } from "~src/notifier";
+import type { ReferenceSourceFinderInterface } from "~src/sync/referenceSourceFinder";
+import { parseSrt } from "~src/sync/subtitleParser";
+import { writeSrt } from "~src/sync/subtitleWriter";
+import { timeWarp } from "~src/sync/timeWarp";
+import { retime } from "~src/sync/retimer";
+import type { SubtitleEntry, TimeWarp } from "~src/sync/types";
+import { GateFailure } from "~src/sync/syncGates";
+
+export interface SyncOptions {
+    splitPenaltyMs?: number;
+    maxOffsetMs?: number;
+    minSegmentEntries?: number;
+    /** Below this, the result is reported as low quality rather than applied silently. */
+    minConfidence?: number;
+}
+
+const DEFAULT_MIN_CONFIDENCE = 0.25;
+
+export interface SyncOutcome {
+    ok: boolean;
+    failure?: GateFailure;
+    warp?: TimeWarp;
+}
 
 export class SubtitleSyncer {
     constructor(
-        private readonly config: SyncConfig,
-        private readonly subtitleSuffix: string,
-        private readonly ollamaClient: OllamaClientInterface,
-        private readonly englishSourceFinder: EnglishSourceFinderInterface,
+        private readonly referenceSourceFinder: ReferenceSourceFinderInterface,
         private readonly logger: LoggerInterface,
-        private readonly notifier: NotifierInterface
+        private readonly notifier: NotifierInterface,
+        private readonly options: SyncOptions = {}
     ) {}
 
-    async sync(videoPath: string): Promise<void> {
-        const ok = await syncPreflightCheck(this.config, this.ollamaClient, this.logger);
-        if (!ok) {
-            return;
+    async sync(targetSrtPath: string): Promise<SyncOutcome> {
+        const target = this.readEntries(targetSrtPath, "target");
+        if (!target) {
+            return this.fail(GateFailure.TARGET_UNREADABLE, `Cannot read ${path.basename(targetSrtPath)}`);
+        }
+        if (target.length === 0) {
+            return this.fail(GateFailure.TARGET_EMPTY, `${path.basename(targetSrtPath)} has no subtitle entries`);
         }
 
-        const engSrtPath = await this.englishSourceFinder.findEnglishSrt(videoPath);
-        if (!engSrtPath) {
-            return;
+        const reference = await this.referenceSourceFinder.find(targetSrtPath);
+        if (!reference) {
+            return this.fail(GateFailure.NO_REFERENCE, "No French or English reference subtitle found");
         }
 
-        const dir = path.dirname(videoPath);
-        const nameNoExt = path.parse(videoPath).name;
-        const hebSrtPath = path.join(dir, `${nameNoExt}.${this.subtitleSuffix}`);
-
-        let engContent: string;
-        let hebContent: string;
-        try {
-            engContent = fs.readFileSync(engSrtPath, "utf-8");
-            hebContent = fs.readFileSync(hebSrtPath, "utf-8");
-        }
-        catch (e) {
-            this.logger.warn(`Sync: Failed to read SRT files: ${e instanceof Error ? e.message : String(e)}. Skipping sync.`);
-            return;
+        const referenceEntries = this.readEntries(reference.srtPath, "reference");
+        if (!referenceEntries || referenceEntries.length === 0) {
+            return this.fail(GateFailure.REFERENCE_EMPTY, `Reference ${path.basename(reference.srtPath)} is empty or unreadable`);
         }
 
-        const engEntries = parseSrt(engContent);
-        const hebEntries = parseSrt(hebContent);
+        this.logger.info(`Sync: Aligning ${target.length} entries against ${referenceEntries.length} ${reference.language} entries (${reference.origin})`);
 
-        if (engEntries.length === 0 || hebEntries.length === 0) {
-            this.logger.warn(`Sync: Empty SRT file(s) — eng=${engEntries.length} heb=${hebEntries.length}. Skipping sync.`);
-            return;
-        }
+        const warp = timeWarp(target, referenceEntries, this.options);
+        const corrected = retime(target, warp);
 
-        this.logger.info(`Sync: Matching ${hebEntries.length} Hebrew lines against ${engEntries.length} English lines`);
+        this.backup(targetSrtPath);
+        fs.writeFileSync(targetSrtPath, writeSrt(corrected), "utf-8");
 
-        const matcher = new SubtitleMatcher(
-            this.ollamaClient,
-            this.config.ollamaModel,
-            this.config.syncBatchSize,
-            this.logger
-        );
-        const matches = await matcher.match(hebEntries, engEntries);
-
-        if (matches.length === 0) {
-            this.logger.warn("Sync: No matches produced by LLM. Skipping sync.");
-            return;
-        }
-
-        const chunks = detectChunks(matches, this.config.syncChunkThresholdSeconds * 1000);
-        this.logger.info(`Sync: Detected ${chunks.length} scene chunk(s)`);
-
-        const corrected = applyTimingCorrections(hebEntries, engEntries, matches, chunks, this.logger);
-
-        const bakPath = `${hebSrtPath}.bak`;
-        try {
-            fs.copyFileSync(hebSrtPath, bakPath);
-            this.logger.warn(`Sync: Backed up original subtitle to ${bakPath}`);
-        }
-        catch (e) {
-            this.logger.warn(`Sync: Could not back up ${hebSrtPath}: ${e instanceof Error ? e.message : String(e)}`);
-        }
-
-        fs.writeFileSync(hebSrtPath, writeSrt(corrected), "utf-8");
-        this.logger.info(`Sync: Saved corrected subtitle to ${hebSrtPath}`);
-        this.notifier.notif("Subtitle sync complete", NotificationType.DOWNLOAD);
+        this.report(targetSrtPath, warp);
+        return { ok: true, warp };
     }
+
+    private report(targetSrtPath: string, warp: TimeWarp): void {
+        const shift = Math.round(warp.segments[0]?.offset ?? 0);
+        const cuts = warp.segments.length - 1;
+        const detail = cuts > 0 ? `${shift} ms, ${cuts} cut${cuts > 1 ? "s" : ""}` : `${shift} ms`;
+        const minConfidence = this.options.minConfidence ?? DEFAULT_MIN_CONFIDENCE;
+
+        this.logger.info(`Sync: Saved ${path.basename(targetSrtPath)} — ${detail}, confidence ${warp.confidence.toFixed(2)}`);
+
+        if (warp.confidence < minConfidence) {
+            // Still written — the .bak makes it trivially reversible, and a weak match is
+            // sometimes still an improvement. But the user must be told not to trust it.
+            this.notifier.notif(`Sync finished but the match looks weak (${detail}). Check the result; the original is in the .bak file.`, NotificationType.WARNING);
+            return;
+        }
+        this.notifier.notif(`Subtitle synced (${detail})`, NotificationType.DOWNLOAD);
+    }
+
+    private backup(targetSrtPath: string): void {
+        const bakPath = `${targetSrtPath}.bak`;
+        try {
+            fs.copyFileSync(targetSrtPath, bakPath);
+            this.logger.verbose(`Sync: Backed up original to ${path.basename(bakPath)}`);
+        }
+        catch (e) {
+            this.logger.warn(`Sync: Could not back up ${targetSrtPath}: ${errorText(e)}`);
+        }
+    }
+
+    private readEntries(srtPath: string, label: string): SubtitleEntry[] | null {
+        try {
+            return parseSrt(fs.readFileSync(srtPath, "utf-8"));
+        }
+        catch (e) {
+            this.logger.warn(`Sync: Failed to read ${label} ${srtPath}: ${errorText(e)}`);
+            return null;
+        }
+    }
+
+    private fail(failure: GateFailure, message: string): SyncOutcome {
+        this.logger.warn(`Sync: ${message}. Skipping sync.`);
+        this.notifier.notif(message, NotificationType.FAILED);
+        return { ok: false, failure };
+    }
+}
+
+function errorText(e: unknown): string {
+    return e instanceof Error ? e.message : String(e);
 }
