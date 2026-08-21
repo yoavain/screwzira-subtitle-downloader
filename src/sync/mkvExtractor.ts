@@ -27,9 +27,19 @@ export interface SubtitleTrack {
     language: string;
 }
 
+export interface SubtitleTrackSearch {
+    /** First text track matching any of `languages`, in the order given. Null if none. */
+    track: SubtitleTrack | null;
+    /**
+     * Languages that are present in the file but only as image-based tracks (PGS, VobSub).
+     * Reported so the caller can say "found, but unusable" instead of "not found" — a
+     * Blu-ray remux typically carries every language as PGS and nothing as text.
+     */
+    bitmapOnlyLanguages: string[];
+}
+
 export interface MkvExtractorInterface {
-    /** First text subtitle track matching any of `languages`, in the order given. Null if none. */
-    findSubtitleTrack: (mkvPath: string, languages: string[]) => Promise<SubtitleTrack | null>;
+    findSubtitleTrack: (mkvPath: string, languages: string[]) => Promise<SubtitleTrackSearch>;
     hasSubtitleTrack: (mkvPath: string, languages: string[]) => Promise<boolean>;
     extractSubtitle: (mkvPath: string, trackId: number, outPath: string) => Promise<void>;
 }
@@ -46,26 +56,41 @@ export class MkvExtractor implements MkvExtractorInterface {
         this.mkvExtractPath = path.join(mkvtoolnixDir, "mkvextract.exe");
     }
 
-    async findSubtitleTrack(mkvPath: string, languages: string[]): Promise<SubtitleTrack | null> {
+    async findSubtitleTrack(mkvPath: string, languages: string[]): Promise<SubtitleTrackSearch> {
         this.logger.debug(`Sync: Identifying tracks in ${mkvPath}`);
         const { stdout } = await execAsync(`"${this.mkvMergePath}" -J "${mkvPath}"`);
         const tracks = (JSON.parse(stdout) as { tracks: MkvTrack[] }).tracks ?? [];
+        const subtitles = tracks.filter((t) => t.type === "subtitles");
+
+        // Log the whole inventory: when nothing usable turns up, the log should answer why
+        // without anyone having to re-run mkvmerge by hand.
+        this.logger.debug(
+            `Sync: ${subtitles.length} subtitle track(s): ` +
+            subtitles.map((t) => `id=${t.id} codec=${t.properties?.codec_id ?? "?"} lang=${t.properties?.language ?? "?"}`).join(", ")
+        );
 
         // Language priority wins over track order: a French track later in the file still
         // beats an English track earlier in it.
         for (const language of languages) {
-            const track = tracks.find((t) => isTextSubtitle(t) && matchesLanguage(t, language));
+            const track = subtitles.find((t) => isTextSubtitle(t) && matchesLanguage(t, language));
             if (track) {
                 this.logger.debug(`Sync: Found ${language} subtitle track id=${track.id} codec=${track.codec}`);
-                return { trackId: track.id, codec: track.codec, language };
+                return { track: { trackId: track.id, codec: track.codec, language }, bitmapOnlyLanguages: [] };
             }
         }
-        return null;
+
+        const bitmapOnlyLanguages = languages.filter((language) =>
+            subtitles.some((t) => !isTextSubtitle(t) && matchesLanguage(t, language))
+        );
+        if (bitmapOnlyLanguages.length > 0) {
+            this.logger.debug(`Sync: ${bitmapOnlyLanguages.join("/")} present only as image-based track(s)`);
+        }
+        return { track: null, bitmapOnlyLanguages };
     }
 
     async hasSubtitleTrack(mkvPath: string, languages: string[]): Promise<boolean> {
         try {
-            return (await this.findSubtitleTrack(mkvPath, languages)) !== null;
+            return (await this.findSubtitleTrack(mkvPath, languages)).track !== null;
         }
         catch (e) {
             this.logger.warn(`Sync: Could not inspect MKV tracks for ${mkvPath}: ${(e as Error).message}`);

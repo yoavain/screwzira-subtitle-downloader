@@ -17,7 +17,7 @@ function makeNotifier() {
 }
 
 function finderReturning(source: ReferenceSource | null): ReferenceSourceFinderInterface {
-    return { find: jest.fn().mockResolvedValue(source) };
+    return { find: jest.fn().mockResolvedValue({ source }) };
 }
 
 /** Evenly spaced dialogue, so the timing fingerprint is unambiguous. */
@@ -155,6 +155,70 @@ describe("SubtitleSyncer — successful sync", () => {
         const corrected = parseSrt(fs.readFileSync(target, "utf-8"));
         expect(corrected).toHaveLength(original.length);
         expect(corrected.map((e) => e.text)).toEqual(original.map((e) => e.text));
+    });
+
+    it("deletes an extracted reference when it is done", async () => {
+        // Extracted references live in a temp folder so media servers never index them,
+        // and they must not survive the run.
+        const { target } = setup();
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ktuvit-sync-"));
+        const tempRef = path.join(tempDir, "Movie.fr.srt");
+        fs.writeFileSync(tempRef, writeSrt(makeEntries(40)), "utf-8");
+
+        await new SubtitleSyncer(
+            finderReturning({ srtPath: tempRef, language: "fr", origin: "embedded", temporary: true }),
+            logger,
+            makeNotifier()
+        ).sync(target);
+
+        expect(fs.existsSync(tempRef)).toBe(false);
+        expect(fs.existsSync(tempDir)).toBe(false);
+    });
+
+    it("never deletes a sidecar reference the user already had", async () => {
+        const { target, refPath } = setup();
+
+        await new SubtitleSyncer(
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            logger,
+            makeNotifier()
+        ).sync(target);
+
+        expect(fs.existsSync(refPath)).toBe(true);
+    });
+
+    it("still deletes the extracted reference when a later gate fails", async () => {
+        const target = write("Movie.Hebrew.srt", makeEntries(10));
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ktuvit-sync-"));
+        const tempRef = path.join(tempDir, "Movie.fr.srt");
+        fs.writeFileSync(tempRef, "", "utf-8"); // empty -> REFERENCE_EMPTY
+
+        const outcome = await new SubtitleSyncer(
+            finderReturning({ srtPath: tempRef, language: "fr", origin: "embedded", temporary: true }),
+            logger,
+            makeNotifier()
+        ).sync(target);
+
+        expect(outcome.failure).toBe(GateFailure.REFERENCE_EMPTY);
+        expect(fs.existsSync(tempDir)).toBe(false);
+    });
+
+    it("reports the offset range, not just the first segment, when the file was cut", async () => {
+        // A real run logged "0 ms, 1 cut" while the second half moved by seconds.
+        const reference = makeEntries(60);
+        const shifted = makeEntries(60).map((entry, i) => (i < 30 ? entry : { ...entry, start: entry.start - 5000, end: entry.end - 5000 }));
+        const target = write("Movie.Hebrew.srt", shifted);
+        const refPath = write("Movie.fr.srt", reference);
+        const notifier = makeNotifier();
+
+        const outcome = await new SubtitleSyncer(
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            logger,
+            notifier
+        ).sync(target);
+
+        expect(outcome.warp?.segments.length).toBeGreaterThan(1);
+        expect(notifier.notif).toHaveBeenCalledWith(expect.stringContaining(" to "), expect.anything());
     });
 
     it("warns instead of claiming success when the match is weak", async () => {

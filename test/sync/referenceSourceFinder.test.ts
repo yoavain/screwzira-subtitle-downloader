@@ -10,7 +10,7 @@ const TAGS = ["he", "heb", "iw", "hebrew", "forced", "sdh", "hi", "cc"];
 
 function makeExtractor(track: SubtitleTrack | null, onExtract?: (out: string) => void): MkvExtractorInterface {
     return {
-        findSubtitleTrack: jest.fn().mockResolvedValue(track),
+        findSubtitleTrack: jest.fn().mockResolvedValue({ track, bitmapOnlyLanguages: [] }),
         hasSubtitleTrack: jest.fn().mockResolvedValue(track !== null),
         extractSubtitle: jest.fn().mockImplementation(async (_mkv: string, _id: number, out: string) => {
             fs.writeFileSync(out, "1\n00:00:01,000 --> 00:00:02,000\nref\n");
@@ -36,8 +36,30 @@ function touch(relativePath: string): string {
     return full;
 }
 
+/**
+ * Extraction creates a real temp folder before the (mocked) mkvextract call, and these tests
+ * never run the syncer that would clean it up. Record and remove them here so the suite does
+ * not litter the OS temp directory on every run.
+ */
+const tempDirs: string[] = [];
+
+afterEach(() => {
+    for (const dir of tempDirs.splice(0)) {
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
+});
+
 function finder(extractor: MkvExtractorInterface, languages = ["fr", "en"]): ReferenceSourceFinder {
-    return new ReferenceSourceFinder(languages, ["hebrew"], extractor, logger);
+    const instance = new ReferenceSourceFinder(languages, ["hebrew"], extractor, logger);
+    const original = instance.find.bind(instance);
+    instance.find = async (targetSrtPath: string) => {
+        const lookup = await original(targetSrtPath);
+        if (lookup.source?.temporary) {
+            tempDirs.push(path.dirname(lookup.source.srtPath));
+        }
+        return lookup;
+    };
+    return instance;
 }
 
 describe("deriveStem", () => {
@@ -65,7 +87,7 @@ describe("ReferenceSourceFinder — sidecars", () => {
         const target = touch("Movie.Hebrew.srt");
         touch("Movie.en.srt");
 
-        const result = await finder(makeExtractor(null)).find(target);
+        const result = (await finder(makeExtractor(null)).find(target)).source;
 
         expect(result?.language).toBe("en");
         expect(result?.origin).toBe("sidecar");
@@ -76,33 +98,33 @@ describe("ReferenceSourceFinder — sidecars", () => {
         touch("Movie.en.srt");
         touch("Movie.fr.srt");
 
-        expect((await finder(makeExtractor(null)).find(target))?.language).toBe("fr");
+        expect((await finder(makeExtractor(null)).find(target)).source?.language).toBe("fr");
     });
 
     it.each(["fr", "fra", "fre", "french"])("accepts the .%s spelling", async (suffix) => {
         const target = touch("Movie.Hebrew.srt");
         touch(`Movie.${suffix}.srt`);
 
-        expect((await finder(makeExtractor(null)).find(target))?.language).toBe("fr");
+        expect((await finder(makeExtractor(null)).find(target)).source?.language).toBe("fr");
     });
 
     it("returns null when no reference exists", async () => {
         const target = touch("Movie.Hebrew.srt");
-        expect(await finder(makeExtractor(null)).find(target)).toBeNull();
+        expect((await finder(makeExtractor(null)).find(target)).source).toBeNull();
     });
 
     it("never returns the clicked file as its own reference", async () => {
         // Right-clicking the French subtitle must not resolve to itself.
         const target = touch("Movie.fr.srt");
 
-        expect(await finder(makeExtractor(null)).find(target)).toBeNull();
+        expect((await finder(makeExtractor(null)).find(target)).source).toBeNull();
     });
 
     it("works with no video file present", async () => {
         const target = touch("Movie.Hebrew.srt");
         touch("Movie.fr.srt");
 
-        const result = await finder(makeExtractor(null)).find(target);
+        const result = (await finder(makeExtractor(null)).find(target)).source;
 
         expect(result?.origin).toBe("sidecar");
     });
@@ -111,7 +133,7 @@ describe("ReferenceSourceFinder — sidecars", () => {
         const target = touch("Subs/Movie.Hebrew.srt");
         touch("Movie.fr.srt");
 
-        const result = await finder(makeExtractor(null)).find(target);
+        const result = (await finder(makeExtractor(null)).find(target)).source;
 
         expect(result?.language).toBe("fr");
     });
@@ -121,7 +143,7 @@ describe("ReferenceSourceFinder — sidecars", () => {
         touch("Movie.en.srt");
         touch("Movie.fr.srt");
 
-        expect((await finder(makeExtractor(null), ["en", "fr"]).find(target))?.language).toBe("en");
+        expect((await finder(makeExtractor(null), ["en", "fr"]).find(target)).source?.language).toBe("en");
     });
 });
 
@@ -133,7 +155,7 @@ describe("ReferenceSourceFinder — embedded tracks", () => {
         touch("Movie.en.srt");
         const extractor = makeExtractor({ trackId: 2, codec: "S_TEXT/UTF8", language: "fr" });
 
-        const result = await finder(extractor).find(target);
+        const result = (await finder(extractor).find(target)).source;
 
         expect(result?.origin).toBe("embedded");
         expect(result?.language).toBe("fr");
@@ -145,7 +167,7 @@ describe("ReferenceSourceFinder — embedded tracks", () => {
         touch("Movie.mkv");
         touch("Movie.en.srt");
 
-        const result = await finder(makeExtractor(null)).find(target);
+        const result = (await finder(makeExtractor(null)).find(target)).source;
 
         expect(result?.origin).toBe("sidecar");
     });
@@ -160,7 +182,7 @@ describe("ReferenceSourceFinder — embedded tracks", () => {
             extractSubtitle: jest.fn()
         };
 
-        const result = await finder(extractor).find(target);
+        const result = (await finder(extractor).find(target)).source;
 
         expect(result?.origin).toBe("sidecar");
     });
@@ -171,7 +193,7 @@ describe("ReferenceSourceFinder — embedded tracks", () => {
         touch("Movie.fr.srt");
         const extractor = makeExtractor({ trackId: 2, codec: "S_TEXT/UTF8", language: "fr" });
 
-        const result = await finder(extractor).find(target);
+        const result = (await finder(extractor).find(target)).source;
 
         expect(result?.origin).toBe("embedded");
         expect(extractor.extractSubtitle).not.toHaveBeenCalled();
@@ -182,7 +204,7 @@ describe("ReferenceSourceFinder — embedded tracks", () => {
         touch("Movie.mkv");
         const extractor = makeExtractor({ trackId: 1, codec: "S_TEXT/UTF8", language: "en" });
 
-        const result = await finder(extractor).find(target);
+        const result = (await finder(extractor).find(target)).source;
 
         expect(result?.origin).toBe("embedded");
         expect(result?.language).toBe("en");
@@ -194,8 +216,54 @@ describe("ReferenceSourceFinder — embedded tracks", () => {
         touch("MovieB.mkv");
         const extractor = makeExtractor({ trackId: 1, codec: "S_TEXT/UTF8", language: "en" });
 
-        expect(await finder(extractor).find(target)).toBeNull();
+        expect((await finder(extractor).find(target)).source).toBeNull();
         expect(extractor.findSubtitleTrack).not.toHaveBeenCalled();
+    });
+
+    it("explains that image-based tracks cannot be used, instead of reporting nothing found", async () => {
+        // Regression: a Blu-ray remux (Obsession 2025) carried English and French as PGS and
+        // nothing as text. The tool correctly refused them but reported "no reference found",
+        // which reads like a bug when MediaInfo plainly shows both languages present.
+        const target = touch("Movie.Hebrew.srt");
+        touch("Movie.mkv");
+        const extractor: MkvExtractorInterface = {
+            findSubtitleTrack: jest.fn().mockResolvedValue({ track: null, bitmapOnlyLanguages: ["fr", "en"] }),
+            hasSubtitleTrack: jest.fn().mockResolvedValue(false),
+            extractSubtitle: jest.fn()
+        };
+
+        const lookup = await finder(extractor).find(target);
+
+        expect(lookup.source).toBeNull();
+        expect(lookup.reason).toContain("image-based");
+        expect(lookup.reason).toContain("FR and EN");
+        expect(lookup.reason).toContain(".fr.srt");
+    });
+
+    it("gives no special reason when the video simply has no matching language", async () => {
+        const target = touch("Movie.Hebrew.srt");
+        touch("Movie.mkv");
+
+        const lookup = await finder(makeExtractor(null)).find(target);
+
+        expect(lookup.source).toBeNull();
+        expect(lookup.reason).toBeUndefined();
+    });
+
+    it("prefers a usable sidecar over reporting bitmap-only tracks", async () => {
+        const target = touch("Movie.Hebrew.srt");
+        touch("Movie.mkv");
+        touch("Movie.en.srt");
+        const extractor: MkvExtractorInterface = {
+            findSubtitleTrack: jest.fn().mockResolvedValue({ track: null, bitmapOnlyLanguages: ["fr"] }),
+            hasSubtitleTrack: jest.fn().mockResolvedValue(false),
+            extractSubtitle: jest.fn()
+        };
+
+        const lookup = await finder(extractor).find(target);
+
+        expect(lookup.source?.origin).toBe("sidecar");
+        expect(lookup.reason).toBeUndefined();
     });
 
     it("ignores a non-MKV video for embedded lookup", async () => {
@@ -203,7 +271,7 @@ describe("ReferenceSourceFinder — embedded tracks", () => {
         touch("Movie.mp4");
         const extractor = makeExtractor({ trackId: 1, codec: "S_TEXT/UTF8", language: "en" });
 
-        expect(await finder(extractor).find(target)).toBeNull();
+        expect((await finder(extractor).find(target)).source).toBeNull();
         expect(extractor.findSubtitleTrack).not.toHaveBeenCalled();
     });
 });

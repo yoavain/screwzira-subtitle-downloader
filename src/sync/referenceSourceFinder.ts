@@ -9,6 +9,8 @@
  * does. The priority list is configurable and applies to both embedded tracks and sidecars.
  */
 
+import * as fs from "node:fs";
+import * as os from "node:os";
 import * as path from "node:path";
 import type { LoggerInterface } from "~src/logger";
 import type { MkvExtractorInterface } from "~src/sync/mkvExtractor";
@@ -18,10 +20,29 @@ export interface ReferenceSource {
     srtPath: string;
     language: string;
     origin: "embedded" | "sidecar";
+    /**
+     * True when this file was created by us and must be removed once sync finishes.
+     *
+     * Extracted references go to a temp folder rather than next to the video: media servers
+     * (Plex, Jellyfin, Emby) scan for sidecar .srt files, and an extracted French track
+     * would show up as a selectable subtitle for anyone watching. A never-created file
+     * cannot be picked up, and cannot be left behind if the run dies.
+     */
+    temporary?: boolean;
+}
+
+export interface ReferenceLookup {
+    source: ReferenceSource | null;
+    /**
+     * Why nothing was found, when the answer is more useful than "nothing was found".
+     * A Blu-ray remux usually carries every language as PGS and none as text, so
+     * "no reference" would be actively misleading there.
+     */
+    reason?: string;
 }
 
 export interface ReferenceSourceFinderInterface {
-    find: (targetSrtPath: string) => Promise<ReferenceSource | null>;
+    find: (targetSrtPath: string) => Promise<ReferenceLookup>;
 }
 
 /** Trailing dot-segments that name a language or a variant rather than part of the title. */
@@ -44,7 +65,7 @@ export class ReferenceSourceFinder implements ReferenceSourceFinderInterface {
         private readonly logger: LoggerInterface
     ) {}
 
-    async find(targetSrtPath: string): Promise<ReferenceSource | null> {
+    async find(targetSrtPath: string): Promise<ReferenceLookup> {
         const dir = path.dirname(targetSrtPath);
         const stem = deriveStem(path.parse(targetSrtPath).name, [...STRIPPABLE_TAGS, ...this.extraStrippableTags]);
         // Scene releases put the video one level up from a Subs/ folder.
@@ -58,14 +79,35 @@ export class ReferenceSourceFinder implements ReferenceSourceFinderInterface {
 
         // Embedded first: an embedded track is guaranteed to be timed against this very
         // video file, whereas a sidecar may have been downloaded for a different release.
+        let bitmapOnlyLanguages: string[] = [];
         if (video && path.extname(video).toLowerCase() === ".mkv") {
             const embedded = await this.extractEmbedded(video, stem, targetSrtPath);
-            if (embedded) {
+            if (embedded.source) {
                 return embedded;
             }
+            bitmapOnlyLanguages = embedded.bitmapOnlyLanguages;
         }
 
-        return this.findSidecar(stem, searchDirs, targetSrtPath);
+        const sidecar = await this.findSidecar(stem, searchDirs, targetSrtPath);
+        if (sidecar) {
+            return { source: sidecar };
+        }
+
+        if (bitmapOnlyLanguages.length > 0) {
+            const languages = bitmapOnlyLanguages.map((l) => l.toUpperCase()).join(" and ");
+            const suggestion = bitmapOnlyLanguages.map((l) => `.${l}.srt`).join(" or ");
+            this.logger.warn(
+                `Sync: ${languages} subtitles exist in the MKV but are image-based (PGS/VobSub) and cannot be read as text. ` +
+                `Place a ${bitmapOnlyLanguages.map((l) => `${stem}.${l}.srt`).join(" or ")} next to the video, or run OCR on the track.`
+            );
+            return {
+                source: null,
+                reason: `${languages} subtitles in the video are image-based (Blu-ray PGS) and cannot be used. `
+                    + `Add a ${suggestion} file next to the video.`
+            };
+        }
+
+        return { source: null };
     }
 
     private async findVideo(stem: string, dirs: string[]): Promise<string | null> {
@@ -103,39 +145,53 @@ export class ReferenceSourceFinder implements ReferenceSourceFinderInterface {
         }
     }
 
-    private async extractEmbedded(video: string, stem: string, targetSrtPath: string): Promise<ReferenceSource | null> {
-        let track: Awaited<ReturnType<MkvExtractorInterface["findSubtitleTrack"]>>;
+    private async extractEmbedded(
+        video: string,
+        stem: string,
+        targetSrtPath: string
+    ): Promise<{ source: ReferenceSource | null; bitmapOnlyLanguages: string[] }> {
+        const none = { source: null, bitmapOnlyLanguages: [] as string[] };
+
+        let search: Awaited<ReturnType<MkvExtractorInterface["findSubtitleTrack"]>>;
         try {
-            track = await this.mkvExtractor.findSubtitleTrack(video, this.languages);
+            search = await this.mkvExtractor.findSubtitleTrack(video, this.languages);
         }
         catch (e) {
             this.logger.warn(`Sync: mkvmerge failed on ${video}: ${errorText(e)}. Falling back to sidecar lookup.`);
-            return null;
-        }
-        if (!track) {
-            return null;
+            return none;
         }
 
-        const outPath = path.join(path.dirname(video), `${stem}.${track.language}.srt`);
-        if (samePath(outPath, targetSrtPath)) {
-            return null;
+        const track = search.track;
+        if (!track) {
+            return { source: null, bitmapOnlyLanguages: search.bitmapOnlyLanguages };
         }
-        // A previous run already extracted this track.
-        if (await isExist(outPath)) {
-            this.logger.verbose(`Sync: Reusing previously extracted ${track.language} reference at ${outPath}`);
-            return { srtPath: outPath, language: track.language, origin: "embedded" };
+
+        // A sidecar left by an older build, next to the video. Reuse it rather than paying
+        // for extraction again, but do not adopt the clicked file as its own reference.
+        const sidecarPath = path.join(path.dirname(video), `${stem}.${track.language}.srt`);
+        if (!samePath(sidecarPath, targetSrtPath) && await isExist(sidecarPath)) {
+            this.logger.verbose(`Sync: Reusing previously extracted ${track.language} reference at ${sidecarPath}`);
+            return { source: { srtPath: sidecarPath, language: track.language, origin: "embedded" }, bitmapOnlyLanguages: [] };
         }
+
+        const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ktuvit-sync-"));
+        const outPath = path.join(tempDir, `${stem}.${track.language}.srt`);
 
         try {
+            this.logger.info(`Sync: Extracting ${track.language} subtitle track from the video (this can take a minute on a large file)`);
             await this.mkvExtractor.extractSubtitle(video, track.trackId, outPath);
         }
         catch (e) {
             this.logger.warn(`Sync: mkvextract failed: ${errorText(e)}. Falling back to sidecar lookup.`);
-            return null;
+            fs.rmSync(tempDir, { recursive: true, force: true });
+            return none;
         }
 
         this.logger.info(`Sync: Extracted ${track.language} reference from ${path.basename(video)}`);
-        return { srtPath: outPath, language: track.language, origin: "embedded" };
+        return {
+            source: { srtPath: outPath, language: track.language, origin: "embedded", temporary: true },
+            bitmapOnlyLanguages: []
+        };
     }
 
     private async findSidecar(stem: string, dirs: string[], targetSrtPath: string): Promise<ReferenceSource | null> {

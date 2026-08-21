@@ -152,7 +152,9 @@ flowchart TD
     I -- found --> Z2([reference ready — sidecar])
     I -- none --> J{"stem.en / .eng / .english .srt"}
     J -- found --> Z2
-    J -- none --> K([G3 fails: no reference])
+    J -- none --> L{"wanted language present<br/>but image-based only?"}
+    L -- Yes --> M(["G3 fails: report PGS/VobSub<br/>and suggest a sidecar"])
+    L -- No --> K([G3 fails: no reference])
 ```
 
 Notes:
@@ -163,6 +165,11 @@ Notes:
 - The reference is never allowed to resolve to the clicked file itself.
 - If the `.srt` sits in a `Subs/` or `Subtitles/` folder, the parent folder is searched too.
 - Sync works with no video present — only the embedded path needs one.
+- **Text codecs only** (`S_TEXT/UTF8`, `S_TEXT/ASS`, `S_TEXT/SSA`). Blu-ray `S_HDMV/PGS` and DVD
+  `S_VOBSUB` tracks are pictures of text and need OCR, so they are rejected. When the wanted language
+  exists *only* as such a track, `findSubtitleTrack` reports it via `bitmapOnlyLanguages` and the
+  failure says "image-based, add a sidecar" rather than the misleading "no reference found".
+  The full subtitle-track inventory is logged at DEBUG so the log always answers why.
 
 ---
 

@@ -225,7 +225,7 @@ describe("sync fixtures — end to end through SubtitleSyncer", () => {
         const original = fs.readFileSync(copy.targetPath, "utf-8");
 
         const finder: ReferenceSourceFinderInterface = {
-            find: jest.fn().mockResolvedValue({ srtPath: copy.referencePath, language: "en", origin: "sidecar" })
+            find: jest.fn().mockResolvedValue({ source: { srtPath: copy.referencePath, language: "en", origin: "sidecar" } })
         };
         const notifier = { notif: jest.fn() };
 

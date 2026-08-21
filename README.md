@@ -101,6 +101,11 @@ Given `Movie.Hebrew.srt`, it looks for a reference in this order:
 A video file is not required — a sidecar reference alone is enough. If the `.srt` lives in a `Subs/`
 folder, the parent folder is searched too.
 
+> **Blu-ray rips usually will not work out of the box.** Most BluRay/remux releases store every
+> subtitle language as **PGS** — pictures of text, not text. `MediaInfo` will happily list "English"
+> and "French" tracks, but they cannot be read without OCR, so sync will tell you so and stop.
+> Drop a real `<name>.en.srt` or `<name>.fr.srt` next to the video and run it again.
+
 ### Safety
 
 The original is always copied to `<name>.srt.bak` before anything is written, and the subtitle **text**

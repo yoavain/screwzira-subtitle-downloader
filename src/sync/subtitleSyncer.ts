@@ -10,7 +10,7 @@ import * as path from "node:path";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
 import { NotificationType } from "~src/notifier";
-import type { ReferenceSourceFinderInterface } from "~src/sync/referenceSourceFinder";
+import type { ReferenceSource, ReferenceSourceFinderInterface } from "~src/sync/referenceSourceFinder";
 import { parseSrt } from "~src/sync/subtitleParser";
 import { writeSrt } from "~src/sync/subtitleWriter";
 import { timeWarp } from "~src/sync/timeWarp";
@@ -51,35 +51,57 @@ export class SubtitleSyncer {
             return this.fail(GateFailure.TARGET_EMPTY, `${path.basename(targetSrtPath)} has no subtitle entries`);
         }
 
-        const reference = await this.referenceSourceFinder.find(targetSrtPath);
+        const lookup = await this.referenceSourceFinder.find(targetSrtPath);
+        const reference = lookup.source;
         if (!reference) {
-            return this.fail(GateFailure.NO_REFERENCE, "No French or English reference subtitle found");
+            return this.fail(GateFailure.NO_REFERENCE, lookup.reason ?? "No French or English reference subtitle found");
         }
 
-        const referenceEntries = this.readEntries(reference.srtPath, "reference");
-        if (!referenceEntries || referenceEntries.length === 0) {
-            return this.fail(GateFailure.REFERENCE_EMPTY, `Reference ${path.basename(reference.srtPath)} is empty or unreadable`);
+        try {
+            const referenceEntries = this.readEntries(reference.srtPath, "reference");
+            if (!referenceEntries || referenceEntries.length === 0) {
+                return this.fail(GateFailure.REFERENCE_EMPTY, `Reference ${path.basename(reference.srtPath)} is empty or unreadable`);
+            }
+
+            this.logger.info(`Sync: Aligning ${target.length} entries against ${referenceEntries.length} ${reference.language} entries (${reference.origin})`);
+
+            const warp = timeWarp(target, referenceEntries, this.options);
+            const corrected = retime(target, warp);
+
+            this.backup(targetSrtPath);
+            fs.writeFileSync(targetSrtPath, writeSrt(corrected), "utf-8");
+
+            this.report(targetSrtPath, warp);
+            return { ok: true, warp };
         }
+        finally {
+            this.discardTemporary(reference);
+        }
+    }
 
-        this.logger.info(`Sync: Aligning ${target.length} entries against ${referenceEntries.length} ${reference.language} entries (${reference.origin})`);
-
-        const warp = timeWarp(target, referenceEntries, this.options);
-        const corrected = retime(target, warp);
-
-        this.backup(targetSrtPath);
-        fs.writeFileSync(targetSrtPath, writeSrt(corrected), "utf-8");
-
-        this.report(targetSrtPath, warp);
-        return { ok: true, warp };
+    /**
+     * Remove an extracted reference. Only ever touches a file this run created in a temp
+     * folder — a sidecar the user already had is never deleted.
+     */
+    private discardTemporary(reference: ReferenceSource): void {
+        if (!reference.temporary) {
+            return;
+        }
+        try {
+            fs.rmSync(path.dirname(reference.srtPath), { recursive: true, force: true });
+            this.logger.verbose(`Sync: Removed the extracted ${reference.language} reference`);
+        }
+        catch (e) {
+            this.logger.warn(`Sync: Could not remove the extracted reference: ${errorText(e)}`);
+        }
     }
 
     private report(targetSrtPath: string, warp: TimeWarp): void {
-        const shift = Math.round(warp.segments[0]?.offset ?? 0);
-        const cuts = warp.segments.length - 1;
-        const detail = cuts > 0 ? `${shift} ms, ${cuts} cut${cuts > 1 ? "s" : ""}` : `${shift} ms`;
         const minConfidence = this.options.minConfidence ?? DEFAULT_MIN_CONFIDENCE;
+        const detail = describeShift(warp);
 
-        this.logger.info(`Sync: Saved ${path.basename(targetSrtPath)} — ${detail}, confidence ${warp.confidence.toFixed(2)}`);
+        // ASCII only: the log file is not written as UTF-8, so an em dash arrives as mojibake.
+        this.logger.info(`Sync: Saved ${path.basename(targetSrtPath)} - ${detail}, confidence ${warp.confidence.toFixed(2)}`);
 
         if (warp.confidence < minConfidence) {
             // Still written — the .bak makes it trivially reversible, and a weak match is
@@ -112,7 +134,8 @@ export class SubtitleSyncer {
     }
 
     private fail(failure: GateFailure, message: string): SyncOutcome {
-        this.logger.warn(`Sync: ${message}. Skipping sync.`);
+        // Reasons may already end in a period; do not double it up.
+        this.logger.warn(`Sync: ${message.replace(/\.$/, "")}. Skipping sync.`);
         this.notifier.notif(message, NotificationType.FAILED);
         return { ok: false, failure };
     }
@@ -120,4 +143,30 @@ export class SubtitleSyncer {
 
 function errorText(e: unknown): string {
     return e instanceof Error ? e.message : String(e);
+}
+
+/**
+ * Summarise the shift for the user.
+ *
+ * Reporting only the first segment's offset is misleading once the file was cut: a real run
+ * logged "0 ms, 1 cut" while the second half moved by seconds. With more than one segment,
+ * report the range actually applied.
+ */
+function describeShift(warp: TimeWarp): string {
+    const offsets = warp.segments.map((segment) => Math.round(segment.offset));
+    const cuts = warp.segments.length - 1;
+    const scale = warp.segments[0]?.scale ?? 1;
+
+    const shift = offsets.length > 1 && Math.min(...offsets) !== Math.max(...offsets)
+        ? `${Math.min(...offsets)} to ${Math.max(...offsets)} ms`
+        : `${offsets[0] ?? 0} ms`;
+
+    const parts = [shift];
+    if (cuts > 0) {
+        parts.push(`${cuts} cut${cuts > 1 ? "s" : ""}`);
+    }
+    if (scale !== 1) {
+        parts.push(`framerate x${scale.toFixed(4)}`);
+    }
+    return parts.join(", ");
 }
