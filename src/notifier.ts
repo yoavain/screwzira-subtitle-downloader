@@ -1,7 +1,7 @@
 import type { NodeNotifier } from "node-notifier";
 import notifier from "node-notifier";
-import * as path from "path";
-import { execFile } from "child_process";
+import * as path from "node:path";
+import { execFile } from "node:child_process";
 import type { LoggerInterface } from "~src/logger";
 import { PROGRAM_TITLE } from "~src/commonConsts";
 

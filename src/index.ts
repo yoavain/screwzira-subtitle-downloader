@@ -13,7 +13,10 @@ import { PROGRAM_CACHE_FOLDER, PROGRAM_CONFIG_FILENAME, PROGRAM_LOG_FILENAME, PR
 import { ensureDirSync, isDirectory, readDir } from "~src/fileUtils";
 import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 import { handleSingleFile } from "~src/singleFileHandler";
-import * as path from "path";
+import { MkvExtractor } from "~src/sync/mkvExtractor";
+import { ReferenceSourceFinder } from "~src/sync/referenceSourceFinder";
+import { SubtitleSyncer } from "~src/sync/subtitleSyncer";
+import * as path from "node:path";
 
 // Make sure the log directory is there
 ensureDirSync(path.resolve(process.env.ProgramData, PROGRAM_NAME));
@@ -43,10 +46,23 @@ const tvShowIdCache: TvShowIdCache = new TvShowIdCache(PROGRAM_TV_SHOW_ID_CACHE_
 // Ktuvit parser
 const ktuvitParser: ParserInterface = new KtuvitParser(KTUVIT_EMAIL, KTUVIT_PASSWORD, logger, notifier, classifier, tvShowIdCache);
 
+const mkvExtractor = new MkvExtractor(argsParser.getMkvtoolnixDir(), logger);
+
+const embeddedSubtitleChecker = async (p: string): Promise<boolean> => {
+    if (!config.getCheckEmbeddedSubtitles()) {
+        return false;
+    }
+    if (!p.toLowerCase().endsWith(".mkv")) {
+        return false;
+    }
+    // Same language the download flow targets, rather than a second hardcoded spelling.
+    return mkvExtractor.hasSubtitleTrack(p, [config.getLanguageCode()]);
+};
+
 // handle single file. Returns true if a call to provider was made
 const handleSingleFileLocal = async (fullpath: string, useParentFolder: boolean): Promise<boolean> => {
     logger.verbose(`Handling file: ${fullpath}`);
-    return handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser);
+    return handleSingleFile(fullpath, useParentFolder, classifier, notifier, ktuvitParser, embeddedSubtitleChecker);
 };
 
 // Batch
@@ -88,12 +104,38 @@ const handleFolder = async (dir: string): Promise<void> => {
     }
 };
 
+// Flow B — sync. Entered by right-clicking a .srt, never chained onto a download, so the
+// download path below is untouched by anything in the sync pipeline.
+const runSync = async (input: string): Promise<void> => {
+    const syncConfig = config.getSyncConfig();
+    const referenceSourceFinder = new ReferenceSourceFinder(
+        syncConfig.referenceLanguages,
+        config.getLanguageCode(),
+        mkvExtractor,
+        logger,
+        config.getExtensions()
+    );
+    const subtitleSyncer = new SubtitleSyncer(referenceSourceFinder, logger, notifier, syncConfig);
+    logger.info(`*** Syncing "${input}" ***`);
+    await subtitleSyncer.sync(input.replace(/\\/g, "/"));
+};
+
 const main = async () => {
     // Main
     logger.verbose(`Argv: ${process.argv.join(" ")}`);
     logger.verbose(`Sonar Mode: ${argsParser.isSonarrMode()}`);
     logger.verbose(`Quiet Mode: ${argsParser.isQuiet()}`);
     const input: string = argsParser.getInput();
+
+    if (argsParser.isSync()) {
+        if (typeof input !== "string") {
+            notifier.notif("Missing subtitle file to sync", NotificationType.FAILED);
+            return;
+        }
+        await runSync(input);
+        return;
+    }
+
     if (typeof input === "string") {
         logger.info(`*** Looking for subtitle for "${input}" ***`);
         const fullpath: string = input.replace(/\\/g, "/");
@@ -118,6 +160,7 @@ const main = async () => {
     else {
         notifier.notif("Missing input file", NotificationType.FAILED);
         // tslint:disable-next-line:no-console
+        // eslint-disable-next-line no-console
         console.log(`Usage:${argsParser.getHelp()}`);
     }
 };

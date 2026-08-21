@@ -1,3 +1,4 @@
+import * as path from "node:path";
 import type { ArgsParserInterface } from "~src/argsParser";
 import { ArgsParser } from "~src/argsParser";
 
@@ -88,5 +89,40 @@ describe("test parse", () => {
     it("test error - only input", () => {
         const argsParser: ArgsParserInterface = new ArgsParser([RUNTIME, INPUT]);
         expect(argsParser.getInput()).toBe(undefined);
+    });
+
+    it("isSync() returns false by default", () => {
+        const argsParser = new ArgsParser([NODE, SCRIPT, INPUT, MKV]);
+        expect(argsParser.isSync()).toBe(false);
+    });
+
+    it("isSync() returns true when 'sync' is in argv", () => {
+        const argsParser = new ArgsParser([NODE, SCRIPT, INPUT, MKV, "sync"]);
+        expect(argsParser.isSync()).toBe(true);
+    });
+
+    it("getMkvtoolnixDir() returns a path ending in mkvtoolnix", () => {
+        const argsParser = new ArgsParser([NODE, SCRIPT, INPUT, MKV]);
+        expect(argsParser.getMkvtoolnixDir()).toContain("mkvtoolnix");
+    });
+
+    it("getSnoreToastPath() returns null for non-installed exe", () => {
+        const argsParser = new ArgsParser([NODE, SCRIPT, INPUT, MKV]);
+        expect(argsParser.getSnoreToastPath()).toBeNull();
+    });
+
+    it("getSnoreToastPath() returns path for installed exe", () => {
+        const argsParser = new ArgsParser(["ktuvit-downloader.exe", INPUT, MKV]);
+        expect(argsParser.getSnoreToastPath()).toContain("snoretoast-x64.exe");
+    });
+
+    it("getHelp() returns a string with option descriptions", () => {
+        const argsParser = new ArgsParser([NODE, SCRIPT, INPUT, MKV]);
+        const help = argsParser.getHelp();
+        expect(typeof help).toBe("string");
+        expect(help).toContain("input");
+        expect(help).toContain("sonarr");
+        expect(help).toContain("quiet");
+        expect(help).toContain("sync");
     });
 });
