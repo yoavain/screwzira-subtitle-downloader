@@ -148,9 +148,6 @@ Configuration json file is located under the %ProgramData%\Ktuvit-Downloader fol
 | `minSegmentEntries` | `3` | A run shorter than this is treated as an outlier, not a real cut |
 | `minConfidence` | `0.25` | Below this, the result is still written but flagged as a weak match |
 
-The generated config also contains `ollamaBaseUrl` and `syncEmbeddingModel`. Both are reserved for a
-future text-matching stage and have no effect today — sync currently uses no AI.
-
 </p>
 </details>
 

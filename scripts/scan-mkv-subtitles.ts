@@ -15,12 +15,15 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { parseArgs } from "node:util";
-import { MkvExtractor } from "../src/sync/mkvExtractor";
+import { MkvExtractor, selectSubtitleTrack } from "../src/sync/mkvExtractor";
 import type { LoggerInterface } from "../src/logger";
 import { isExist } from "../src/fileUtils";
+import { aliasesFor } from "../src/languages";
+import { errorText } from "../src/stringUtils";
 
 const MKVTOOLNIX_DIR = path.join(__dirname, "..", "resources", "mkvtoolnix");
 const REFERENCE_LANGUAGES = ["fr", "en"];
+const HEBREW = "he";
 /** mkvmerge spawns a process per file; keep a lid on it for large libraries. */
 const CONCURRENCY = 8;
 
@@ -74,9 +77,17 @@ async function inspect(fullPath: string, root: string): Promise<Row> {
     const dir = path.dirname(fullPath);
     const nameNoExt = path.parse(fullPath).name;
 
+    // One mkvmerge spawn per file, not two. Calling findSubtitleTrack for the reference
+    // languages and then hasSubtitleTrack for Hebrew re-spawned mkvmerge and re-parsed
+    // identical JSON purely to match a different language list — 2x the subprocess count
+    // across a whole library, at ~50-200 ms each.
     let reference: string;
+    let hebrewText = false;
     try {
-        const search = await mkvExtractor.findSubtitleTrack(fullPath, REFERENCE_LANGUAGES);
+        const tracks = await mkvExtractor.listSubtitleTracks(fullPath);
+        const search = selectSubtitleTrack(tracks, REFERENCE_LANGUAGES);
+        hebrewText = selectSubtitleTrack(tracks, [HEBREW]).track !== null;
+
         if (search.track) {
             reference = `YES  ${search.track.language} (${search.track.codec})`;
         }
@@ -88,18 +99,13 @@ async function inspect(fullPath: string, root: string): Promise<Row> {
         }
     }
     catch (e) {
-        reference = `err  ${(e as Error).message.slice(0, 30)}`;
+        reference = `err  ${errorText(e).slice(0, 30)}`;
     }
 
-    const hebrewText = await mkvExtractor.hasSubtitleTrack(fullPath, ["he"]).catch(() => false);
-
-    const suffixes = ["heb", "he", "Hebrew", "en", "eng", "fr", "fra"];
-    const present: string[] = [];
-    for (const suffix of suffixes) {
-        if (await isExist(path.join(dir, `${nameNoExt}.${suffix}.srt`))) {
-            present.push(suffix);
-        }
-    }
+    const suffixes = [...aliasesFor(HEBREW), ...REFERENCE_LANGUAGES.flatMap(aliasesFor)];
+    const present = (await Promise.all(
+        suffixes.map(async (suffix) => (await isExist(path.join(dir, `${nameNoExt}.${suffix}.srt`)) ? suffix : null))
+    )).filter((suffix): suffix is string => suffix !== null);
 
     return {
         filename: path.relative(root, fullPath),

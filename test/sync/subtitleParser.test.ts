@@ -1,4 +1,4 @@
-import { parseSrt, stripFormattingTags } from "~src/sync/subtitleParser";
+import { parseSrt } from "~src/sync/subtitleParser";
 import type { SubtitleEntry } from "~src/sync/types";
 
 const SIMPLE_SRT = `1
@@ -60,20 +60,3 @@ describe("parseSrt", () => {
     });
 });
 
-describe("stripFormattingTags", () => {
-    it("strips italic tags", () => {
-        expect(stripFormattingTags("<i>Hello</i>")).toBe("Hello");
-    });
-
-    it("strips bold tags", () => {
-        expect(stripFormattingTags("<b>World</b>")).toBe("World");
-    });
-
-    it("strips nested tags", () => {
-        expect(stripFormattingTags("<i><b>text</b></i>")).toBe("text");
-    });
-
-    it("leaves plain text unchanged", () => {
-        expect(stripFormattingTags("Plain text")).toBe("Plain text");
-    });
-});

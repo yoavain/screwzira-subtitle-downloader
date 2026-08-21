@@ -15,8 +15,6 @@ export interface SyncConfig {
     maxOffsetMs: number;
     minSegmentEntries: number;
     minConfidence: number;
-    ollamaBaseUrl: string;
-    syncEmbeddingModel: string;
 }
 
 interface ConfigurationInterface {
@@ -29,8 +27,6 @@ interface ConfigurationInterface {
     maxOffsetMs: number;
     minSegmentEntries: number;
     minConfidence: number;
-    ollamaBaseUrl: string;
-    syncEmbeddingModel: string;
     checkEmbeddedSubtitles: boolean;
 }
 
@@ -45,8 +41,6 @@ const defaultConf: ConfigurationInterface = {
     maxOffsetMs: 180_000,
     minSegmentEntries: 3,
     minConfidence: 0.25,
-    ollamaBaseUrl: "",
-    syncEmbeddingModel: "qwen3-embedding:0.6b",
     checkEmbeddedSubtitles: false
 };
 
@@ -55,7 +49,6 @@ export interface ConfigInterface {
     getLogLevel: () => string;
     getExtensions: () => string[];
     getLanguageCode: () => string;
-    getSubtitlesSuffix: () => string;
     getSyncConfig: () => SyncConfig;
     getCheckEmbeddedSubtitles: () => boolean;
 }
@@ -94,9 +87,7 @@ export class Config implements ConfigInterface {
             splitPenaltyMs: conf?.splitPenaltyMs ?? defaultConf.splitPenaltyMs,
             maxOffsetMs: conf?.maxOffsetMs ?? defaultConf.maxOffsetMs,
             minSegmentEntries: conf?.minSegmentEntries ?? defaultConf.minSegmentEntries,
-            minConfidence: conf?.minConfidence ?? defaultConf.minConfidence,
-            ollamaBaseUrl: conf?.ollamaBaseUrl ?? defaultConf.ollamaBaseUrl,
-            syncEmbeddingModel: conf?.syncEmbeddingModel ?? defaultConf.syncEmbeddingModel
+            minConfidence: conf?.minConfidence ?? defaultConf.minConfidence
         };
         this.checkEmbeddedSubtitles = conf?.checkEmbeddedSubtitles ?? false;
         this.logger.debug(
@@ -125,10 +116,6 @@ export class Config implements ConfigInterface {
 
     public getLanguageCode(): string {
         return this.languageCode;
-    }
-
-    public getSubtitlesSuffix(): string {
-        return `${this.languageCode}.srt`;
     }
 
     public getSyncConfig(): SyncConfig {

@@ -4,12 +4,14 @@ import * as path from "node:path";
 import { ReferenceSourceFinder, deriveStem } from "~src/sync/referenceSourceFinder";
 import type { MkvExtractorInterface, SubtitleTrack } from "~src/sync/mkvExtractor";
 import { MockLogger } from "~test/mocks";
+import { strippableTags } from "~src/languages";
 
 const logger = new MockLogger();
-const TAGS = ["he", "heb", "iw", "hebrew", "forced", "sdh", "hi", "cc"];
+const TAGS = strippableTags("he");
 
 function makeExtractor(track: SubtitleTrack | null, onExtract?: (out: string) => void): MkvExtractorInterface {
     return {
+        listSubtitleTracks: jest.fn().mockResolvedValue([]),
         findSubtitleTrack: jest.fn().mockResolvedValue({ track, bitmapOnlyLanguages: [] }),
         hasSubtitleTrack: jest.fn().mockResolvedValue(track !== null),
         extractSubtitle: jest.fn().mockImplementation(async (_mkv: string, _id: number, out: string) => {
@@ -38,24 +40,24 @@ function touch(relativePath: string): string {
 
 /**
  * Extraction creates a real temp folder before the (mocked) mkvextract call, and these tests
- * never run the syncer that would clean it up. Record and remove them here so the suite does
- * not litter the OS temp directory on every run.
+ * never run the syncer that would call dispose(). Collect the disposers and run them here so
+ * the suite does not litter the OS temp directory on every run.
  */
-const tempDirs: string[] = [];
+const disposers: (() => void)[] = [];
 
 afterEach(() => {
-    for (const dir of tempDirs.splice(0)) {
-        fs.rmSync(dir, { recursive: true, force: true });
+    for (const dispose of disposers.splice(0)) {
+        dispose();
     }
 });
 
 function finder(extractor: MkvExtractorInterface, languages = ["fr", "en"]): ReferenceSourceFinder {
-    const instance = new ReferenceSourceFinder(languages, ["hebrew"], extractor, logger);
+    const instance = new ReferenceSourceFinder(languages, "he", extractor, logger);
     const original = instance.find.bind(instance);
     instance.find = async (targetSrtPath: string) => {
         const lookup = await original(targetSrtPath);
-        if (lookup.source?.temporary) {
-            tempDirs.push(path.dirname(lookup.source.srtPath));
+        if (lookup.source) {
+            disposers.push(lookup.source.dispose);
         }
         return lookup;
     };
@@ -74,7 +76,7 @@ describe("deriveStem", () => {
         ["Movie", "Movie"],
         [".hidden", ".hidden"]
     ])("%s -> %s", (input, expected) => {
-        expect(deriveStem(input, [...TAGS, "hebrew"])).toBe(expected);
+        expect(deriveStem(input, TAGS)).toBe(expected);
     });
 
     it("strips only one segment", () => {
@@ -177,6 +179,7 @@ describe("ReferenceSourceFinder — embedded tracks", () => {
         touch("Movie.mkv");
         touch("Movie.fr.srt");
         const extractor: MkvExtractorInterface = {
+            listSubtitleTracks: jest.fn().mockResolvedValue([]),
             findSubtitleTrack: jest.fn().mockRejectedValue(new Error("mkvmerge missing")),
             hasSubtitleTrack: jest.fn().mockResolvedValue(false),
             extractSubtitle: jest.fn()
@@ -227,6 +230,7 @@ describe("ReferenceSourceFinder — embedded tracks", () => {
         const target = touch("Movie.Hebrew.srt");
         touch("Movie.mkv");
         const extractor: MkvExtractorInterface = {
+            listSubtitleTracks: jest.fn().mockResolvedValue([]),
             findSubtitleTrack: jest.fn().mockResolvedValue({ track: null, bitmapOnlyLanguages: ["fr", "en"] }),
             hasSubtitleTrack: jest.fn().mockResolvedValue(false),
             extractSubtitle: jest.fn()
@@ -255,6 +259,7 @@ describe("ReferenceSourceFinder — embedded tracks", () => {
         touch("Movie.mkv");
         touch("Movie.en.srt");
         const extractor: MkvExtractorInterface = {
+            listSubtitleTracks: jest.fn().mockResolvedValue([]),
             findSubtitleTrack: jest.fn().mockResolvedValue({ track: null, bitmapOnlyLanguages: ["fr"] }),
             hasSubtitleTrack: jest.fn().mockResolvedValue(false),
             extractSubtitle: jest.fn()

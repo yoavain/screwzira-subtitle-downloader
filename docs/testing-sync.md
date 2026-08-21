@@ -113,8 +113,7 @@ index-aligned drift grows to 82.9 s across the episode. Anything assuming `targe
 
 ```ts
 scoreSync(corrected, groundTruth) -> {
-    medianAbsStartErrorMs, p90AbsStartErrorMs, maxAbsStartErrorMs,
-    withinThresholdRatio, entryCount
+    medianAbsStartErrorMs, p90AbsStartErrorMs, withinThresholdRatio
 }
 ```
 
@@ -134,7 +133,6 @@ monotonic starts, and no overlap that the original did not already have.
 | `referenceSourceFinder.test.ts` | stem derivation, language priority, embedded-vs-sidecar | mocked extractor |
 | `subtitleSyncer.test.ts` | gate paths, backup, write | temp dirs |
 | `cases.test.ts` | fixture corpus, end to end | temp copies |
-| `ollamaClient.integration.test.ts` | real Ollama | `OLLAMA_INTEGRATION=true` |
 
 ## Gap worth closing
 

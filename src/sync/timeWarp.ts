@@ -101,7 +101,10 @@ export function timeWarp(target: TimeSpan[], reference: TimeSpan[], options: Tim
     // fit — so the two-pass structure bought nothing and lost correctness.
     const candidates: { warp: TimeWarp; score: number; ratio: number }[] = [];
 
-    for (const ratio of opts.framerateRatios) {
+    // 23.976/24 and 29.97/30 are both exactly 0.999, as are their inverses, so the default
+    // list of 9 holds only 7 distinct ratios. A duplicate can only tie with its twin — same
+    // segments, same stretch flag, same score — so dropping it cannot change the winner.
+    for (const ratio of new Set(opts.framerateRatios)) {
         const scaled = scaleSpans(target, ratio);
         const offsets = candidateOffsets(scaled, refStarts, opts);
         if (offsets.length === 0) {
@@ -248,10 +251,6 @@ function rangeOverlap(
         sum += spanOverlap(target[i].start + offset, target[i].end + offset, refStarts, refEnds);
     }
     return sum;
-}
-
-function totalOverlap(target: TimeSpan[], offset: number, refStarts: Float64Array, refEnds: Float64Array): number {
-    return rangeOverlap(target, 0, target.length - 1, offset, refStarts, refEnds);
 }
 
 /** Milliseconds of [start, end) covered by any reference span. */

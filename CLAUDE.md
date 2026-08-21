@@ -84,7 +84,7 @@ Similarity matching uses weighted word scoring (`WORD_WEIGHTS`) to pick the best
 | File | Purpose |
 |------|---------|
 | `src/argsParser.ts` | CLI arg parsing; supports `input <path>`, `sonarr`, `quiet`, `sync` modes; `getMkvtoolnixDir()` resolves the bundled binary folder |
-| `src/config.ts` | Reads/writes JSON config; owns the `SyncConfig` type. Fields: `logLevel`, `extensions`, `replacePairs`, `languageCode`, `checkEmbeddedSubtitles`, plus sync fields (`referenceLanguages`, `splitPenaltyMs`, `maxOffsetMs`, `minSegmentEntries`, `minConfidence`, `ollamaBaseUrl`, `syncEmbeddingModel`) |
+| `src/config.ts` | Reads/writes JSON config; owns the `SyncConfig` type. Fields: `logLevel`, `extensions`, `replacePairs`, `languageCode`, `checkEmbeddedSubtitles`, plus sync fields (`referenceLanguages`, `splitPenaltyMs`, `maxOffsetMs`, `minSegmentEntries`, `minConfidence`) |
 | `src/singleFileHandler.ts` | Core single-file logic: subtitle-exists check → embedded-subtitle check → classify → parser dispatch |
 | `src/notifier.ts` | Windows toast notifications via SnoreToast (bundled in `dist/`) |
 | `src/logger.ts` | Winston-based logger writing to ProgramData log file |
@@ -98,16 +98,16 @@ Sync is a four-stage pipeline. Only Stage 2 will ever involve AI, and it is not 
 | File | Purpose |
 |------|---------|
 | `src/sync/types.ts` | `SubtitleEntry`, `TimeSpan`, `Segment`, `TimeWarp` interfaces |
-| `src/sync/subtitleParser.ts` | `parseSrt()`, `stripFormattingTags()` |
+| `src/sync/subtitleParser.ts` | `parseSrt()` |
 | `src/sync/subtitleWriter.ts` | `writeSrt()`, `formatTimestamp()` |
 | `src/sync/mkvExtractor.ts` | `MkvExtractor` — runs `mkvmerge -J` and `mkvextract`. `findSubtitleTrack(path, languages)` is language-parameterised with ISO 639-2/639-3/BCP-47 alias matching; used for both embedded Hebrew detection and reference extraction |
 | `src/sync/referenceSourceFinder.ts` | Given the target `.srt`, derives the stem, locates the video, and resolves a reference — embedded track first, then sidecar; French before English |
-| `src/sync/syncGates.ts` | `GateFailure` reasons; `canUseEmbeddings()` for the soft Ollama gates |
+| `src/sync/syncGates.ts` | `GateFailure` — the reasons Flow B can stop before writing |
 | `src/sync/segmentFitter.ts` | `fitSegments()` — split-penalty DP over (item × candidate offset); `mergeShortRuns()` folds islands that are too short to be a real cut |
 | `src/sync/timeWarp.ts` | **Stage 1** — builds candidate offsets, scans framerate ratios, fits segments, refines offsets. No AI, no text |
 | `src/sync/retimer.ts` | **Stage 4** — `retime()` applies the warp; `repair()` fixes monotonicity and overlaps introduced by retiming |
 | `src/sync/subtitleSyncer.ts` | `SubtitleSyncer` — orchestrates gates → Stage 1 → Stage 4 → backup → write |
-| `src/sync/ollamaClient.ts` | `OllamaClient` — fetch wrapper for Ollama. Unused on the current path; retained for Stage 2 |
+| `src/languages.ts` | One alias table for every spelling of a language (`aliasesFor`, `isLanguage`, `strippableTags`) |
 
 **Invariants the sync pipeline must never break:** subtitle text, entry order, and entry count are immutable. Only timings change. The original is always copied to `<name>.srt.bak` before the target is overwritten.
 
@@ -174,7 +174,7 @@ Tests live in `test/` and mirror `src/`. Mocks are in `test/mocks/` (exported vi
 
 Sync tests live in `test/sync/`. See [`docs/testing-sync.md`](docs/testing-sync.md) for the fixture corpus and how to add a case.
 
-> `jest.config.ts` uses `testRegex: "test/.*.test.ts$"`, so `*.integration.test.ts` files **are** collected by `npm test`. They stay green only because each wraps itself in `describe.skip` unless its environment variable is set (e.g. `OLLAMA_INTEGRATION`). Do not rely on the filename to exclude a test — add the env guard.
+> `jest.config.ts` uses `testRegex: "test/.*.test.ts$"`, so `*.integration.test.ts` files **are** collected by `npm test`. They stay green only because each wraps itself in `describe.skip` unless its environment variable is set. Do not rely on the filename to exclude a test — add the env guard.
 
 ### Sync fixtures are read-only
 

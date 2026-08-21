@@ -39,7 +39,3 @@ export function parseSrt(content: string): SubtitleEntry[] {
 
     return entries;
 }
-
-export function stripFormattingTags(text: string): string {
-    return text.replace(/<[^>]+>/g, "").trim();
-}

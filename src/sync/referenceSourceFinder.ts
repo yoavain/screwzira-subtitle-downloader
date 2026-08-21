@@ -15,20 +15,37 @@ import * as path from "node:path";
 import type { LoggerInterface } from "~src/logger";
 import type { MkvExtractorInterface } from "~src/sync/mkvExtractor";
 import { isExist, readDir } from "~src/fileUtils";
+import { aliasesFor, strippableTags } from "~src/languages";
+import { errorText } from "~src/stringUtils";
 
 export interface ReferenceSource {
     srtPath: string;
     language: string;
     origin: "embedded" | "sidecar";
     /**
-     * True when this file was created by us and must be removed once sync finishes.
+     * Releases anything this lookup created. Always safe to call; a no-op for a sidecar the
+     * user already had.
      *
-     * Extracted references go to a temp folder rather than next to the video: media servers
-     * (Plex, Jellyfin, Emby) scan for sidecar .srt files, and an extracted French track
-     * would show up as a selectable subtitle for anyone watching. A never-created file
-     * cannot be picked up, and cannot be left behind if the run dies.
+     * The consumer must never derive a path to delete from `srtPath` — only this module
+     * knows whether the file sits in a scratch folder it made or in the user's media folder,
+     * and the two cases are adjacent return statements in `extractEmbedded`. Handing back a
+     * closure keeps that knowledge here, so a `rmSync(dirname(...), { recursive: true })` in
+     * the caller can never be pointed at a media folder.
+     *
+     * Extraction targets a temp folder rather than the video's folder because media servers
+     * (Plex, Jellyfin, Emby) index sidecar .srt files, and an extracted French track would
+     * otherwise appear as a selectable subtitle mid-run.
      */
-    temporary?: boolean;
+    dispose: () => void;
+}
+
+const NO_CLEANUP = (): void => {
+    // A sidecar the user already had. Nothing to release.
+};
+
+/** Only ever called with a directory this module created via mkdtempSync. */
+function removeDir(dir: string): void {
+    fs.rmSync(dir, { recursive: true, force: true });
 }
 
 export interface ReferenceLookup {
@@ -45,29 +62,27 @@ export interface ReferenceSourceFinderInterface {
     find: (targetSrtPath: string) => Promise<ReferenceLookup>;
 }
 
-/** Trailing dot-segments that name a language or a variant rather than part of the title. */
-const STRIPPABLE_TAGS = ["he", "heb", "iw", "hebrew", "forced", "sdh", "hi", "cc"];
-
-/** Sidecar spellings tried per language, in order. */
-const SIDECAR_SUFFIXES: Record<string, string[]> = {
-    fr: ["fr", "fra", "fre", "french"],
-    en: ["en", "eng", "english"]
-};
-
-const VIDEO_EXTENSIONS = [".mkv", ".mp4", ".avi"];
+const DEFAULT_VIDEO_EXTENSIONS = ["mkv", "mp4", "avi"];
 const SUBS_FOLDER_NAMES = ["subs", "subtitles"];
 
 export class ReferenceSourceFinder implements ReferenceSourceFinderInterface {
+    private readonly videoExtensions: string[];
+
     constructor(
         private readonly languages: string[],
-        private readonly extraStrippableTags: string[],
+        private readonly targetLanguage: string,
         private readonly mkvExtractor: MkvExtractorInterface,
-        private readonly logger: LoggerInterface
-    ) {}
+        private readonly logger: LoggerInterface,
+        videoExtensions: string[] = DEFAULT_VIDEO_EXTENSIONS
+    ) {
+        // Honour the same `extensions` list the download flow uses, so adding "m4v" there is
+        // not silently ignored here. Normalised to a leading dot for path.extname comparison.
+        this.videoExtensions = videoExtensions.map((ext) => (ext.startsWith(".") ? ext : `.${ext}`).toLowerCase());
+    }
 
     async find(targetSrtPath: string): Promise<ReferenceLookup> {
         const dir = path.dirname(targetSrtPath);
-        const stem = deriveStem(path.parse(targetSrtPath).name, [...STRIPPABLE_TAGS, ...this.extraStrippableTags]);
+        const stem = deriveStem(path.parse(targetSrtPath).name, strippableTags(this.targetLanguage));
         // Scene releases put the video one level up from a Subs/ folder.
         const searchDirs = SUBS_FOLDER_NAMES.includes(path.basename(dir).toLowerCase())
             ? [dir, path.dirname(dir)]
@@ -112,7 +127,7 @@ export class ReferenceSourceFinder implements ReferenceSourceFinderInterface {
 
     private async findVideo(stem: string, dirs: string[]): Promise<string | null> {
         for (const dir of dirs) {
-            for (const ext of VIDEO_EXTENSIONS) {
+            for (const ext of this.videoExtensions) {
                 const candidate = path.join(dir, `${stem}${ext}`);
                 if (await isExist(candidate)) {
                     return candidate;
@@ -137,7 +152,7 @@ export class ReferenceSourceFinder implements ReferenceSourceFinderInterface {
         try {
             const items = await readDir(dir);
             return items
-                .filter((item) => VIDEO_EXTENSIONS.includes(path.extname(item).toLowerCase()))
+                .filter((item) => this.videoExtensions.includes(path.extname(item).toLowerCase()))
                 .map((item) => path.join(dir, item));
         }
         catch {
@@ -171,7 +186,7 @@ export class ReferenceSourceFinder implements ReferenceSourceFinderInterface {
         const sidecarPath = path.join(path.dirname(video), `${stem}.${track.language}.srt`);
         if (!samePath(sidecarPath, targetSrtPath) && await isExist(sidecarPath)) {
             this.logger.verbose(`Sync: Reusing previously extracted ${track.language} reference at ${sidecarPath}`);
-            return { source: { srtPath: sidecarPath, language: track.language, origin: "embedded" }, bitmapOnlyLanguages: [] };
+            return { source: { srtPath: sidecarPath, language: track.language, origin: "embedded", dispose: NO_CLEANUP }, bitmapOnlyLanguages: [] };
         }
 
         const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ktuvit-sync-"));
@@ -189,14 +204,14 @@ export class ReferenceSourceFinder implements ReferenceSourceFinderInterface {
 
         this.logger.info(`Sync: Extracted ${track.language} reference from ${path.basename(video)}`);
         return {
-            source: { srtPath: outPath, language: track.language, origin: "embedded", temporary: true },
+            source: { srtPath: outPath, language: track.language, origin: "embedded", dispose: () => removeDir(tempDir) },
             bitmapOnlyLanguages: []
         };
     }
 
     private async findSidecar(stem: string, dirs: string[], targetSrtPath: string): Promise<ReferenceSource | null> {
         for (const language of this.languages) {
-            for (const suffix of SIDECAR_SUFFIXES[language] ?? [language]) {
+            for (const suffix of aliasesFor(language)) {
                 for (const dir of dirs) {
                     const candidate = path.join(dir, `${stem}.${suffix}.srt`);
                     // Never let the file the user clicked become its own reference.
@@ -205,7 +220,7 @@ export class ReferenceSourceFinder implements ReferenceSourceFinderInterface {
                     }
                     if (await isExist(candidate)) {
                         this.logger.info(`Sync: Using ${language} sidecar reference ${path.basename(candidate)}`);
-                        return { srtPath: candidate, language, origin: "sidecar" };
+                        return { srtPath: candidate, language, origin: "sidecar", dispose: NO_CLEANUP };
                     }
                 }
             }
@@ -234,6 +249,3 @@ function samePath(a: string, b: string): boolean {
     return path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase();
 }
 
-function errorText(e: unknown): string {
-    return e instanceof Error ? e.message : String(e);
-}

@@ -62,11 +62,11 @@ describe("fitSegments", () => {
         expect(runs).toHaveLength(1);
     });
 
-    it("reports rawScore without the penalty and totalScore with it", () => {
+    it("reports totalScore with the split penalty already deducted", () => {
         const truth = [...Array<number>(5).fill(0), ...Array<number>(5).fill(1)];
         const result = fitSegments({ itemCount: 10, offsetCount: 2, scoreAt: scorerFor(truth), splitPenalty: 100 });
 
-        expect(result.rawScore).toBe(1000);
+        // 10 items x 100 reward, minus one 100 split.
         expect(result.totalScore).toBe(900);
     });
 

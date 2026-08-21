@@ -124,9 +124,9 @@ flowchart TD
     D -- No --> F([Notify WARNING: match looks weak<br/>original is in the .bak])
 ```
 
-Gates G4/G5 (Ollama reachable, embedding model pulled) arrive with Phase 3. They are **soft**: they
-downgrade the bead scorer, they never stop the sync. Stages 2 and 3 — the bead DP and the segment
-refit — slot between Stage 1 and Stage 4 without changing this shape.
+Sync uses no AI and needs no external service. A text-matching stage between Stage 1 and Stage 4 is
+described in `docs/sync-algorithm.md`, but nothing for it is built or configured — see
+`docs/plan/subtitle-sync-v2.md` for that design.
 
 ---
 

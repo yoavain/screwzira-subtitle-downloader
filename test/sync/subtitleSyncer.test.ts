@@ -7,13 +7,13 @@ import type { ReferenceSourceFinderInterface, ReferenceSource } from "~src/sync/
 import { parseSrt } from "~src/sync/subtitleParser";
 import { writeSrt } from "~src/sync/subtitleWriter";
 import type { SubtitleEntry } from "~src/sync/types";
-import { MockLogger } from "~test/mocks";
+import { MockLogger, MockNotifier } from "~test/mocks";
 import { NotificationType } from "~src/notifier";
 
 const logger = new MockLogger();
 
 function makeNotifier() {
-    return { notif: jest.fn() };
+    return new MockNotifier();
 }
 
 function finderReturning(source: ReferenceSource | null): ReferenceSourceFinderInterface {
@@ -85,7 +85,7 @@ describe("SubtitleSyncer — hard gates notify and stop", () => {
         fs.writeFileSync(refPath, "");
 
         const outcome = await new SubtitleSyncer(
-            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar", dispose: () => undefined }),
             logger,
             notifier
         ).sync(target);
@@ -118,7 +118,7 @@ describe("SubtitleSyncer — successful sync", () => {
         const notifier = makeNotifier();
 
         const outcome = await new SubtitleSyncer(
-            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar", dispose: () => undefined }),
             logger,
             notifier
         ).sync(target);
@@ -134,7 +134,7 @@ describe("SubtitleSyncer — successful sync", () => {
         const before = fs.readFileSync(target, "utf-8");
 
         await new SubtitleSyncer(
-            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar", dispose: () => undefined }),
             logger,
             makeNotifier()
         ).sync(target);
@@ -147,7 +147,7 @@ describe("SubtitleSyncer — successful sync", () => {
         const original = parseSrt(fs.readFileSync(target, "utf-8"));
 
         await new SubtitleSyncer(
-            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar", dispose: () => undefined }),
             logger,
             makeNotifier()
         ).sync(target);
@@ -166,7 +166,7 @@ describe("SubtitleSyncer — successful sync", () => {
         fs.writeFileSync(tempRef, writeSrt(makeEntries(40)), "utf-8");
 
         await new SubtitleSyncer(
-            finderReturning({ srtPath: tempRef, language: "fr", origin: "embedded", temporary: true }),
+            finderReturning({ srtPath: tempRef, language: "fr", origin: "embedded", dispose: () => fs.rmSync(tempDir, { recursive: true, force: true }) }),
             logger,
             makeNotifier()
         ).sync(target);
@@ -179,7 +179,7 @@ describe("SubtitleSyncer — successful sync", () => {
         const { target, refPath } = setup();
 
         await new SubtitleSyncer(
-            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar", dispose: () => undefined }),
             logger,
             makeNotifier()
         ).sync(target);
@@ -194,7 +194,7 @@ describe("SubtitleSyncer — successful sync", () => {
         fs.writeFileSync(tempRef, "", "utf-8"); // empty -> REFERENCE_EMPTY
 
         const outcome = await new SubtitleSyncer(
-            finderReturning({ srtPath: tempRef, language: "fr", origin: "embedded", temporary: true }),
+            finderReturning({ srtPath: tempRef, language: "fr", origin: "embedded", dispose: () => fs.rmSync(tempDir, { recursive: true, force: true }) }),
             logger,
             makeNotifier()
         ).sync(target);
@@ -212,7 +212,7 @@ describe("SubtitleSyncer — successful sync", () => {
         const notifier = makeNotifier();
 
         const outcome = await new SubtitleSyncer(
-            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar", dispose: () => undefined }),
             logger,
             notifier
         ).sync(target);
@@ -228,7 +228,7 @@ describe("SubtitleSyncer — successful sync", () => {
 
         // A confidence floor above any achievable value forces the low-quality path.
         const outcome = await new SubtitleSyncer(
-            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar" }),
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar", dispose: () => undefined }),
             logger,
             notifier,
             { minConfidence: 1.1 }

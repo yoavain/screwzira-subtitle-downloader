@@ -61,15 +61,3 @@ function shiftFor(entries: SubtitleEntry[], transform: DesyncTransform): (t: num
     }
 }
 
-/** How many distinct segments a transform should produce. Used to assert segmentation. */
-export function expectedSegments(transform: DesyncTransform): number {
-    switch (transform.type) {
-        case "constant":
-        case "scale":
-            return 1;
-        case "cuts":
-            return transform.points.length + 1;
-        case "drift":
-            return -1; // depends on the split penalty; assert a range instead
-    }
-}

@@ -2,6 +2,8 @@ import * as path from "node:path";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import type { LoggerInterface } from "~src/logger";
+import { isLanguage } from "~src/languages";
+import { errorText } from "~src/stringUtils";
 
 const execAsync = promisify(exec);
 
@@ -13,8 +15,6 @@ interface MkvTrack {
         codec_id?: string;
         language?: string;
         language_ietf?: string;
-        default_track?: boolean;
-        track_name?: string;
     };
 }
 
@@ -39,9 +39,25 @@ export interface SubtitleTrackSearch {
 }
 
 export interface MkvExtractorInterface {
+    /**
+     * Every subtitle track in the file, from a single mkvmerge spawn.
+     *
+     * Use this when you need to answer more than one question about the same file —
+     * `findSubtitleTrack` and `hasSubtitleTrack` each spawn mkvmerge, so calling both is
+     * two subprocesses and two parses of identical JSON.
+     */
+    listSubtitleTracks: (mkvPath: string) => Promise<SubtitleTrackInfo[]>;
     findSubtitleTrack: (mkvPath: string, languages: string[]) => Promise<SubtitleTrackSearch>;
     hasSubtitleTrack: (mkvPath: string, languages: string[]) => Promise<boolean>;
     extractSubtitle: (mkvPath: string, trackId: number, outPath: string) => Promise<void>;
+}
+
+export interface SubtitleTrackInfo {
+    trackId: number;
+    codec: string;
+    /** As tagged in the file; compare with `isLanguage`, not with `===`. */
+    language: string;
+    isText: boolean;
 }
 
 export class MkvExtractor implements MkvExtractorInterface {
@@ -56,36 +72,30 @@ export class MkvExtractor implements MkvExtractorInterface {
         this.mkvExtractPath = path.join(mkvtoolnixDir, "mkvextract.exe");
     }
 
-    async findSubtitleTrack(mkvPath: string, languages: string[]): Promise<SubtitleTrackSearch> {
+    async listSubtitleTracks(mkvPath: string): Promise<SubtitleTrackInfo[]> {
         this.logger.debug(`Sync: Identifying tracks in ${mkvPath}`);
         const { stdout } = await execAsync(`"${this.mkvMergePath}" -J "${mkvPath}"`);
         const tracks = (JSON.parse(stdout) as { tracks: MkvTrack[] }).tracks ?? [];
-        const subtitles = tracks.filter((t) => t.type === "subtitles");
+        const subtitles = tracks
+            .filter((t) => t.type === "subtitles")
+            .map((t) => ({
+                trackId: t.id,
+                codec: t.codec,
+                language: t.properties?.language ?? t.properties?.language_ietf?.split("-")[0] ?? "",
+                isText: TEXT_CODECS.includes(t.properties?.codec_id ?? "")
+            }));
 
         // Log the whole inventory: when nothing usable turns up, the log should answer why
         // without anyone having to re-run mkvmerge by hand.
         this.logger.debug(
             `Sync: ${subtitles.length} subtitle track(s): ` +
-            subtitles.map((t) => `id=${t.id} codec=${t.properties?.codec_id ?? "?"} lang=${t.properties?.language ?? "?"}`).join(", ")
+            subtitles.map((t) => `id=${t.trackId} codec=${t.codec} lang=${t.language || "?"} text=${t.isText}`).join(", ")
         );
+        return subtitles;
+    }
 
-        // Language priority wins over track order: a French track later in the file still
-        // beats an English track earlier in it.
-        for (const language of languages) {
-            const track = subtitles.find((t) => isTextSubtitle(t) && matchesLanguage(t, language));
-            if (track) {
-                this.logger.debug(`Sync: Found ${language} subtitle track id=${track.id} codec=${track.codec}`);
-                return { track: { trackId: track.id, codec: track.codec, language }, bitmapOnlyLanguages: [] };
-            }
-        }
-
-        const bitmapOnlyLanguages = languages.filter((language) =>
-            subtitles.some((t) => !isTextSubtitle(t) && matchesLanguage(t, language))
-        );
-        if (bitmapOnlyLanguages.length > 0) {
-            this.logger.debug(`Sync: ${bitmapOnlyLanguages.join("/")} present only as image-based track(s)`);
-        }
-        return { track: null, bitmapOnlyLanguages };
+    async findSubtitleTrack(mkvPath: string, languages: string[]): Promise<SubtitleTrackSearch> {
+        return selectSubtitleTrack(await this.listSubtitleTracks(mkvPath), languages, this.logger);
     }
 
     async hasSubtitleTrack(mkvPath: string, languages: string[]): Promise<boolean> {
@@ -93,7 +103,7 @@ export class MkvExtractor implements MkvExtractorInterface {
             return (await this.findSubtitleTrack(mkvPath, languages)).track !== null;
         }
         catch (e) {
-            this.logger.warn(`Sync: Could not inspect MKV tracks for ${mkvPath}: ${(e as Error).message}`);
+            this.logger.warn(`Sync: Could not inspect MKV tracks for ${mkvPath}: ${errorText(e)}`);
             return false;
         }
     }
@@ -104,27 +114,31 @@ export class MkvExtractor implements MkvExtractorInterface {
     }
 }
 
-function isTextSubtitle(track: MkvTrack): boolean {
-    return track.type === "subtitles" && TEXT_CODECS.includes(track.properties?.codec_id ?? "");
-}
-
 /**
- * Matches ISO 639-2/B, 639-2/T and BCP 47 spellings of the same language, so "fr" also
- * matches a track tagged "fre" or "fra", and "he" also matches "heb" or "iw".
+ * Pick the best text track for `languages`, in priority order, from an already-listed set.
+ *
+ * Language priority beats track order: a French track later in the file still beats an
+ * English one earlier in it. Exported so a caller holding one listing can answer several
+ * language questions without spawning mkvmerge again.
  */
-function matchesLanguage(track: MkvTrack, language: string): boolean {
-    const aliases = LANGUAGE_ALIASES[language.toLowerCase()] ?? [language.toLowerCase()];
-    const declared = (track.properties?.language ?? "").toLowerCase();
-    const ietf = (track.properties?.language_ietf ?? "").toLowerCase().split("-")[0];
-    return aliases.includes(declared) || aliases.includes(ietf);
-}
+export function selectSubtitleTrack(
+    subtitles: SubtitleTrackInfo[],
+    languages: string[],
+    logger?: LoggerInterface
+): SubtitleTrackSearch {
+    for (const language of languages) {
+        const track = subtitles.find((t) => t.isText && isLanguage(t.language, language));
+        if (track) {
+            logger?.debug(`Sync: Found ${language} subtitle track id=${track.trackId} codec=${track.codec}`);
+            return { track: { trackId: track.trackId, codec: track.codec, language }, bitmapOnlyLanguages: [] };
+        }
+    }
 
-const LANGUAGE_ALIASES: Record<string, string[]> = {
-    fr: ["fr", "fre", "fra", "french"],
-    fre: ["fr", "fre", "fra", "french"],
-    fra: ["fr", "fre", "fra", "french"],
-    en: ["en", "eng", "english"],
-    eng: ["en", "eng", "english"],
-    he: ["he", "heb", "iw", "hebrew"],
-    heb: ["he", "heb", "iw", "hebrew"]
-};
+    const bitmapOnlyLanguages = languages.filter((language) =>
+        subtitles.some((t) => !t.isText && isLanguage(t.language, language))
+    );
+    if (bitmapOnlyLanguages.length > 0) {
+        logger?.debug(`Sync: ${bitmapOnlyLanguages.join("/")} present only as image-based track(s)`);
+    }
+    return { track: null, bitmapOnlyLanguages };
+}

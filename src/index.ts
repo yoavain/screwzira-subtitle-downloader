@@ -55,7 +55,8 @@ const embeddedSubtitleChecker = async (p: string): Promise<boolean> => {
     if (!p.toLowerCase().endsWith(".mkv")) {
         return false;
     }
-    return mkvExtractor.hasSubtitleTrack(p, ["he"]);
+    // Same language the download flow targets, rather than a second hardcoded spelling.
+    return mkvExtractor.hasSubtitleTrack(p, [config.getLanguageCode()]);
 };
 
 // handle single file. Returns true if a call to provider was made
@@ -109,9 +110,10 @@ const runSync = async (input: string): Promise<void> => {
     const syncConfig = config.getSyncConfig();
     const referenceSourceFinder = new ReferenceSourceFinder(
         syncConfig.referenceLanguages,
-        [config.getLanguageCode().toLowerCase()],
+        config.getLanguageCode(),
         mkvExtractor,
-        logger
+        logger,
+        config.getExtensions()
     );
     const subtitleSyncer = new SubtitleSyncer(referenceSourceFinder, logger, notifier, syncConfig);
     logger.info(`*** Syncing "${input}" ***`);

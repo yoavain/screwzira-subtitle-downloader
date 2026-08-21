@@ -15,6 +15,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { parseSrt } from "~src/sync/subtitleParser";
+import { isExistSync } from "~src/fileUtils";
 import type { SubtitleEntry } from "~src/sync/types";
 
 export const SYNC_RESOURCES = path.resolve(__dirname, "../resources/sync");
@@ -34,7 +35,7 @@ export interface SyncCase {
 }
 
 export function listCaseNames(): string[] {
-    if (!fs.existsSync(CASES_DIR)) {
+    if (!isExistSync(CASES_DIR)) {
         return [];
     }
     return fs
@@ -116,7 +117,7 @@ function readUtf8(file: string): string {
 }
 
 function walk(dir: string, visit: (file: string) => void): void {
-    if (!fs.existsSync(dir)) {
+    if (!isExistSync(dir)) {
         return;
     }
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

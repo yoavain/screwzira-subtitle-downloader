@@ -43,10 +43,6 @@ describe("Test replaceTitleIfNeeded", () => {
 });
 
 describe("Test sync-related config methods", () => {
-    it("getSubtitlesSuffix() returns languageCode + '.srt'", () => {
-        expect(config.getSubtitlesSuffix()).toBe("heb.srt");
-    });
-
     it("getSyncConfig() returns object with correct shape and default values", () => {
         const syncConfig = config.getSyncConfig();
         expect(syncConfig).toEqual({
@@ -54,9 +50,7 @@ describe("Test sync-related config methods", () => {
             splitPenaltyMs: 7000,
             maxOffsetMs: 180_000,
             minSegmentEntries: 3,
-            minConfidence: 0.25,
-            ollamaBaseUrl: "",
-            syncEmbeddingModel: "qwen3-embedding:0.6b"
+            minConfidence: 0.25
         });
     });
 

@@ -30,11 +30,9 @@ export interface SplitFitResult {
     runs: FittedRun[];
     /** Sum of scoreAt along the chosen path, with split penalties already deducted. */
     totalScore: number;
-    /** Sum of scoreAt along the chosen path, before penalties. */
-    rawScore: number;
 }
 
-const EMPTY_RESULT: SplitFitResult = { runs: [], totalScore: 0, rawScore: 0 };
+const EMPTY_RESULT: SplitFitResult = { runs: [], totalScore: 0 };
 
 export function fitSegments(input: SplitFitInput): SplitFitResult {
     const { itemCount, offsetCount, scoreAt, splitPenalty } = input;
@@ -112,10 +110,8 @@ export function fitSegments(input: SplitFitInput): SplitFitResult {
     }
 
     const runs: FittedRun[] = [];
-    let rawScore = 0;
     let runStart = 0;
     for (let i = 0; i < itemCount; i++) {
-        rawScore += scoreAt(i, path[i]);
         const isLast = i === itemCount - 1;
         if (isLast || path[i + 1] !== path[i]) {
             runs.push({ startIdx: runStart, endIdx: i, offsetIdx: path[i] });
@@ -123,7 +119,7 @@ export function fitSegments(input: SplitFitInput): SplitFitResult {
         }
     }
 
-    return { runs, totalScore, rawScore };
+    return { runs, totalScore };
 }
 
 /**

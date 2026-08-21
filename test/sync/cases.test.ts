@@ -16,7 +16,7 @@ import { SubtitleSyncer } from "~src/sync/subtitleSyncer";
 import { parseSrt } from "~src/sync/subtitleParser";
 import type { SubtitleEntry, TimeSpan } from "~src/sync/types";
 import type { ReferenceSourceFinderInterface } from "~src/sync/referenceSourceFinder";
-import { MockLogger } from "~test/mocks";
+import { MockLogger, MockNotifier } from "~test/mocks";
 import { applyDesync } from "~test/sync/desync";
 import { assertWellFormed, scoreSync } from "~test/sync/scoreSync";
 import { copyCaseToTmp, expectFixturesUnchanged, hashFixtures, listCaseNames, loadCase } from "~test/sync/fixtures";
@@ -61,14 +61,22 @@ describe("sync fixtures", () => {
     describe.each(caseNames)("case: %s", (name) => {
         const testCase = loadCase(name);
 
+        // One fit per fixture, not one per assertion: each timeWarp call is 9 framerate ratios
+        // x up to 200 candidate offsets x every entry.
+        let warp: ReturnType<typeof timeWarp>;
+        let baseline: SubtitleEntry[];
+
+        beforeAll(() => {
+            warp = timeWarp(testCase.target, testCase.reference);
+            baseline = retime(testCase.target, warp);
+        });
+
         it("parses both sides", () => {
             expect(testCase.target.length).toBeGreaterThan(0);
             expect(testCase.reference.length).toBeGreaterThan(0);
         });
 
         it("covers every entry with contiguous segments at scale 1", () => {
-            const warp = timeWarp(testCase.target, testCase.reference);
-
             expect(warp.segments.length).toBeGreaterThan(0);
             expect(warp.segments[0].startIdx).toBe(0);
             expect(warp.segments[warp.segments.length - 1].endIdx).toBe(testCase.target.length - 1);
@@ -81,19 +89,15 @@ describe("sync fixtures", () => {
         });
 
         it("reports high confidence", () => {
-            expect(timeWarp(testCase.target, testCase.reference).confidence).toBeGreaterThan(0.9);
+            expect(warp.confidence).toBeGreaterThan(0.9);
         });
 
         it("increases overlap with the reference", () => {
-            const warp = timeWarp(testCase.target, testCase.reference);
-            const corrected = retime(testCase.target, warp);
-
-            expect(overlapMs(corrected, testCase.reference)).toBeGreaterThanOrEqual(overlapMs(testCase.target, testCase.reference));
+            expect(overlapMs(baseline, testCase.reference)).toBeGreaterThanOrEqual(overlapMs(testCase.target, testCase.reference));
         });
 
         it("emits a well-formed subtitle list", () => {
-            const corrected = retime(testCase.target, timeWarp(testCase.target, testCase.reference));
-            assertWellFormed(corrected, testCase.target);
+            assertWellFormed(baseline, testCase.target);
         });
 
         it.each([
@@ -103,7 +107,6 @@ describe("sync fixtures", () => {
             // Syncing the pristine target gives the baseline. A pure shift does not change the
             // file's segment structure, so re-syncing must land back on the baseline exactly,
             // whatever the fixture's own residual offset happens to be.
-            const baseline = retime(testCase.target, timeWarp(testCase.target, testCase.reference));
             const desynced = applyDesync(testCase.target, transform);
             const recovered = retime(desynced, timeWarp(desynced, testCase.reference));
 
@@ -116,7 +119,6 @@ describe("sync fixtures", () => {
             // Looser than the shift cases on purpose. A global stretch interacts with any
             // segment boundaries the file already has, so a multi-segment fixture cannot come
             // back exactly. Sub-second is the honest bar here.
-            const baseline = retime(testCase.target, timeWarp(testCase.target, testCase.reference));
             const desynced = applyDesync(testCase.target, { type: "scale", factor: 25 / 23.976 });
             const recovered = retime(desynced, timeWarp(desynced, testCase.reference));
 
@@ -227,7 +229,7 @@ describe("sync fixtures — end to end through SubtitleSyncer", () => {
         const finder: ReferenceSourceFinderInterface = {
             find: jest.fn().mockResolvedValue({ source: { srtPath: copy.referencePath, language: "en", origin: "sidecar" } })
         };
-        const notifier = { notif: jest.fn() };
+        const notifier = new MockNotifier();
 
         const outcome = await new SubtitleSyncer(finder, logger, notifier).sync(copy.targetPath);
 

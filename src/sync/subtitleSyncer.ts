@@ -14,14 +14,15 @@ import type { ReferenceSource, ReferenceSourceFinderInterface } from "~src/sync/
 import { parseSrt } from "~src/sync/subtitleParser";
 import { writeSrt } from "~src/sync/subtitleWriter";
 import { timeWarp } from "~src/sync/timeWarp";
+import type { TimeWarpOptions } from "~src/sync/timeWarp";
 import { retime } from "~src/sync/retimer";
 import type { SubtitleEntry, TimeWarp } from "~src/sync/types";
 import { GateFailure } from "~src/sync/syncGates";
+import { errorText } from "~src/stringUtils";
 
-export interface SyncOptions {
-    splitPenaltyMs?: number;
-    maxOffsetMs?: number;
-    minSegmentEntries?: number;
+/** Everything timeWarp accepts, plus the syncer's own reporting threshold. Extending rather
+ * than re-listing keeps offsetBinMs / maxCandidateOffsets / framerateRatios reachable. */
+export interface SyncOptions extends TimeWarpOptions {
     /** Below this, the result is reported as low quality rather than applied silently. */
     minConfidence?: number;
 }
@@ -75,24 +76,17 @@ export class SubtitleSyncer {
             return { ok: true, warp };
         }
         finally {
-            this.discardTemporary(reference);
+            this.release(reference);
         }
     }
 
-    /**
-     * Remove an extracted reference. Only ever touches a file this run created in a temp
-     * folder — a sidecar the user already had is never deleted.
-     */
-    private discardTemporary(reference: ReferenceSource): void {
-        if (!reference.temporary) {
-            return;
-        }
+    /** Hand the reference back so the finder can release anything it created. */
+    private release(reference: ReferenceSource): void {
         try {
-            fs.rmSync(path.dirname(reference.srtPath), { recursive: true, force: true });
-            this.logger.verbose(`Sync: Removed the extracted ${reference.language} reference`);
+            reference.dispose();
         }
         catch (e) {
-            this.logger.warn(`Sync: Could not remove the extracted reference: ${errorText(e)}`);
+            this.logger.warn(`Sync: Could not release the reference: ${errorText(e)}`);
         }
     }
 
@@ -141,9 +135,6 @@ export class SubtitleSyncer {
     }
 }
 
-function errorText(e: unknown): string {
-    return e instanceof Error ? e.message : String(e);
-}
 
 /**
  * Summarise the shift for the user.
