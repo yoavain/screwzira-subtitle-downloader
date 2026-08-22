@@ -1,5 +1,5 @@
 import { cleanText, splitText } from "~src/stringUtils";
-import * as path from "path";
+import * as path from "node:path";
 import type { ConfigInterface } from "~src/config";
 import type { LoggerInterface } from "~src/logger";
 import { isExist } from "~src/fileUtils";

@@ -1,16 +1,16 @@
-import * as path from "path";
+import * as path from "node:path";
 import * as fileUtils from "~src/fileUtils";
 import type { ClassifierInterface, MovieFileClassificationInterface, TvEpisodeFileClassificationInterface } from "~src/classifier";
 import { Classifier, FileClassification } from "~src/classifier";
 import { KtuvitParser } from "~src/parsers/ktuvit/ktuvitParser";
-import { MockConfig, MockLogger, MockNotifier } from "~test/__mocks__";
+import { MockConfig, MockLogger, MockNotifier } from "~test/mocks";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import type { LoggerInterface } from "~src/logger";
 import type { NotifierInterface } from "~src/notifier";
 import type { ConfigInterface } from "~src/config";
 import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 import { PERSISTENT_CACHE_DIR, TRANSIENT_CACHE_DIR } from "~test/parsers/ktuvit/tvShowIdCache.test";
-import { randomUUID as uuid } from "crypto";
+import { randomUUID as uuid } from "node:crypto";
 
 jest.setTimeout(20000);
 

@@ -1,0 +1,5 @@
+# Sync test fixtures are INPUTS: tests assert they are byte-identical before and after a
+# run. With core.autocrlf enabled, git would store them LF and convert on checkout, so the
+# bytes would differ between a Windows and a Linux checkout. Treat them as binary to keep
+# them exactly as committed.
+test/resources/sync/cases/** -text

@@ -26,7 +26,6 @@ jest.mock("winston", () => ({
 describe("Test logger", () => {
     it.each(["info", "debug", "verbose", "warn", "error"])("Test logger %s", (level) => {
         const logger = new Logger("mockLogFile");
-        // eslint-disable-next-line security/detect-object-injection
         logger[level]("mock message");
         expect(mockLog).toHaveBeenCalledTimes(1);
         expect(mockLog.mock.calls[0][0]).toEqual(level);
@@ -36,5 +35,15 @@ describe("Test logger", () => {
         const logger = new Logger("mockLogFile");
         const logFileLocation = logger.getLogFileLocation();
         expect(logFileLocation).toEqual("mockLogFile");
+    });
+
+    it("setLogLevel with a truthy level sets the transport level", () => {
+        const logger = new Logger("mockLogFile");
+        expect(() => logger.setLogLevel("info")).not.toThrow();
+    });
+
+    it("setLogLevel with an empty string is a no-op", () => {
+        const logger = new Logger("mockLogFile");
+        expect(() => logger.setLogLevel("")).not.toThrow();
     });
 });
