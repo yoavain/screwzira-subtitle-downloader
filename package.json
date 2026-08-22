@@ -35,7 +35,7 @@
         "npm": ">=11"
     },
     "dependencies": {
-        "flat-cache": "6.1.20",
+        "flat-cache": "6.1.23",
         "node-notifier": "10.0.1",
         "winston": "3.19.0"
     },
