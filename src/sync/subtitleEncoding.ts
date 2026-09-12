@@ -14,6 +14,8 @@ const UTF8_BOM = Buffer.from([0xEF, 0xBB, 0xBF]);
 /** Language-specific fallback for bytes that are not valid UTF-8. */
 const LEGACY_ENCODING = "windows-1255";
 
+const HEBREW_LETTER = /[א-ת]/g;
+
 export function decodeSubtitle(bytes: Buffer): string {
     // TextDecoder consumes a leading BOM, which parseSrt would otherwise read as part of
     // the first index and drop that entry.
@@ -21,8 +23,19 @@ export function decodeSubtitle(bytes: Buffer): string {
         return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
     }
     catch {
-        return new TextDecoder(LEGACY_ENCODING).decode(bytes);
+        // Not strictly UTF-8. It may still be a UTF-8 file with one stray legacy byte, and
+        // decoding that as Windows-1255 garbles every Hebrew line to save one byte. The
+        // target is always Hebrew, so the decoding that yields more Hebrew letters is the
+        // right one. Counting U+FFFD cannot tell them apart: Windows-1255 maps nearly every
+        // byte to some character, so it produces none either way.
+        const utf8 = new TextDecoder("utf-8").decode(bytes);
+        const legacy = new TextDecoder(LEGACY_ENCODING).decode(bytes);
+        return countHebrewLetters(legacy) > countHebrewLetters(utf8) ? legacy : utf8;
     }
+}
+
+function countHebrewLetters(text: string): number {
+    return text.split(HEBREW_LETTER).length - 1;
 }
 
 export function encodeSubtitle(text: string): Buffer {
