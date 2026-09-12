@@ -12,6 +12,7 @@ import type { NotifierInterface } from "~src/notifier";
 import { NotificationType } from "~src/notifier";
 import type { ReferenceSource, ReferenceSourceFinderInterface } from "~src/sync/referenceSourceFinder";
 import { parseSrt } from "~src/sync/subtitleParser";
+import { decodeSubtitle, encodeSubtitle } from "~src/sync/subtitleEncoding";
 import { writeSrt } from "~src/sync/subtitleWriter";
 import { timeWarp } from "~src/sync/timeWarp";
 import type { TimeWarpOptions } from "~src/sync/timeWarp";
@@ -70,7 +71,7 @@ export class SubtitleSyncer {
             const corrected = retime(target, warp);
 
             this.backup(targetSrtPath);
-            fs.writeFileSync(targetSrtPath, writeSrt(corrected), "utf-8");
+            fs.writeFileSync(targetSrtPath, encodeSubtitle(writeSrt(corrected)));
 
             this.report(targetSrtPath, warp);
             return { ok: true, warp };
@@ -119,7 +120,7 @@ export class SubtitleSyncer {
 
     private readEntries(srtPath: string, label: string): SubtitleEntry[] | null {
         try {
-            return parseSrt(fs.readFileSync(srtPath, "utf-8"));
+            return parseSrt(decodeSubtitle(fs.readFileSync(srtPath)));
         }
         catch (e) {
             this.logger.warn(`Sync: Failed to read ${label} ${srtPath}: ${errorText(e)}`);

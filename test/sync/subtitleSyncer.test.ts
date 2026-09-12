@@ -6,6 +6,8 @@ import { GateFailure } from "~src/sync/syncGates";
 import type { ReferenceSourceFinderInterface, ReferenceSource } from "~src/sync/referenceSourceFinder";
 import { parseSrt } from "~src/sync/subtitleParser";
 import { writeSrt } from "~src/sync/subtitleWriter";
+import { decodeSubtitle } from "~src/sync/subtitleEncoding";
+import { toWindows1255 } from "~test/sync/windows1255";
 import type { SubtitleEntry } from "~src/sync/types";
 import { MockLogger, MockNotifier } from "~test/mocks";
 import { NotificationType } from "~src/notifier";
@@ -155,6 +157,24 @@ describe("SubtitleSyncer — successful sync", () => {
         const corrected = parseSrt(fs.readFileSync(target, "utf-8"));
         expect(corrected).toHaveLength(original.length);
         expect(corrected.map((e) => e.text)).toEqual(original.map((e) => e.text));
+    });
+
+    it("keeps Hebrew text when the target is Windows-1255", async () => {
+        // A real Windows-1255 file came back with every Hebrew letter replaced by U+FFFD.
+        const reference = makeEntries(40);
+        const hebrew = makeEntries(40, 2500).map((entry) => ({ ...entry, text: `שורה ${entry.index}` }));
+        const target = path.join(tmpDir, "Movie.heb.srt");
+        fs.writeFileSync(target, toWindows1255(writeSrt(hebrew).replace(/\n/g, "\r\n")));
+        const refPath = write("Movie.fr.srt", reference);
+
+        await new SubtitleSyncer(
+            finderReturning({ srtPath: refPath, language: "fr", origin: "sidecar", dispose: () => undefined }),
+            logger,
+            makeNotifier()
+        ).sync(target);
+
+        const corrected = parseSrt(decodeSubtitle(fs.readFileSync(target)));
+        expect(corrected.map((e) => e.text)).toEqual(hebrew.map((e) => e.text));
     });
 
     it("deletes an extracted reference when it is done", async () => {

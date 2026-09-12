@@ -100,6 +100,7 @@ Sync is a four-stage pipeline. Only Stage 2 will ever involve AI, and it is not 
 | `src/sync/types.ts` | `SubtitleEntry`, `TimeSpan`, `Segment`, `TimeWarp` interfaces |
 | `src/sync/subtitleParser.ts` | `parseSrt()` |
 | `src/sync/subtitleWriter.ts` | `writeSrt()`, `formatTimestamp()` |
+| `src/sync/subtitleEncoding.ts` | `decodeSubtitle()` — UTF-8 when the bytes are valid UTF-8; otherwise lenient UTF-8 or Windows-1255, whichever yields more Hebrew letters; `encodeSubtitle()` — always UTF-8 with BOM. Every subtitle read and write in the syncer goes through these, never `readFileSync(..., "utf-8")` |
 | `src/sync/mkvExtractor.ts` | `MkvExtractor` — runs `mkvmerge -J` and `mkvextract`. `findSubtitleTrack(path, languages)` is language-parameterised with ISO 639-2/639-3/BCP-47 alias matching; used for both embedded Hebrew detection and reference extraction |
 | `src/sync/referenceSourceFinder.ts` | Given the target `.srt`, derives the stem, locates the video, and resolves a reference — embedded track first, then sidecar; French before English |
 | `src/sync/syncGates.ts` | `GateFailure` — the reasons Flow B can stop before writing |

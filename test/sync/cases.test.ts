@@ -14,6 +14,7 @@ import { timeWarp } from "~src/sync/timeWarp";
 import { retime } from "~src/sync/retimer";
 import { SubtitleSyncer } from "~src/sync/subtitleSyncer";
 import { parseSrt } from "~src/sync/subtitleParser";
+import { decodeSubtitle } from "~src/sync/subtitleEncoding";
 import type { SubtitleEntry, TimeSpan } from "~src/sync/types";
 import type { ReferenceSourceFinderInterface } from "~src/sync/referenceSourceFinder";
 import { MockLogger, MockNotifier } from "~test/mocks";
@@ -224,7 +225,7 @@ describe("sync fixtures — end to end through SubtitleSyncer", () => {
     it("writes the corrected subtitle and a .bak, leaving the fixtures untouched", async () => {
         const name = caseNames[0];
         copy = copyCaseToTmp(name);
-        const original = fs.readFileSync(copy.targetPath, "utf-8");
+        const original = fs.readFileSync(copy.targetPath);
 
         const finder: ReferenceSourceFinderInterface = {
             find: jest.fn().mockResolvedValue({ source: { srtPath: copy.referencePath, language: "en", origin: "sidecar" } })
@@ -234,10 +235,10 @@ describe("sync fixtures — end to end through SubtitleSyncer", () => {
         const outcome = await new SubtitleSyncer(finder, logger, notifier).sync(copy.targetPath);
 
         expect(outcome.ok).toBe(true);
-        expect(fs.readFileSync(`${copy.targetPath}.bak`, "utf-8")).toBe(original);
+        expect(fs.readFileSync(`${copy.targetPath}.bak`).equals(original)).toBe(true);
 
-        const corrected = parseSrt(fs.readFileSync(copy.targetPath, "utf-8"));
-        const before = parseSrt(original);
+        const corrected = parseSrt(decodeSubtitle(fs.readFileSync(copy.targetPath)));
+        const before = parseSrt(decodeSubtitle(original));
         expect(corrected).toHaveLength(before.length);
         expect(corrected.map((e) => e.text)).toEqual(before.map((e) => e.text));
         expect(corrected[0].start).not.toBe(before[0].start);
