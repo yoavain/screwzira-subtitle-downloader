@@ -1,7 +1,7 @@
 import { toTitleCase } from "~src/stringUtils";
 import type { Subtitle } from "~src/parsers/commonParser";
 import { CommonParser } from "~src/parsers/commonParser";
-import { parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
+import { isDownloadErrorPage, parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
 import * as path from "node:path";
 import type { ParserInterface } from "~src/parsers/parserInterface";
 import type { LoggerInterface } from "~src/logger";
@@ -44,8 +44,17 @@ type DownloadBestSubtitlesResponse = {
     errorMessage?: string
 }
 
+enum DownloadFileStatus {
+    SUCCESS,
+    FAILED,
+    ERROR_PAGE
+}
+
 export class KtuvitParser extends CommonParser implements ParserInterface {
     private readonly baseUrl: string = "https://www.ktuvit.me";
+    // Ktuvit intermittently serves an error page instead of the subtitle.
+    // The same download identifier keeps failing, so each retry requests a fresh one.
+    private readonly downloadRetryDelaysMs: number[] = [250, 500, 1000, 2000, 4000];
     private readonly email: string;
     private readonly password: string;
     private readonly tShowIdCache: TvShowIdCache;
@@ -308,7 +317,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         }
     }
 
-    private async downloadFile(movieId: string, downloadIdentifier: string, filenameNoExtension: string, relativePath: string, contextMessage: string): Promise<boolean> {
+    private async downloadFile(movieId: string, downloadIdentifier: string, filenameNoExtension: string, relativePath: string, contextMessage: string): Promise<DownloadFileStatus> {
         this.logger.info(`Downloading: ${downloadIdentifier}`);
         const options: FetchOptions = {
             url: `${this.baseUrl}/Services/DownloadFile.ashx?DownloadIdentifier=${downloadIdentifier}`,
@@ -327,11 +336,17 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
             this.logger.debug(`Downloading subtitle for ${contextMessage}`);
             response = await this.fetchWithRetry(options.url, options.requestInit);
             if (response.status === 200) {
+                const body: Buffer = Buffer.from(await response.arrayBuffer());
+                if (isDownloadErrorPage(body)) {
+                    this.logger.warn(`Ktuvit returned an error page instead of a subtitle: "${body.toString("utf-8")}"`);
+                    return DownloadFileStatus.ERROR_PAGE;
+                }
+
                 const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${this.classifier.getSubtitlesSuffix()}`);
                 this.logger.verbose(`writing response to ${destination}`);
 
-                await writeFile(destination, Buffer.from(await response.arrayBuffer()));
-                return true;
+                await writeFile(destination, body);
+                return DownloadFileStatus.SUCCESS;
             }
             else {
                 this.logger.error(response.statusText);
@@ -340,6 +355,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         catch (error) {
             this.logger.error(error instanceof Error ? error.message : String(error));
         }
+        return DownloadFileStatus.FAILED;
     }
 
     private async downloadBestSubtitles(
@@ -347,18 +363,28 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
         filenameNoExtension: string, relativePath: string, contextMessage: string
     ): Promise<DownloadBestSubtitlesResponse> {
         const subtitleId: string = this.findClosestMatch(filenameNoExtension, subtitles, excludeList);
-        const downloadIdentifier: string = await this.getDownloadIdentifier(id, subtitleId, contextMessage);
-        if (!downloadIdentifier) {
+        for (let attempt = 0; ; attempt++) {
+            const downloadIdentifier: string = await this.getDownloadIdentifier(id, subtitleId, contextMessage);
+            if (!downloadIdentifier) {
+                return {
+                    success: false,
+                    errorMessage: `Unable to find subtitle download identifier for ${contextMessage}`
+                };
+            }
+
+            const status: DownloadFileStatus = await this.downloadFile(id, downloadIdentifier, filenameNoExtension, relativePath, contextMessage);
+            if (status === DownloadFileStatus.ERROR_PAGE && attempt < this.downloadRetryDelaysMs.length) {
+                const delayMs: number = this.downloadRetryDelaysMs[attempt];
+                this.logger.info(`Retrying download for ${contextMessage} in ${delayMs}ms (attempt ${attempt + 2} of ${this.downloadRetryDelaysMs.length + 1})`);
+                await new Promise((resolve) => setTimeout(resolve, delayMs));
+                continue;
+            }
+
+            const success: boolean = status === DownloadFileStatus.SUCCESS;
             return {
-                success: false,
-                errorMessage: `Unable to find subtitle download identifier for ${contextMessage}`
+                success,
+                errorMessage: !success && `Failed downloading subtitle for ${contextMessage}`
             };
         }
-
-        const success: boolean = await this.downloadFile(id, downloadIdentifier, filenameNoExtension, relativePath, contextMessage);
-        return {
-            success,
-            errorMessage: !success && `Failed downloading subtitle for ${contextMessage}`
-        };
     }
 }

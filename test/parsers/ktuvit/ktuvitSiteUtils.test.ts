@@ -1,4 +1,4 @@
-import { parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
+import { isDownloadErrorPage, parseDownloadIdentifier, parseId, parseSubtitles } from "~src/parsers/ktuvit/ktuvitSiteUtils";
 import { readFile } from "node:fs/promises";
 import * as path from "node:path";
 import type { Subtitle } from "~src/parsers/commonParser";
@@ -48,5 +48,25 @@ describe("Test ktuvit site utils", () => {
         const downloadIdentifier = parseDownloadIdentifier(output);
 
         expect(downloadIdentifier).toEqual("b53e6717-98ed-4827-9fae-083b5004b22a");
+    });
+
+    describe("isDownloadErrorPage", () => {
+        it("detects the error page Ktuvit returns instead of a subtitle", async () => {
+            const errorPageLocation: string = path.resolve(__dirname, "..", "..", "resources", "parsers", "ktuvit", "downloadRequestNotFound.txt");
+            expect(isDownloadErrorPage(await readFile(errorPageLocation))).toBe(true);
+        });
+
+        it("treats an empty body as an error page", () => {
+            expect(isDownloadErrorPage(Buffer.alloc(0))).toBe(true);
+        });
+
+        it("accepts a subtitle file", () => {
+            expect(isDownloadErrorPage(Buffer.from("1\r\n00:00:30,000 --> 00:00:33,789\r\nשלום\r\n"))).toBe(false);
+        });
+
+        it("accepts a full-size subtitle that quotes the error message in its text", () => {
+            const subtitle = `1\r\n00:00:01,000 --> 00:00:02,000\r\nהבקשה לא נמצאה\r\n\r\n${"2\r\n00:00:03,000 --> 00:00:04,000\r\nטקסט\r\n\r\n".repeat(50)}`;
+            expect(isDownloadErrorPage(Buffer.from(subtitle))).toBe(false);
+        });
     });
 });

@@ -74,9 +74,16 @@ flowchart TD
     G -- No --> G1([Notify: no subtitle match<br/>End])
     G -- Yes --> H[Request download token]
     H --> I[Download .srt file]
-    I --> J[Save as<br/>filename.languageCode.srt]
+    I --> I1{Error page<br/>instead of subtitle?}
+    I1 -- No --> J[Save as<br/>filename.languageCode.srt]
+    I1 -- Yes --> I2{Retries<br/>left?}
+    I2 -- Yes --> I3[Wait 250 / 500 / 1000 / 2000 / 4000 ms]
+    I3 --> H
+    I2 -- No --> I4([Notify: download failed<br/>End])
     J --> K([Notify: success])
 ```
+
+Ktuvit sometimes answers the download with HTTP 200 and a short Hebrew error page. The same token keeps failing, so each retry requests a new token.
 
 ---
 
