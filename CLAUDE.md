@@ -83,7 +83,7 @@ Similarity matching uses weighted word scoring (`WORD_WEIGHTS`) to pick the best
 
 - `ParserInterface` — `handleMovie()` / `handleEpisode()`
 - `CommonParser` — base class with `findClosestMatch()` and HTTP error handling
-- `KtuvitParser extends CommonParser` — Ktuvit.me API client: login → search → get subtitles list → request download token → download file
+- `KtuvitParser extends CommonParser` — Ktuvit.me API client: login → search → get subtitles list → request download token → download file. Ktuvit intermittently returns HTTP 200 with a Hebrew error page instead of the subtitle (`isDownloadErrorPage()`); the parser never writes that page and retries with a new token, with backoff `downloadRetryDelaysMs`.
 
 ### Key Components
 
