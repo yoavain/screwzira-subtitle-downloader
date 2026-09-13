@@ -48,7 +48,7 @@
         "@types/cross-spawn": "6.0.6",
         "@types/flat-cache": "2.0.2",
         "@types/jest": "30.0.0",
-        "@types/node": "24.13.3",
+        "@types/node": "24.13.4",
         "@typescript-eslint/eslint-plugin": "8.68.0",
         "@typescript-eslint/parser": "8.68.0",
         "copy-webpack-plugin": "14.0.0",
