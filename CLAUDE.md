@@ -44,6 +44,12 @@ npx jest test/classifier.test.ts
 npx jest -t "pattern"
 ```
 
+### Two TypeScript packages
+
+- `npm run type-check` uses `tsc` from `@typescript/native` (an alias of `typescript@7`, the native compiler).
+- `typescript` is an alias of `@typescript/typescript6`. It supplies the JS API that ts-jest, ts-loader, ts-node, and typescript-eslint load.
+- Every tool reads the same `tsconfig.json`, so it must be valid for both versions. TypeScript 7 removes `baseUrl`, so `paths` entries start with `./`. TypeScript 6 requires an explicit `rootDir` when a tool emits, so `rootDir` is set.
+
 ## Credentials Required for Build
 
 `KTUVIT_EMAIL` and `KTUVIT_PASSWORD` must be set in a `.env` file at the project root. The webpack build bakes these credentials directly into the bundled `.exe`. The `.env` file must exist before running `npm run webpack` or `npm run build`.
