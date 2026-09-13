@@ -15,6 +15,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { parseSrt } from "~src/sync/subtitleParser";
+import { decodeSubtitle } from "~src/sync/subtitleEncoding";
 import { isExistSync } from "~src/fileUtils";
 import type { SubtitleEntry } from "~src/sync/types";
 
@@ -63,8 +64,8 @@ export function loadCase(name: string): SyncCase {
         targetPath,
         referencePath,
         referenceLanguage: referenceFile.endsWith(".fr.srt") || referenceFile.endsWith(".fra.srt") || referenceFile.endsWith(".fre.srt") ? "fr" : "en",
-        target: parseSrt(readUtf8(targetPath)),
-        reference: parseSrt(readUtf8(referencePath))
+        target: parseSrt(readSubtitle(targetPath)),
+        reference: parseSrt(readSubtitle(referencePath))
     };
 }
 
@@ -110,10 +111,9 @@ function findBySuffix(files: string[], suffixes: string[]): string | undefined {
     return undefined;
 }
 
-function readUtf8(file: string): string {
-    // Some subtitle downloads carry a BOM; parseSrt would read it as part of the first index.
-    const text = fs.readFileSync(file, "utf-8");
-    return text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+function readSubtitle(file: string): string {
+    // Same decoding as the syncer: the Hebrew fixtures are Windows-1255, not UTF-8.
+    return decodeSubtitle(fs.readFileSync(file));
 }
 
 function walk(dir: string, visit: (file: string) => void): void {
