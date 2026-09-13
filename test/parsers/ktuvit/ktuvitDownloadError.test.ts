@@ -111,12 +111,12 @@ describe("KtuvitParser - download returns an error page", () => {
         expect(notifMock).not.toHaveBeenCalledWith(expect.anything(), NotificationType.DOWNLOAD);
     });
 
-    it("requests a fresh download identifier for each retry, up to 6 attempts", async () => {
+    it("requests a fresh download identifier for each retry, up to 7 attempts", async () => {
         mockKtuvit([]);
 
         await handleSingleFile(videoPath, true, classifier, { notif: notifMock } as never, parser);
 
-        expect(downloadedIdentifiers).toEqual(["dl-1", "dl-2", "dl-3", "dl-4", "dl-5", "dl-6"]);
+        expect(downloadedIdentifiers).toEqual(["dl-1", "dl-2", "dl-3", "dl-4", "dl-5", "dl-6", "dl-7"]);
     });
 
     it("writes the subtitle when a retry succeeds after the error page", async () => {

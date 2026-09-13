@@ -54,7 +54,7 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
     private readonly baseUrl: string = "https://www.ktuvit.me";
     // Ktuvit intermittently serves an error page instead of the subtitle.
     // The same download identifier keeps failing, so each retry requests a fresh one.
-    private readonly downloadRetryDelaysMs: number[] = [250, 500, 1000, 2000, 4000];
+    private readonly downloadRetryDelaysMs: number[] = [250, 500, 1000, 2000, 4000, 8000];
     private readonly email: string;
     private readonly password: string;
     private readonly tShowIdCache: TvShowIdCache;

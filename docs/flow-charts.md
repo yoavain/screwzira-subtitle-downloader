@@ -77,7 +77,7 @@ flowchart TD
     I --> I1{Error page<br/>instead of subtitle?}
     I1 -- No --> J[Save as<br/>filename.languageCode.srt]
     I1 -- Yes --> I2{Retries<br/>left?}
-    I2 -- Yes --> I3[Wait 250 / 500 / 1000 / 2000 / 4000 ms]
+    I2 -- Yes --> I3[Wait 250 / 500 / 1000 / 2000 / 4000 / 8000 ms]
     I3 --> H
     I2 -- No --> I4([Notify: download failed<br/>End])
     J --> K([Notify: success])
