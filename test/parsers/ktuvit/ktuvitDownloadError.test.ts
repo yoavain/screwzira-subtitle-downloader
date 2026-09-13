@@ -1,7 +1,7 @@
 /**
  * Ktuvit sometimes answers a download with HTTP 200 and a short Hebrew error page instead of
- * the subtitle ("הבקשה לא נמצאה, נא לנסות להוריד את הקובץ בשנית"). The failure is transient:
- * the same download identifier keeps failing, but a fresh identifier usually succeeds.
+ * the subtitle ("הבקשה לא נמצאה, נא לנסות להוריד את הקובץ בשנית"). The failure is transient.
+ * A download identifier is single-use, so a failed one never recovers, but a fresh identifier usually succeeds.
  * Fetch is mocked — no real network calls are made.
  */
 import * as os from "node:os";

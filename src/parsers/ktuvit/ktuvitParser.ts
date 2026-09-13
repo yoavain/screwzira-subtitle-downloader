@@ -52,8 +52,9 @@ enum DownloadFileStatus {
 
 export class KtuvitParser extends CommonParser implements ParserInterface {
     private readonly baseUrl: string = "https://www.ktuvit.me";
-    // Ktuvit intermittently serves an error page instead of the subtitle.
-    // The same download identifier keeps failing, so each retry requests a fresh one.
+    // Ktuvit intermittently serves an error page instead of the subtitle, sometimes for over 15 seconds in a row.
+    // A download identifier is single-use and expires within about a second, so each retry requests a fresh
+    // identifier and downloads it at once. The delays only wait out a bad stretch; they never go between the two calls.
     private readonly downloadRetryDelaysMs: number[] = [250, 500, 1000, 2000, 4000, 8000];
     private readonly email: string;
     private readonly password: string;

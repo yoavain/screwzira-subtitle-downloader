@@ -83,7 +83,7 @@ flowchart TD
     J --> K([Notify: success])
 ```
 
-Ktuvit sometimes answers the download with HTTP 200 and a short Hebrew error page. The same token keeps failing, so each retry requests a new token.
+Ktuvit sometimes answers the download with HTTP 200 and a short Hebrew error page. A token is single-use and expires within about a second, so each retry requests a new token and downloads it at once. The wait comes before the new token, never between the token and the download.
 
 ---
 
