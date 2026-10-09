@@ -72,7 +72,7 @@
         "postject": "1.0.0-alpha.6",
         "prettier": "3.9.9",
         "rimraf": "6.1.3",
-        "ts-jest": "29.4.12",
+        "ts-jest": "29.4.14",
         "ts-loader": "9.6.2",
         "ts-node": "10.9.2",
         "typescript": "npm:@typescript/typescript6@6.0.2",
