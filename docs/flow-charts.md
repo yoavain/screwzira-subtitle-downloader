@@ -75,7 +75,7 @@ flowchart TD
     G -- Yes --> H[Request download token]
     H --> I[Download .srt file]
     I --> I1{Error page<br/>instead of subtitle?}
-    I1 -- No --> J[Save as<br/>filename.languageCode.srt]
+    I1 -- No --> J[Convert to UTF-8 with BOM<br/>Save as filename.languageCode.srt]
     I1 -- Yes --> I2{Retries<br/>left?}
     I2 -- Yes --> I3[Wait 250 / 500 / 1000 / 2000 / 4000 / 8000 ms]
     I3 --> H

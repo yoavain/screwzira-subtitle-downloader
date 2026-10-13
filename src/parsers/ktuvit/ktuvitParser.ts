@@ -12,6 +12,7 @@ import { FileClassification } from "~src/classifier";
 import type { FetchOptions } from "~src/types";
 import { writeFile } from "~src/fileUtils";
 import type { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
+import { decodeSubtitle, encodeSubtitle } from "~src/sync/subtitleEncoding";
 
 
 export type GetMovieResponse = {
@@ -346,7 +347,8 @@ export class KtuvitParser extends CommonParser implements ParserInterface {
                 const destination: string = path.resolve(relativePath, `${filenameNoExtension}.${this.classifier.getSubtitlesSuffix()}`);
                 this.logger.verbose(`writing response to ${destination}`);
 
-                await writeFile(destination, body);
+                // Ktuvit serves each subtitle in the encoding it was uploaded in, often Windows-1255
+                await writeFile(destination, encodeSubtitle(decodeSubtitle(body)));
                 return DownloadFileStatus.SUCCESS;
             }
             else {

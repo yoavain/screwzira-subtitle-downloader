@@ -22,6 +22,12 @@ describe("decodeSubtitle", () => {
         const bytes = Buffer.concat([Buffer.from([0xEF, 0xBB, 0xBF]), Buffer.from(HEBREW, "utf-8")]);
         expect(decodeSubtitle(bytes)).toBe(HEBREW);
     });
+
+    it("decodes a UTF-16 file by its BOM, which Windows-1255 would read as garbled Hebrew", () => {
+        const littleEndian = Buffer.concat([Buffer.from([0xFF, 0xFE]), Buffer.from(HEBREW, "utf16le")]);
+        expect(decodeSubtitle(littleEndian)).toBe(HEBREW);
+        expect(decodeSubtitle(Buffer.from(littleEndian).swap16())).toBe(HEBREW);
+    });
 });
 
 describe("encodeSubtitle", () => {
