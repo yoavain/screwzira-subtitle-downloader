@@ -27,3 +27,13 @@ export const parseSubtitles = (pageBody: string): Subtitle[] => {
 export const parseDownloadIdentifier = (queryBody: string): string => {
     return queryBody && JSON.parse(queryBody).DownloadIdentifier;
 };
+
+// Ktuvit answers a failed download with HTTP 200 and this message as the whole body:
+// "הבקשה לא נמצאה, נא לנסות להוריד את הקובץ בשנית" ("request not found, try downloading again")
+const DOWNLOAD_REQUEST_NOT_FOUND_MESSAGE = "הבקשה לא נמצאה";
+const MAX_ERROR_PAGE_BYTES = 1024;
+
+export const isDownloadErrorPage = (body: Buffer): boolean => {
+    return body.length === 0 ||
+        (body.length <= MAX_ERROR_PAGE_BYTES && body.toString("utf-8").includes(DOWNLOAD_REQUEST_NOT_FOUND_MESSAGE));
+};

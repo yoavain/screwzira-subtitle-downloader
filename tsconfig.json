@@ -6,12 +6,13 @@
         "isolatedModules": true,
         "allowJs": true,
         "noEmit": true,
-        "baseUrl": ".",
+        "rootDir": ".",
         "paths": {
-            "~src/*": ["src/*"],
-            "~test/*": ["test/*"],
-            "~resources/*": ["resources/*"]
-        }
+            "~src/*": ["./src/*"],
+            "~test/*": ["./test/*"],
+            "~resources/*": ["./resources/*"]
+        },
+        "types": ["node", "jest"]
     },
     "include": ["./src/**/*", "./test/**/*", "./scripts/**/*", "./*.ts", "./*.js", "./launcher/*.ts", "./*.mjs"]
 }

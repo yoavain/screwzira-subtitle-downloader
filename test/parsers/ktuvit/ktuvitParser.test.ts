@@ -12,7 +12,8 @@ import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 import { PERSISTENT_CACHE_DIR, TRANSIENT_CACHE_DIR } from "~test/parsers/ktuvit/tvShowIdCache.test";
 import { randomUUID as uuid } from "node:crypto";
 
-jest.setTimeout(20000);
+// Live tests: a download can take several retries (see downloadRetryDelaysMs) while Ktuvit serves error pages
+jest.setTimeout(60000);
 
 const mockFsWriteFile = jest.fn(async (destination, response: Buffer) => {
     console.log(`Writing file: ${destination} with ${response.length} bytes`);
