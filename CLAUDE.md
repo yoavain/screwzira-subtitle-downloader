@@ -8,7 +8,7 @@ A Windows CLI tool and context-menu application for downloading Hebrew subtitles
 
 ### Two disjoint flows
 
-The app has two flows, chosen by what the user right-clicks. They share no invocation and no code path.
+The app has two flows, chosen by what the user right-clicks. They share no invocation and no code path. The only shared modules are stateless helpers: `src/languages.ts` and `src/sync/subtitleEncoding.ts`.
 
 | | **Flow A — Download** | **Flow B — Sync** |
 |---|---|---|
@@ -83,7 +83,7 @@ Similarity matching uses weighted word scoring (`WORD_WEIGHTS`) to pick the best
 
 - `ParserInterface` — `handleMovie()` / `handleEpisode()`
 - `CommonParser` — base class with `findClosestMatch()` and HTTP error handling
-- `KtuvitParser extends CommonParser` — Ktuvit.me API client: login → search → get subtitles list → request download token → download file. Ktuvit intermittently returns HTTP 200 with a Hebrew error page instead of the subtitle (`isDownloadErrorPage()`); the parser never writes that page and retries with a new token, with backoff `downloadRetryDelaysMs`.
+- `KtuvitParser extends CommonParser` — Ktuvit.me API client: login → search → get subtitles list → request download token → download file. Ktuvit intermittently returns HTTP 200 with a Hebrew error page instead of the subtitle (`isDownloadErrorPage()`); the parser never writes that page and retries with a new token, with backoff `downloadRetryDelaysMs`. Ktuvit serves each subtitle in the encoding it was uploaded in, often Windows-1255; the parser saves every download as UTF-8 with BOM via `encodeSubtitle(decodeSubtitle(body))`.
 
 ### Key Components
 
@@ -106,7 +106,7 @@ Sync is a four-stage pipeline. Only Stage 2 will ever involve AI, and it is not 
 | `src/sync/types.ts` | `SubtitleEntry`, `TimeSpan`, `Segment`, `TimeWarp` interfaces |
 | `src/sync/subtitleParser.ts` | `parseSrt()` |
 | `src/sync/subtitleWriter.ts` | `writeSrt()`, `formatTimestamp()` |
-| `src/sync/subtitleEncoding.ts` | `decodeSubtitle()` — UTF-8 when the bytes are valid UTF-8; otherwise lenient UTF-8 or Windows-1255, whichever yields more Hebrew letters; `encodeSubtitle()` — always UTF-8 with BOM. Every subtitle read and write in the syncer goes through these, never `readFileSync(..., "utf-8")` |
+| `src/sync/subtitleEncoding.ts` | `decodeSubtitle()` — UTF-16 when the bytes start with a UTF-16 BOM; UTF-8 when the bytes are valid UTF-8; otherwise lenient UTF-8 or Windows-1255, whichever yields more Hebrew letters; `encodeSubtitle()` — always UTF-8 with BOM. Every subtitle read and write in the syncer goes through these, never `readFileSync(..., "utf-8")`. The download flow uses the same pair to save |
 | `src/sync/mkvExtractor.ts` | `MkvExtractor` — runs `mkvmerge -J` and `mkvextract`. `findSubtitleTrack(path, languages)` is language-parameterised with ISO 639-2/639-3/BCP-47 alias matching; used for both embedded Hebrew detection and reference extraction |
 | `src/sync/referenceSourceFinder.ts` | Given the target `.srt`, derives the stem, locates the video, and resolves a reference — embedded track first, then sidecar; French before English |
 | `src/sync/syncGates.ts` | `GateFailure` — the reasons Flow B can stop before writing |

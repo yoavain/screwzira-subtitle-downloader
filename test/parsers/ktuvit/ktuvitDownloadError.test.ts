@@ -2,6 +2,7 @@
  * Ktuvit sometimes answers a download with HTTP 200 and a short Hebrew error page instead of
  * the subtitle ("הבקשה לא נמצאה, נא לנסות להוריד את הקובץ בשנית"). The failure is transient.
  * A download identifier is single-use, so a failed one never recovers, but a fresh identifier usually succeeds.
+ * A subtitle that does arrive is saved as UTF-8 with a BOM, whatever encoding Ktuvit served it in.
  * Fetch is mocked — no real network calls are made.
  */
 import * as os from "node:os";
@@ -15,6 +16,7 @@ import { NotificationType } from "~src/notifier";
 import { MockConfig, MockLogger } from "~test/mocks";
 import { TvShowIdCache } from "~src/parsers/ktuvit/tvShowIdCache";
 import type { ConfigInterface } from "~src/config";
+import { toWindows1255 } from "~test/sync/windows1255";
 
 const VIDEO_FILENAME = "The Green Mile 1999 REPACK 1080p BluRay x265-YAWNTiC.mkv";
 const MOVIE_ID = "A3F9B2A801BA0F3D69323A9C0950E236";
@@ -32,7 +34,9 @@ const SUBTITLE_HTML = [
     "</tr>"
 ].join("\n");
 
-type DownloadReply = "error" | "subtitle";
+const SUBTITLE_AS_SAVED: Buffer = Buffer.concat([Buffer.from([0xEF, 0xBB, 0xBF]), Buffer.from(SUBTITLE_CONTENT, "utf-8")]);
+
+type DownloadReply = "error" | "subtitle" | "windows1255Subtitle";
 
 describe("KtuvitParser - download returns an error page", () => {
     let tmpDir: string;
@@ -66,9 +70,11 @@ describe("KtuvitParser - download returns an error page", () => {
             if (url.includes("/DownloadFile.ashx?DownloadIdentifier=")) {
                 downloadedIdentifiers.push(new URL(url).searchParams.get("DownloadIdentifier"));
                 const reply: DownloadReply = downloadReplies[downloadedIdentifiers.length - 1] ?? "error";
-                return reply === "subtitle" ?
-                    new Response(SUBTITLE_CONTENT, { headers: { "Content-Disposition": "attachment; filename=The.Green.Mile.1999.1080p.BluRay.DTS.x264-VietHD.srt" } }) :
-                    new Response(new Uint8Array(ERROR_PAGE));
+                if (reply === "error") {
+                    return new Response(new Uint8Array(ERROR_PAGE));
+                }
+                const subtitle: Buffer = reply === "windows1255Subtitle" ? toWindows1255(SUBTITLE_CONTENT) : Buffer.from(SUBTITLE_CONTENT, "utf-8");
+                return new Response(new Uint8Array(subtitle), { headers: { "Content-Disposition": "attachment; filename=The.Green.Mile.1999.1080p.BluRay.DTS.x264-VietHD.srt" } });
             }
             throw new Error(`Unexpected fetch: ${url}`);
         });
@@ -125,8 +131,16 @@ describe("KtuvitParser - download returns an error page", () => {
         await handleSingleFile(videoPath, true, classifier, { notif: notifMock } as never, parser);
 
         expect(downloadedIdentifiers).toEqual(["dl-1", "dl-2", "dl-3"]);
-        expect(fs.readFileSync(subtitlePath(), "utf-8")).toEqual(SUBTITLE_CONTENT);
+        expect(fs.readFileSync(subtitlePath())).toEqual(SUBTITLE_AS_SAVED);
         expect(notifMock).toHaveBeenCalledWith(expect.stringContaining("Successfully downloaded"), NotificationType.DOWNLOAD);
         expect(notifMock).not.toHaveBeenCalledWith(expect.anything(), NotificationType.FAILED);
+    });
+
+    it("saves a Windows-1255 subtitle as UTF-8 with a BOM", async () => {
+        mockKtuvit(["windows1255Subtitle"]);
+
+        await handleSingleFile(videoPath, true, classifier, { notif: notifMock } as never, parser);
+
+        expect(fs.readFileSync(subtitlePath())).toEqual(SUBTITLE_AS_SAVED);
     });
 });
