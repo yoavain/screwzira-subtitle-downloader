@@ -36,7 +36,7 @@
     },
     "dependencies": {
         "flat-cache": "6.1.23",
-        "node-notifier": "10.0.1",
+        "node-notifier": "11.0.0",
         "winston": "3.19.0"
     },
     "devDependencies": {
