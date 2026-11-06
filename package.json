@@ -63,7 +63,7 @@
         "eslint-plugin-jest": "29.17.0",
         "eslint-plugin-n": "18.5.0",
         "eslint-plugin-security": "4.2.0",
-        "eslint-plugin-unicorn": "63.0.0",
+        "eslint-plugin-unicorn": "79.0.0",
         "globals": "17.13.0",
         "husky": "9.1.7",
         "jest": "30.5.2",
