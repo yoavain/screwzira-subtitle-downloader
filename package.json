@@ -46,7 +46,7 @@
         "@jest/types": "30.5.1",
         "@tsconfig/node24": "24.0.4",
         "@types/cross-spawn": "6.0.6",
-        "@types/flat-cache": "2.0.2",
+        "@types/flat-cache": "6.1.23",
         "@types/jest": "30.0.0",
         "@types/node": "24.19.2",
         "@typescript-eslint/eslint-plugin": "8.68.0",
